@@ -1,13 +1,11 @@
 import sys
 import os
 import shutil
-import errno
 
 import argh
 import sh
 import yaml
 import requests
-from path import path
 from argh.decorators import arg
 
 import cloudify_cli
@@ -19,18 +17,18 @@ from settings import Settings
 from completion import Completion
 
 
-def sh_bake(command):
-    return command.bake(_out=lambda line: sys.stdout.write(line),
-                        _err=lambda line: sys.stderr.write(line))
+NO_INIT = 'Not initialized'
+NO_BOOTSTRAP = 'Not bootstrapped'
 
 
 def get_manager_ip():
-    settings = load_cloudify_working_dir_settings()
-    return settings.get_management_server()
+    cli_settings = load_cloudify_working_dir_settings()
+    return cli_settings.get_management_server()
 
 
 app = argh.EntryPoint('systest')
-cfy = sh_bake(sh.cfy)
+cfy = sh.cfy.bake(_out=lambda line: sys.stdout.write(line),
+                  _err=lambda line: sys.stderr.write(line))
 settings = Settings()
 completion = Completion(settings)
 
@@ -92,13 +90,14 @@ def generate(configuration, reset_config=False):
 @app
 @arg('configuration', completer=completion.existing_configurations)
 def status(configuration):
-    no_init = 'Not initialized'
-    no_bootstrap = 'Not bootstrapped'
+    config_dir = settings.basedir / configuration
+    if not config_dir.exists():
+        return NO_INIT
     try:
         with settings.basedir / configuration:
             manager_ip = get_manager_ip()
         if not manager_ip:
-            return no_bootstrap
+            return NO_BOOTSTRAP
         client = CloudifyClient(manager_ip)
         try:
             version = client.manager.get_version()['version']
@@ -106,13 +105,8 @@ def status(configuration):
         except requests.exceptions.ConnectionError:
             return '[{0}] Not reachable'.format(manager_ip)
     except cloudify_cli.exceptions.CloudifyCliError as e:
-        if no_init in str(e):
-            return no_init
-        else:
-            raise
-    except OSError as e:
-        if e.errno == errno.ENOENT:
-            return no_init
+        if NO_INIT in str(e):
+            return NO_INIT
         else:
             raise
 
@@ -141,7 +135,7 @@ def bootstrap(configuration, reset_config=False):
 def teardown(configuration):
     config_dir = settings.basedir / configuration
     if not config_dir.exists():
-        'Not initialized'
+        return NO_INIT
     with config_dir:
         cfy.teardown(force=True, ignore_deployments=True).wait()
 
@@ -150,4 +144,4 @@ def teardown(configuration):
 def global_status():
     for directory in settings.basedir.dirs():
         configuration = directory.basename()
-        yield '{0}: {1}'.format(configuration, status(directory.basename()))
+        yield '{0}: {1}'.format(configuration, status(configuration))
