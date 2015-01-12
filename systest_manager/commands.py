@@ -16,8 +16,6 @@ def sh_bake(command):
     return command.bake(_out=lambda line: sys.stdout.write(line),
                         _err=lambda line: sys.stderr.write(line))
 
-cfy = sh_bake(sh.cfy)
-
 
 class Settings(object):
 
@@ -60,27 +58,38 @@ class Settings(object):
             'user_suites_yaml': os.path.expanduser(user_suites_yaml_path)
         }, default_flow_style=False))
 
+    def load_suites_yaml(self, variables=True):
+        suites_yaml = yaml.load(self.user_suites_yaml.text())
+        if variables:
+            main_suites_yaml = yaml.load(self.main_suites_yaml.text())
+            variables = main_suites_yaml.get('variables', {})
+            variables.update(suites_yaml.get('variables', {}))
+            suites_yaml['variables'] = variables
+        return suites_yaml
+
+
+class Completion(object):
+
+    def __init__(self, settings):
+        self._settings = settings
+
+    def _configurations(self):
+        return settings.load_suites_yaml(variables=False)[
+            'handler_configurations'].keys()
+
+    def all_configurations(self, prefix, **kwargs):
+        return (c for c in self._configurations()
+                if c.startswith(prefix))
+
+    def existing_configurations(self, prefix, **kwargs):
+        return (c for c in self._configurations()
+                if c.startswith(prefix) and
+                (self._settings.basedir / c).exists())
+
+
+cfy = sh_bake(sh.cfy)
 settings = Settings()
-
-
-def load_suites_yaml(load_variables=True):
-    suites_yaml = yaml.load(settings.user_suites_yaml.text())
-    if load_variables:
-        main_suites_yaml = yaml.load(settings.main_suites_yaml.text())
-        variables = main_suites_yaml.get('variables', {})
-        variables.update(suites_yaml.get('variables', {}))
-        suites_yaml['variables'] = variables
-    return suites_yaml
-
-
-def _configurations():
-    return load_suites_yaml(load_variables=False)[
-        'handler_configurations'].keys()
-
-
-def configuration_completer(prefix, parsed_args, **kwargs):
-    configurations = _configurations()
-    return (c for c in configurations if c.startswith(prefix))
+completion = Completion(settings)
 
 
 @arg('--basedir', required=True)
@@ -90,9 +99,9 @@ def init(basedir=None, main_suites_yaml=None, user_suites_yaml=None):
     settings.write_settings(basedir, main_suites_yaml, user_suites_yaml)
 
 
-@arg('configuration', completer=configuration_completer)
+@arg('configuration', completer=completion.all_configurations)
 def generate(configuration, reset_config=False):
-    suites_yaml = load_suites_yaml()
+    suites_yaml = settings.load_suites_yaml()
     handler_configuration = suites_yaml[
         'handler_configurations'][configuration]
     original_inputs_path = os.path.expanduser(handler_configuration['inputs'])
@@ -135,7 +144,7 @@ def generate(configuration, reset_config=False):
                                                     default_flow_style=False))
 
 
-@arg('configuration', completer=configuration_completer)
+@arg('configuration', completer=completion.existing_configurations)
 def status(configuration):
     try:
         with settings.basedir / configuration:
@@ -148,7 +157,7 @@ def status(configuration):
         raise
 
 
-@arg('configuration', completer=configuration_completer)
+@arg('configuration', completer=completion.all_configurations)
 def bootstrap(configuration, reset_config=False):
     config_dir = settings.basedir / configuration
     if not config_dir.exists() or reset_config:
@@ -161,7 +170,7 @@ def bootstrap(configuration, reset_config=False):
                       inputs=config_dir / 'inputs.yaml').wait()
 
 
-@arg('configuration', completer=configuration_completer)
+@arg('configuration', completer=completion.existing_configurations)
 def teardown(configuration):
     config_dir = settings.basedir / configuration
     if not config_dir.exists():
