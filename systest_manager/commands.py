@@ -15,6 +15,9 @@ from cloudify_rest_client import CloudifyClient
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
+from settings import Settings
+from completion import Completion
+
 
 def sh_bake(command):
     return command.bake(_out=lambda line: sys.stdout.write(line),
@@ -26,81 +29,13 @@ def get_manager_ip():
     return settings.get_management_server()
 
 
-class Settings(object):
-
-    systest_settings = path(
-        os.path.expanduser(os.environ.get('SYSTEST_SETTINGS',
-                                          '~/.cloudify-systest')))
-
-    def __init__(self):
-        self._settings = None
-
-    @property
-    def main_suites_yaml(self):
-        self._load_settings()
-        return path(self._settings['main_suites_yaml'])
-
-    @property
-    def user_suites_yaml(self):
-        self._load_settings()
-        return path(self._settings['user_suites_yaml'])
-
-    @property
-    def basedir(self):
-        self._load_settings()
-        return path(self._settings['basedir'])
-
-    def _load_settings(self):
-        if self._settings:
-            return
-        if not self.systest_settings.exists():
-            raise argh.CommandError('Run `systest init` to configure systest')
-        self._settings = yaml.safe_load(self.systest_settings.text())
-
-    def write_settings(self,
-                       basedir,
-                       main_suites_yaml_path,
-                       user_suites_yaml_path):
-        self.systest_settings.write_text(yaml.safe_dump({
-            'basedir': os.path.expanduser(basedir),
-            'main_suites_yaml': os.path.expanduser(main_suites_yaml_path),
-            'user_suites_yaml': os.path.expanduser(user_suites_yaml_path)
-        }, default_flow_style=False))
-
-    def load_suites_yaml(self, variables=True):
-        suites_yaml = yaml.load(self.user_suites_yaml.text())
-        if variables:
-            main_suites_yaml = yaml.load(self.main_suites_yaml.text())
-            variables = main_suites_yaml.get('variables', {})
-            variables.update(suites_yaml.get('variables', {}))
-            suites_yaml['variables'] = variables
-        return suites_yaml
-
-
-class Completion(object):
-
-    def __init__(self, settings):
-        self._settings = settings
-
-    def _configurations(self):
-        return settings.load_suites_yaml(variables=False)[
-            'handler_configurations'].keys()
-
-    def all_configurations(self, prefix, **kwargs):
-        return (c for c in self._configurations()
-                if c.startswith(prefix))
-
-    def existing_configurations(self, prefix, **kwargs):
-        return (c for c in self._configurations()
-                if c.startswith(prefix) and
-                (self._settings.basedir / c).exists())
-
-
+app = argh.EntryPoint('systest')
 cfy = sh_bake(sh.cfy)
 settings = Settings()
 completion = Completion(settings)
 
 
+@app
 @arg('--basedir', required=True)
 @arg('--main_suites_yaml', required=True)
 @arg('--user_suites_yaml', required=True)
@@ -108,6 +43,7 @@ def init(basedir=None, main_suites_yaml=None, user_suites_yaml=None):
     settings.write_settings(basedir, main_suites_yaml, user_suites_yaml)
 
 
+@app
 @arg('configuration', completer=completion.all_configurations)
 def generate(configuration, reset_config=False):
     suites_yaml = settings.load_suites_yaml()
@@ -153,6 +89,7 @@ def generate(configuration, reset_config=False):
         yaml.safe_dump(handler_configuration, default_flow_style=False))
 
 
+@app
 @arg('configuration', completer=completion.existing_configurations)
 def status(configuration):
     no_init = 'Not initialized'
@@ -180,6 +117,7 @@ def status(configuration):
             raise
 
 
+@app
 @arg('configuration', completer=completion.all_configurations)
 def bootstrap(configuration, reset_config=False):
     config_dir = settings.basedir / configuration
@@ -198,6 +136,7 @@ def bootstrap(configuration, reset_config=False):
             yaml.safe_dump(handler_configuration, default_flow_style=False))
 
 
+@app
 @arg('configuration', completer=completion.existing_configurations)
 def teardown(configuration):
     config_dir = settings.basedir / configuration
@@ -207,10 +146,8 @@ def teardown(configuration):
         cfy.teardown(force=True, ignore_deployments=True).wait()
 
 
+@app
 def global_status():
     for directory in settings.basedir.dirs():
         configuration = directory.basename()
         yield '{0}: {1}'.format(configuration, status(directory.basename()))
-
-
-commands = (init, generate, status, bootstrap, teardown, global_status)

@@ -1,10 +1,8 @@
-import argh
-
-from commands import commands
+from commands import app
 
 
 def main():
-    argh.dispatch_commands(commands)
+    app()
 
 if __name__ == '__main__':
     main()
