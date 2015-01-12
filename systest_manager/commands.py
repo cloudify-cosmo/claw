@@ -145,3 +145,12 @@ def global_status():
     for directory in settings.basedir.dirs():
         configuration = directory.basename()
         yield '{0}: {1}'.format(configuration, status(configuration))
+
+
+@app
+def clear(force=False):
+    if not force:
+        raise argh.CommandError('Must pass -f flag to actually clear '
+                                'configurations dir')
+    if settings.basedir.exists():
+        shutil.rmtree(settings.basedir)

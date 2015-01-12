@@ -13,7 +13,7 @@ setup(
         'sh',
         'path.py',
     ],
-    entry_points = {
+    entry_points={
         'console_scripts': [
             'systest = systest_manager.systest:main',
         ],
