@@ -22,7 +22,8 @@ cfy = sh_bake(sh.cfy)
 class Settings(object):
 
     systest_settings = path(
-        os.path.expanduser(os.environ.get('SYSTEST_SETTINGS', '~/.cloudify-systest')))
+        os.path.expanduser(os.environ.get('SYSTEST_SETTINGS',
+                                          '~/.cloudify-systest')))
 
     def __init__(self):
         self._settings = None
@@ -49,7 +50,10 @@ class Settings(object):
             raise argh.CommandError('Run `systest init` to configure systest')
         self._settings = yaml.safe_load(self.systest_settings.text())
 
-    def write_settings(self, basedir, main_suites_yaml_path, user_suites_yaml_path):
+    def write_settings(self,
+                       basedir,
+                       main_suites_yaml_path,
+                       user_suites_yaml_path):
         self.systest_settings.write_text(yaml.safe_dump({
             'basedir': os.path.expanduser(basedir),
             'main_suites_yaml': os.path.expanduser(main_suites_yaml_path),
@@ -70,7 +74,8 @@ def load_suites_yaml(load_variables=True):
 
 
 def _configurations():
-    return load_suites_yaml(load_variables=False)['handler_configurations'].keys()
+    return load_suites_yaml(load_variables=False)[
+        'handler_configurations'].keys()
 
 
 def configuration_completer(prefix, parsed_args, **kwargs):
@@ -88,9 +93,11 @@ def init(basedir=None, main_suites_yaml=None, user_suites_yaml=None):
 @arg('configuration', completer=configuration_completer)
 def generate(configuration, reset_config=False):
     suites_yaml = load_suites_yaml()
-    handler_configuration = suites_yaml['handler_configurations'][configuration]
+    handler_configuration = suites_yaml[
+        'handler_configurations'][configuration]
     original_inputs_path = os.path.expanduser(handler_configuration['inputs'])
-    original_manager_blueprint_path = os.path.expanduser(handler_configuration['manager_blueprint'])
+    original_manager_blueprint_path = os.path.expanduser(
+        handler_configuration['manager_blueprint'])
     handler_configuration_dir = settings.basedir / configuration
     if reset_config and handler_configuration_dir.exists():
         shutil.rmtree(handler_configuration_dir)
@@ -101,11 +108,13 @@ def generate(configuration, reset_config=False):
         original_inputs_path=original_inputs_path,
         original_manager_blueprint_path=original_manager_blueprint_path)
     inputs_path = str(inputs_path)
-    new_manager_blueprint_path = manager_blueprint_path.dirname() / 'manager-blueprint.yaml'
+    new_manager_blueprint_path = (
+        manager_blueprint_path.dirname() / 'manager-blueprint.yaml')
     shutil.move(manager_blueprint_path, new_manager_blueprint_path)
     manager_blueprint_path = str(new_manager_blueprint_path)
 
-    handler_configuration_path = handler_configuration_dir / 'handler-configuration.yaml'
+    handler_configuration_path = (
+        handler_configuration_dir / 'handler-configuration.yaml')
     handler_configuration['inputs'] = inputs_path
     handler_configuration['manager_blueprint'] = manager_blueprint_path
 
@@ -119,7 +128,8 @@ def generate(configuration, reset_config=False):
             del handler_configuration[prop]
 
     apply_override_and_remove_prop(inputs_path, 'inputs_override')
-    apply_override_and_remove_prop(manager_blueprint_path, 'manager_blueprint_override')
+    apply_override_and_remove_prop(manager_blueprint_path,
+                                   'manager_blueprint_override')
 
     handler_configuration_path.write_text(yaml.dump(handler_configuration,
                                                     default_flow_style=False))
@@ -144,8 +154,10 @@ def bootstrap(configuration, reset_config=False):
     if not config_dir.exists() or reset_config:
         generate(configuration, reset_config=reset_config)
     with config_dir:
+        blueprint_path = (
+            config_dir / 'manager-blueprint' / 'manager-blueprint.yaml')
         cfy.init().wait()
-        cfy.bootstrap(blueprint_path=config_dir / 'manager-blueprint' / 'manager-blueprint.yaml',
+        cfy.bootstrap(blueprint_path=blueprint_path,
                       inputs=config_dir / 'inputs.yaml').wait()
 
 
