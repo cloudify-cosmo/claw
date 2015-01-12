@@ -6,15 +6,24 @@ import errno
 import argh
 import sh
 import yaml
+import requests
 from path import path
 from argh.decorators import arg
 
+import cloudify_cli
+from cloudify_rest_client import CloudifyClient
+from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
 
 def sh_bake(command):
     return command.bake(_out=lambda line: sys.stdout.write(line),
                         _err=lambda line: sys.stderr.write(line))
+
+
+def get_manager_ip():
+    settings = load_cloudify_working_dir_settings()
+    return settings.get_management_server()
 
 
 class Settings(object):
@@ -146,15 +155,29 @@ def generate(configuration, reset_config=False):
 
 @arg('configuration', completer=completion.existing_configurations)
 def status(configuration):
+    no_init = 'Not initialized'
+    no_bootstrap = 'Not bootstrapped'
     try:
         with settings.basedir / configuration:
-            cfy.status().wait()
-    except sh.ErrorReturnCode:
-        pass
+            manager_ip = get_manager_ip()
+        if not manager_ip:
+            return no_bootstrap
+        client = CloudifyClient(manager_ip)
+        try:
+            version = client.manager.get_version()['version']
+            return '[{0}] Running ({1})'.format(manager_ip, version)
+        except requests.exceptions.ConnectionError:
+            return '[{0}] Not reachable'.format(manager_ip)
+    except cloudify_cli.exceptions.CloudifyCliError as e:
+        if no_init in str(e):
+            return no_init
+        else:
+            raise
     except OSError as e:
         if e.errno == errno.ENOENT:
-            return 'Not initialized'
-        raise
+            return no_init
+        else:
+            raise
 
 
 @arg('configuration', completer=completion.all_configurations)
@@ -182,10 +205,7 @@ def teardown(configuration):
 def global_status():
     for directory in settings.basedir.dirs():
         configuration = directory.basename()
-        print 'Configuration: {0}'.format(configuration)
-        config_status = status(directory.basename())
-        if config_status:
-            print config_status
+        yield '{0}: {1}'.format(configuration, status(directory.basename()))
 
 
 commands = (init, generate, status, bootstrap, teardown, global_status)
