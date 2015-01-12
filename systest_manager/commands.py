@@ -142,6 +142,8 @@ def teardown(configuration):
 
 @app
 def global_status():
+    if not settings.basedir.exists():
+        return
     for directory in settings.basedir.dirs():
         configuration = directory.basename()
         yield '{0}: {1}'.format(configuration, status(configuration))
