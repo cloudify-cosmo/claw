@@ -149,8 +149,8 @@ def generate(configuration, reset_config=False):
     apply_override_and_remove_prop(manager_blueprint_path,
                                    'manager_blueprint_override')
 
-    handler_configuration_path.write_text(yaml.dump(handler_configuration,
-                                                    default_flow_style=False))
+    handler_configuration_path.write_text(
+        yaml.safe_dump(handler_configuration, default_flow_style=False))
 
 
 @arg('configuration', completer=completion.existing_configurations)
@@ -191,6 +191,11 @@ def bootstrap(configuration, reset_config=False):
         cfy.init().wait()
         cfy.bootstrap(blueprint_path=blueprint_path,
                       inputs=config_dir / 'inputs.yaml').wait()
+        handler_configuration_path = config_dir / 'handler-configuration.yaml'
+        handler_configuration = yaml.load(handler_configuration_path.text())
+        handler_configuration['manager_ip'] = get_manager_ip()
+        handler_configuration_path.write_text(
+            yaml.safe_dump(handler_configuration, default_flow_style=False))
 
 
 @arg('configuration', completer=completion.existing_configurations)
