@@ -47,6 +47,8 @@ def generate(configuration, reset_config=False):
     suites_yaml = settings.load_suites_yaml()
     handler_configuration = suites_yaml[
         'handler_configurations'][configuration]
+    is_manager_bootstrap = not handler_configuration.get(
+        'bootstrap_using_provider', False)
     original_inputs_path = os.path.expanduser(handler_configuration['inputs'])
     original_manager_blueprint_path = os.path.expanduser(
         handler_configuration['manager_blueprint'])
@@ -58,17 +60,20 @@ def generate(configuration, reset_config=False):
     inputs_path, manager_blueprint_path = util.generate_unique_configurations(
         workdir=handler_configuration_dir,
         original_inputs_path=original_inputs_path,
-        original_manager_blueprint_path=original_manager_blueprint_path)
+        original_manager_blueprint_path=original_manager_blueprint_path,
+        is_provider_bootstrap=not is_manager_bootstrap)
     inputs_path = str(inputs_path)
-    new_manager_blueprint_path = (
-        manager_blueprint_path.dirname() / 'manager-blueprint.yaml')
-    shutil.move(manager_blueprint_path, new_manager_blueprint_path)
-    manager_blueprint_path = str(new_manager_blueprint_path)
+    if is_manager_bootstrap:
+        new_manager_blueprint_path = (
+            manager_blueprint_path.dirname() / 'manager-blueprint.yaml')
+        shutil.move(manager_blueprint_path, new_manager_blueprint_path)
+        manager_blueprint_path = str(new_manager_blueprint_path)
 
     handler_configuration_path = (
         handler_configuration_dir / 'handler-configuration.yaml')
     handler_configuration['inputs'] = inputs_path
-    handler_configuration['manager_blueprint'] = manager_blueprint_path
+    if is_manager_bootstrap:
+        handler_configuration['manager_blueprint'] = manager_blueprint_path
 
     def apply_override_and_remove_prop(yaml_path, prop):
         with util.YamlPatcher(yaml_path, default_flow_style=False) as patch:
@@ -80,8 +85,9 @@ def generate(configuration, reset_config=False):
             del handler_configuration[prop]
 
     apply_override_and_remove_prop(inputs_path, 'inputs_override')
-    apply_override_and_remove_prop(manager_blueprint_path,
-                                   'manager_blueprint_override')
+    if is_manager_bootstrap:
+        apply_override_and_remove_prop(manager_blueprint_path,
+                                       'manager_blueprint_override')
 
     handler_configuration_path.write_text(
         yaml.safe_dump(handler_configuration, default_flow_style=False))
