@@ -48,10 +48,13 @@ def generate(configuration, reset_config=False):
     handler_configuration = suites_yaml[
         'handler_configurations'][configuration]
     is_manager_bootstrap = not handler_configuration.get(
-        'bootstrap_using_provider', False)
+        'bootstrap_using_providers', False)
     original_inputs_path = os.path.expanduser(handler_configuration['inputs'])
-    original_manager_blueprint_path = os.path.expanduser(
-        handler_configuration['manager_blueprint'])
+    if is_manager_bootstrap:
+        original_manager_blueprint_path = os.path.expanduser(
+            handler_configuration['manager_blueprint'])
+    else:
+        original_manager_blueprint_path = None
     handler_configuration_dir = settings.basedir / configuration
     if reset_config and handler_configuration_dir.exists():
         shutil.rmtree(handler_configuration_dir)
