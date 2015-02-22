@@ -9,6 +9,7 @@ setup(
     description='Manages cloudify system tests configurations',
     zip_safe=False,
     install_requires=[
+        'requests',
         'argh',
         'sh',
         'path.py',

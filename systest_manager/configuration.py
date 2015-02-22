@@ -1,8 +1,6 @@
-import importlib
-
 import yaml
 
-from settings import Settings
+from systest_manager.settings import Settings
 
 settings = Settings()
 
@@ -56,16 +54,10 @@ class Configuration(object):
     def handler_configuration(self, value):
         self._dump(value, self.handler_configuration_path)
 
-    @property
-    def handler(self):
-        handler_module_path = 'system_tests.{0}'.format(
-            self.handler_configuration['handler'])
-        handler_module = importlib.import_module(handler_module_path)
-        handler_cls = handler_module.handler
-        return handler_cls
-
-    def _load(self, obj_path):
+    @staticmethod
+    def _load(obj_path):
         return yaml.load(obj_path.text())
 
-    def _dump(self, obj, obj_path):
+    @staticmethod
+    def _dump(obj, obj_path):
         obj_path.write_text(yaml.safe_dump(obj, default_flow_style=False))

@@ -12,9 +12,9 @@ from cloudify_rest_client import CloudifyClient
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
-from configuration import Configuration
-from settings import Settings
-from completion import Completion
+from systest_manager.configuration import Configuration
+from systest_manager.settings import Settings
+from systest_manager.completion import Completion
 
 
 NO_INIT = 'Not initialized'

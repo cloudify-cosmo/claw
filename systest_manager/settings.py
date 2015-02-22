@@ -7,7 +7,7 @@ from path import path
 
 class Settings(object):
 
-    systest_settings = path(
+    settings_path = path(
         os.path.expanduser(os.environ.get('SYSTEST_SETTINGS',
                                           '~/.cloudify-systest')))
 
@@ -32,15 +32,15 @@ class Settings(object):
     def _load_settings(self):
         if self._settings:
             return
-        if not self.systest_settings.exists():
+        if not self.settings_path.exists():
             raise argh.CommandError('Run `systest init` to configure systest')
-        self._settings = yaml.safe_load(self.systest_settings.text())
+        self._settings = yaml.safe_load(self.settings_path.text())
 
     def write_settings(self,
                        basedir,
                        main_suites_yaml_path,
                        user_suites_yaml_path):
-        self.systest_settings.write_text(yaml.safe_dump({
+        self.settings_path.write_text(yaml.safe_dump({
             'basedir': os.path.expanduser(basedir),
             'main_suites_yaml': os.path.expanduser(main_suites_yaml_path),
             'user_suites_yaml': os.path.expanduser(user_suites_yaml_path)
