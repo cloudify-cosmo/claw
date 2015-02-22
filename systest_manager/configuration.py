@@ -6,6 +6,7 @@ from settings import Settings
 
 settings = Settings()
 
+
 class Configuration(object):
 
     def __init__(self, configuration):
@@ -61,6 +62,7 @@ class Configuration(object):
             self.handler_configuration['handler'])
         handler_module = importlib.import_module(handler_module_path)
         handler_cls = handler_module.handler
+        return handler_cls
 
     def _load(self, obj_path):
         return yaml.load(obj_path.text())

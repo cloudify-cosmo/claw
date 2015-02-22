@@ -4,7 +4,6 @@ import shutil
 
 import argh
 import sh
-import yaml
 import requests
 from argh.decorators import arg
 
@@ -13,6 +12,7 @@ from cloudify_rest_client import CloudifyClient
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
+from configuration import Configuration
 from settings import Settings
 from completion import Completion
 
@@ -44,31 +44,26 @@ def init(basedir=None, main_suites_yaml=None, user_suites_yaml=None):
 @app
 @arg('configuration', completer=completion.all_configurations)
 def generate(configuration, reset_config=False):
+    conf = Configuration(configuration)
     suites_yaml = settings.load_suites_yaml()
     handler_configuration = suites_yaml[
         'handler_configurations'][configuration]
     original_inputs_path = os.path.expanduser(handler_configuration['inputs'])
     original_manager_blueprint_path = os.path.expanduser(
         handler_configuration['manager_blueprint'])
-    handler_configuration_dir = settings.basedir / configuration
-    if reset_config and handler_configuration_dir.exists():
-        shutil.rmtree(handler_configuration_dir)
-    handler_configuration_dir.makedirs()
+    if reset_config and conf.dir.exists():
+        shutil.rmtree(conf.dir)
+    conf.dir.makedirs()
 
-    inputs_path, manager_blueprint_path = util.generate_unique_configurations(
-        workdir=handler_configuration_dir,
+    _, manager_blueprint_path = util.generate_unique_configurations(
+        workdir=conf.dir,
         original_inputs_path=original_inputs_path,
         original_manager_blueprint_path=original_manager_blueprint_path)
-    inputs_path = str(inputs_path)
-    new_manager_blueprint_path = (
-        manager_blueprint_path.dirname() / 'manager-blueprint.yaml')
-    shutil.move(manager_blueprint_path, new_manager_blueprint_path)
-    manager_blueprint_path = str(new_manager_blueprint_path)
+    shutil.move(manager_blueprint_path, conf.manager_blueprint_path)
 
-    handler_configuration_path = (
-        handler_configuration_dir / 'handler-configuration.yaml')
-    handler_configuration['inputs'] = inputs_path
-    handler_configuration['manager_blueprint'] = manager_blueprint_path
+    handler_configuration['inputs'] = str(conf.inputs_path)
+    handler_configuration['manager_blueprint'] = str(
+        conf.manager_blueprint_path)
 
     def apply_override_and_remove_prop(yaml_path, prop):
         with util.YamlPatcher(yaml_path, default_flow_style=False) as patch:
@@ -79,22 +74,21 @@ def generate(configuration, reset_config=False):
         if prop in handler_configuration:
             del handler_configuration[prop]
 
-    apply_override_and_remove_prop(inputs_path, 'inputs_override')
-    apply_override_and_remove_prop(manager_blueprint_path,
+    apply_override_and_remove_prop(conf.inputs_path, 'inputs_override')
+    apply_override_and_remove_prop(conf.manager_blueprint_path,
                                    'manager_blueprint_override')
 
-    handler_configuration_path.write_text(
-        yaml.safe_dump(handler_configuration, default_flow_style=False))
+    conf.handler_configuration = handler_configuration
 
 
 @app
 @arg('configuration', completer=completion.existing_configurations)
 def status(configuration):
-    config_dir = settings.basedir / configuration
-    if not config_dir.exists():
+    conf = Configuration(configuration)
+    if not conf.dir.exists():
         return NO_INIT
     try:
-        with settings.basedir / configuration:
+        with conf.dir:
             manager_ip = get_manager_ip()
         if not manager_ip:
             return NO_BOOTSTRAP
@@ -114,29 +108,26 @@ def status(configuration):
 @app
 @arg('configuration', completer=completion.all_configurations)
 def bootstrap(configuration, reset_config=False):
-    config_dir = settings.basedir / configuration
-    if not config_dir.exists() or reset_config:
+    conf = Configuration(configuration)
+    if not conf.dir.exists() or reset_config:
         generate(configuration, reset_config=reset_config)
-    with config_dir:
-        blueprint_path = (
-            config_dir / 'manager-blueprint' / 'manager-blueprint.yaml')
+    with conf.dir:
         cfy.init().wait()
-        cfy.bootstrap(blueprint_path=blueprint_path,
-                      inputs=config_dir / 'inputs.yaml').wait()
-        handler_configuration_path = config_dir / 'handler-configuration.yaml'
-        handler_configuration = yaml.load(handler_configuration_path.text())
+        cfy.bootstrap(blueprint_path=conf.manager_blueprint_path,
+                      inputs=conf.inputs_path).wait()
+
+        handler_configuration = conf.handler_configuration
         handler_configuration['manager_ip'] = get_manager_ip()
-        handler_configuration_path.write_text(
-            yaml.safe_dump(handler_configuration, default_flow_style=False))
+        conf.handler_configuration = handler_configuration
 
 
 @app
 @arg('configuration', completer=completion.existing_configurations)
 def teardown(configuration):
-    config_dir = settings.basedir / configuration
-    if not config_dir.exists():
+    conf = Configuration(configuration)
+    if not conf.dir.exists():
         return NO_INIT
-    with config_dir:
+    with conf.dir:
         cfy.teardown(force=True, ignore_deployments=True).wait()
 
 
