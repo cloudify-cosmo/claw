@@ -27,13 +27,14 @@ def get_manager_ip():
 
 
 app = argh.EntryPoint('systest')
+command = app
 cfy = sh.cfy.bake(_out=lambda line: sys.stdout.write(line),
                   _err=lambda line: sys.stderr.write(line))
 settings = Settings()
 completion = Completion(settings)
 
 
-@app
+@command
 @arg('--basedir', required=True)
 @arg('--main_suites_yaml', required=True)
 @arg('--user_suites_yaml', required=True)
@@ -41,7 +42,7 @@ def init(basedir=None, main_suites_yaml=None, user_suites_yaml=None):
     settings.write_settings(basedir, main_suites_yaml, user_suites_yaml)
 
 
-@app
+@command
 @arg('configuration', completer=completion.all_configurations)
 def generate(configuration, reset_config=False):
     conf = Configuration(configuration)
@@ -81,7 +82,7 @@ def generate(configuration, reset_config=False):
     conf.handler_configuration = handler_configuration
 
 
-@app
+@command
 @arg('configuration', completer=completion.existing_configurations)
 def status(configuration):
     conf = Configuration(configuration)
@@ -105,7 +106,7 @@ def status(configuration):
             raise
 
 
-@app
+@command
 @arg('configuration', completer=completion.all_configurations)
 def bootstrap(configuration, reset_config=False):
     conf = Configuration(configuration)
@@ -121,7 +122,7 @@ def bootstrap(configuration, reset_config=False):
         conf.handler_configuration = handler_configuration
 
 
-@app
+@command
 @arg('configuration', completer=completion.existing_configurations)
 def teardown(configuration):
     conf = Configuration(configuration)
@@ -131,7 +132,7 @@ def teardown(configuration):
         cfy.teardown(force=True, ignore_deployments=True).wait()
 
 
-@app
+@command
 def global_status():
     if not settings.basedir.exists():
         return
