@@ -11,7 +11,7 @@ class Configuration(object):
 
     def __init__(self, configuration):
         if os.path.isdir(configuration):
-            configuration = os.path.basename(configuration)
+            configuration = os.path.basename(os.path.abspath(configuration))
         self.configuration = configuration
 
     def exists(self):
@@ -60,6 +60,10 @@ class Configuration(object):
     @handler_configuration.setter
     def handler_configuration(self, value):
         self._dump(value, self.handler_configuration_path)
+
+    @property
+    def tmuxp_path(self):
+        return self.dir / 'tmuxp.yaml'
 
     @staticmethod
     def _load(obj_path):

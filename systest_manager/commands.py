@@ -1,10 +1,12 @@
 import sys
 import os
 import shutil
+import subprocess
 
 import argh
 import sh
 import requests
+import jinja2
 from argh.decorators import arg
 
 import cloudify_cli
@@ -21,17 +23,22 @@ NO_INIT = 'Not initialized'
 NO_BOOTSTRAP = 'Not bootstrapped'
 
 
-def get_manager_ip():
-    cli_settings = load_cloudify_working_dir_settings()
-    return cli_settings.get_management_server()
+def bake(cmd):
+    return cmd.bake(_out=lambda line: sys.stdout.write(line),
+                    _err=lambda line: sys.stderr.write(line))
 
 
 app = argh.EntryPoint('systest')
 command = app
-cfy = sh.cfy.bake(_out=lambda line: sys.stdout.write(line),
-                  _err=lambda line: sys.stderr.write(line))
+cfy = bake(sh.cfy)
+tmuxp = bake(sh.tmuxp)
 settings = Settings()
 completion = Completion(settings)
+
+
+def get_manager_ip():
+    cli_settings = load_cloudify_working_dir_settings()
+    return cli_settings.get_management_server()
 
 
 @command
@@ -80,6 +87,11 @@ def generate(configuration, reset_config=False):
                                    'manager_blueprint_override')
 
     conf.handler_configuration = handler_configuration
+
+    tmuxp_template = jinja2.Template(settings.tmuxp_template)
+    conf.tmuxp_path.write_text(tmuxp_template.render(
+        configuration=conf,
+        virtualenv_bin=os.path.dirname(sys.executable)))
 
 
 @command
@@ -130,6 +142,18 @@ def teardown(configuration):
         return NO_INIT
     with conf.dir:
         cfy.teardown(force=True, ignore_deployments=True).wait()
+
+
+@command
+@arg('configuration', completer=completion.existing_configurations)
+def tmux(configuration):
+    conf = Configuration(configuration)
+    if not conf.exists():
+        return NO_INIT
+    with conf.dir:
+        tmuxp.load(conf.tmuxp_path, d=True).wait()
+        cmd = 'tmux attach-session -t {0}'.format(conf.configuration)
+        subprocess.call(cmd.split(' '))
 
 
 @command

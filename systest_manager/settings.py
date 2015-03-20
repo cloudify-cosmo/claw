@@ -29,6 +29,12 @@ class Settings(object):
         self._load_settings()
         return path(self._settings['basedir'])
 
+    @property
+    def tmuxp_template(self):
+        template_path = (path(__file__).dirname() /
+                         'resources' / 'tmuxp.template.yaml')
+        return template_path.text()
+
     def _load_settings(self):
         if self._settings:
             return

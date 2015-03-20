@@ -8,12 +8,17 @@ setup(
     packages=['systest_manager'],
     description='Manages cloudify system tests configurations',
     zip_safe=False,
+    package_data={
+        'systest_manager': ['resources/tmuxp.template.yaml'],
+    },
     install_requires=[
         'requests',
         'argh',
         'sh',
         'path.py',
         'tmuxp',
+        'Jinja2',
+        'pyyaml'
     ],
     entry_points={
         'console_scripts': [
