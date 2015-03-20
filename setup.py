@@ -13,6 +13,7 @@ setup(
         'argh',
         'sh',
         'path.py',
+        'tmuxp',
     ],
     entry_points={
         'console_scripts': [
