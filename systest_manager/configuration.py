@@ -1,3 +1,5 @@
+import os
+
 import yaml
 
 from systest_manager.settings import Settings
@@ -8,7 +10,12 @@ settings = Settings()
 class Configuration(object):
 
     def __init__(self, configuration):
+        if os.path.isdir(configuration):
+            configuration = os.path.basename(configuration)
         self.configuration = configuration
+
+    def exists(self):
+        return self.inputs_path.exists()
 
     @property
     def dir(self):

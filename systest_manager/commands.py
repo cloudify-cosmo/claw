@@ -86,7 +86,7 @@ def generate(configuration, reset_config=False):
 @arg('configuration', completer=completion.existing_configurations)
 def status(configuration):
     conf = Configuration(configuration)
-    if not conf.dir.exists():
+    if not conf.exists():
         return NO_INIT
     try:
         with conf.dir:
@@ -110,7 +110,7 @@ def status(configuration):
 @arg('configuration', completer=completion.all_configurations)
 def bootstrap(configuration, reset_config=False):
     conf = Configuration(configuration)
-    if not conf.dir.exists() or reset_config:
+    if not conf.exists() or reset_config:
         generate(configuration, reset_config=reset_config)
     with conf.dir:
         cfy.init().wait()
@@ -126,7 +126,7 @@ def bootstrap(configuration, reset_config=False):
 @arg('configuration', completer=completion.existing_configurations)
 def teardown(configuration):
     conf = Configuration(configuration)
-    if not conf.dir.exists():
+    if not conf.exists():
         return NO_INIT
     with conf.dir:
         cfy.teardown(force=True, ignore_deployments=True).wait()
