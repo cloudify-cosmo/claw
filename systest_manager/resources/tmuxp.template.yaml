@@ -14,3 +14,11 @@ windows:
     panes: [cd /opt/manager]
   - window_name: cfy
     panes: []
+  - window_name: interpreter
+    panes:
+        - shell_command:
+            - ptipython
+            - |
+                import systest_manager.configuration;
+                config = systest_manager.configuration.Configuration('.');
+                client = config.rest_client

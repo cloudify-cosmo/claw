@@ -9,8 +9,6 @@ import requests
 import jinja2
 from argh.decorators import arg
 
-import cloudify_cli
-from cloudify_rest_client import CloudifyClient
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
@@ -100,22 +98,15 @@ def status(configuration):
     conf = Configuration(configuration)
     if not conf.exists():
         return NO_INIT
+    with conf.dir:
+        manager_ip = conf.handler_configuration.get('manager_ip')
+    if not manager_ip:
+        return NO_BOOTSTRAP
     try:
-        with conf.dir:
-            manager_ip = get_manager_ip()
-        if not manager_ip:
-            return NO_BOOTSTRAP
-        client = CloudifyClient(manager_ip)
-        try:
-            version = client.manager.get_version()['version']
-            return '[{0}] Running ({1})'.format(manager_ip, version)
-        except requests.exceptions.ConnectionError:
-            return '[{0}] Not reachable'.format(manager_ip)
-    except cloudify_cli.exceptions.CloudifyCliError as e:
-        if NO_INIT in str(e):
-            return NO_INIT
-        else:
-            raise
+        version = conf.rest_client.manager.get_version()['version']
+        return '[{0}] Running ({1})'.format(manager_ip, version)
+    except requests.exceptions.ConnectionError:
+        return '[{0}] Not reachable'.format(manager_ip)
 
 
 @command
@@ -128,7 +119,6 @@ def bootstrap(configuration, reset_config=False):
         cfy.init().wait()
         cfy.bootstrap(blueprint_path=conf.manager_blueprint_path,
                       inputs=conf.inputs_path).wait()
-
         handler_configuration = conf.handler_configuration
         handler_configuration['manager_ip'] = get_manager_ip()
         conf.handler_configuration = handler_configuration

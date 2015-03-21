@@ -2,6 +2,8 @@ import os
 
 import yaml
 
+import cloudify_rest_client
+
 from systest_manager.settings import Settings
 
 settings = Settings()
@@ -60,6 +62,11 @@ class Configuration(object):
     @handler_configuration.setter
     def handler_configuration(self, value):
         self._dump(value, self.handler_configuration_path)
+
+    @property
+    def rest_client(self):
+        return cloudify_rest_client.CloudifyClient(
+            self.handler_configuration['manager_ip'])
 
     @property
     def tmuxp_path(self):
