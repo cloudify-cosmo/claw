@@ -64,7 +64,7 @@ class Configuration(object):
         self._dump(value, self.handler_configuration_path)
 
     @property
-    def rest_client(self):
+    def client(self):
         return cloudify_rest_client.CloudifyClient(
             self.handler_configuration['manager_ip'])
 

@@ -21,4 +21,4 @@ windows:
             - |
                 import systest_manager.configuration;
                 config = systest_manager.configuration.Configuration('.');
-                client = config.rest_client
+                client = config.client

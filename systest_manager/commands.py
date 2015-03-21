@@ -103,7 +103,7 @@ def status(configuration):
     if not manager_ip:
         return NO_BOOTSTRAP
     try:
-        version = conf.rest_client.manager.get_version()['version']
+        version = conf.client.manager.get_version()['version']
         return '[{0}] Running ({1})'.format(manager_ip, version)
     except requests.exceptions.ConnectionError:
         return '[{0}] Not reachable'.format(manager_ip)
