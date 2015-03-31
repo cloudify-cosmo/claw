@@ -70,6 +70,7 @@ def generate(configuration, reset_config=False):
     handler_configuration['inputs'] = str(conf.inputs_path)
     handler_configuration['manager_blueprint'] = str(
         conf.manager_blueprint_path)
+    handler_configuration['install_manager_blueprint_dependencies'] = False
 
     def apply_override_and_remove_prop(yaml_path, prop):
         with util.YamlPatcher(yaml_path, default_flow_style=False) as patch:
