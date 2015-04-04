@@ -68,10 +68,6 @@ class Configuration(object):
         return cloudify_rest_client.CloudifyClient(
             self.handler_configuration['manager_ip'])
 
-    @property
-    def tmuxp_path(self):
-        return self.dir / 'tmuxp.yaml'
-
     @staticmethod
     def _load(obj_path):
         return yaml.load(obj_path.text())
