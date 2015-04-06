@@ -12,6 +12,5 @@ class Completion(object):
                 if c.startswith(prefix))
 
     def existing_configurations(self, prefix, **kwargs):
-        return (c for c in self._configurations()
-                if c.startswith(prefix) and
-                (self._settings.basedir / c).exists())
+        return (c for c in self.all_configurations(prefix)
+                if (self._settings.basedir / c).exists())
