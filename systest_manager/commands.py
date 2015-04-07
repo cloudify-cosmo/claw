@@ -147,42 +147,40 @@ def global_status():
 @command
 @arg('configuration', completer=completion.existing_configurations)
 @arg('blueprint', completer=completion.all_blueprints)
-def deploy(configuration, blueprint):
+def generate_blueprint(configuration, blueprint):
     conf = Configuration(configuration)
     if not conf.exists():
         return NO_INIT
     blueprints_yaml = settings.load_blueprints_yaml()
     blueprint = Blueprint(blueprint, conf)
-
-    blueprint_configuration = blueprints_yaml[blueprint.blueprint]
-
+    blueprint.dir.makedirs()
+    blueprint_configuration = blueprints_yaml['blueprints'][
+        blueprint.blueprint]
     original_inputs_path = os.path.expanduser(
         blueprint_configuration['inputs'])
     original_blueprint_path = os.path.expanduser(
         blueprint_configuration['blueprint'])
-
-    _, manager_blueprint_path = util.generate_unique_configurations(
-        workdir=conf.dir,
+    _, blueprint_path = util.generate_unique_configurations(
+        workdir=blueprint.dir,
         original_inputs_path=original_inputs_path,
-        original_manager_blueprint_path=original_manager_blueprint_path)
-    shutil.move(manager_blueprint_path, conf.manager_blueprint_path)
+        original_manager_blueprint_path=original_blueprint_path,
+        manager_blueprint_dir_name='blueprint')
+    shutil.move(blueprint_path, blueprint.blueprint_path)
 
-    handler_configuration['inputs'] = str(conf.inputs_path)
-    handler_configuration['manager_blueprint'] = str(
-        conf.manager_blueprint_path)
-    handler_configuration['install_manager_blueprint_dependencies'] = False
+    blueprint_configuration['inputs'] = str(blueprint.inputs_path)
+    blueprint_configuration['blueprint'] = str(blueprint.blueprint_path)
 
-    def apply_override(yaml_path, prop):
+    def apply_override_and_remove_prop(yaml_path, prop):
         with util.YamlPatcher(yaml_path, default_flow_style=False) as patch:
             override = util.process_variables(
-                suites_yaml, handler_configuration.get(prop, {}))
+                blueprints_yaml, blueprint_configuration.get(prop, {}))
             for key, value in override.items():
                 patch.set_value(key, value)
-        if prop in handler_configuration:
-            del handler_configuration[prop]
+        if prop in blueprint_configuration:
+            del blueprint_configuration[prop]
 
-    apply_override(blueprint.inputs_path, 'inputs_override')
-    apply_override(conf.manager_blueprint_path,
+    apply_override_and_remove_prop(blueprint.inputs_path, 'inputs_override')
+    apply_override_and_remove_prop(blueprint.blueprint_path,
                                    'blueprint_override')
 
     blueprint.blueprint_configuration = blueprint_configuration

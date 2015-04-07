@@ -6,13 +6,12 @@ class Blueprint(object):
         self.configuration = configuration
 
     @property
-    def blueprint_dir(self):
+    def dir(self):
         return self.configuration.blueprints_dir / self.blueprint
 
     @property
     def blueprint_configuration_path(self):
-        return self.configuration.blueprints_dir / '{}.yaml'.format(
-            self.blueprint)
+        return self.dir / 'blueprint-configuration.yaml'
 
     @property
     def blueprint_configuration(self):
@@ -21,3 +20,11 @@ class Blueprint(object):
     @blueprint_configuration.setter
     def blueprint_configuration(self, value):
         self.configuration.dump(value, self.blueprint_configuration_path)
+
+    @property
+    def inputs_path(self):
+        return self.dir / 'inputs.yaml'
+
+    @property
+    def blueprint_path(self):
+        return self.dir / 'blueprint' / 'blueprint.yaml'
