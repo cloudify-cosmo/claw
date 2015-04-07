@@ -29,11 +29,11 @@ class Configuration(object):
 
     @property
     def inputs(self):
-        return self._load(self.inputs_path)
+        return self.load(self.inputs_path)
 
     @inputs.setter
     def inputs(self, value):
-        self._dump(value, self.inputs_path)
+        self.dump(value, self.inputs_path)
 
     @property
     def manager_blueprint_dir(self):
@@ -44,12 +44,16 @@ class Configuration(object):
         return self.manager_blueprint_dir / 'manager-blueprint.yaml'
 
     @property
+    def blueprints_dir(self):
+        return self.dir / 'blueprints'
+
+    @property
     def manager_blueprint(self):
-        return self._load(self.manager_blueprint_path)
+        return self.load(self.manager_blueprint_path)
 
     @manager_blueprint.setter
     def manager_blueprint(self, value):
-        self._dump(value, self.manager_blueprint_path)
+        self.dump(value, self.manager_blueprint_path)
 
     @property
     def handler_configuration_path(self):
@@ -57,11 +61,11 @@ class Configuration(object):
 
     @property
     def handler_configuration(self):
-        return self._load(self.handler_configuration_path)
+        return self.load(self.handler_configuration_path)
 
     @handler_configuration.setter
     def handler_configuration(self, value):
-        self._dump(value, self.handler_configuration_path)
+        self.dump(value, self.handler_configuration_path)
 
     @property
     def client(self):
@@ -69,9 +73,9 @@ class Configuration(object):
             self.handler_configuration['manager_ip'])
 
     @staticmethod
-    def _load(obj_path):
+    def load(obj_path):
         return yaml.load(obj_path.text())
 
     @staticmethod
-    def _dump(obj, obj_path):
+    def dump(obj, obj_path):
         obj_path.write_text(yaml.safe_dump(obj, default_flow_style=False))

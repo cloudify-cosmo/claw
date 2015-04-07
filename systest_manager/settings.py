@@ -25,6 +25,11 @@ class Settings(object):
         return path(self._settings['user_suites_yaml'])
 
     @property
+    def blueprints_yaml(self):
+        self._load_settings()
+        return path(self._settings['blueprints_yaml'])
+
+    @property
     def basedir(self):
         self._load_settings()
         return path(self._settings['basedir'])
@@ -39,11 +44,14 @@ class Settings(object):
     def write_settings(self,
                        basedir,
                        main_suites_yaml_path,
-                       user_suites_yaml_path):
+                       user_suites_yaml_path,
+                       blueprints_yaml_path):
+        blueprints_yaml_path = blueprints_yaml_path or user_suites_yaml_path
         self.settings_path.write_text(yaml.safe_dump({
             'basedir': os.path.expanduser(basedir),
             'main_suites_yaml': os.path.expanduser(main_suites_yaml_path),
-            'user_suites_yaml': os.path.expanduser(user_suites_yaml_path)
+            'user_suites_yaml': os.path.expanduser(user_suites_yaml_path),
+            'blueprints_yaml': os.path.expanduser(blueprints_yaml_path)
         }, default_flow_style=False))
 
     def load_suites_yaml(self, variables=True):
@@ -54,3 +62,12 @@ class Settings(object):
             variables.update(suites_yaml.get('variables', {}))
             suites_yaml['variables'] = variables
         return suites_yaml
+
+    def load_blueprints_yaml(self, variables=True):
+        blueprints_yaml = yaml.load(self.blueprints_yaml.text())
+        if variables:
+            suites_yaml = self.load_suites_yaml(variables=True)
+            variables = suites_yaml['variables']
+            variables.update(blueprints_yaml.get('variables', {}))
+            blueprints_yaml['variables'] = variables
+        return blueprints_yaml

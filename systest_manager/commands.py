@@ -10,6 +10,7 @@ from argh.decorators import arg
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
+from systest_manager.blueprint import Blueprint
 from systest_manager.configuration import Configuration
 from systest_manager.settings import Settings
 from systest_manager.completion import Completion
@@ -40,8 +41,15 @@ def get_manager_ip():
 @arg('--basedir', required=True)
 @arg('--main_suites_yaml', required=True)
 @arg('--user_suites_yaml', required=True)
-def init(basedir=None, main_suites_yaml=None, user_suites_yaml=None):
-    settings.write_settings(basedir, main_suites_yaml, user_suites_yaml)
+@arg('--blueprints_yaml', required=False)
+def init(basedir=None,
+         main_suites_yaml=None,
+         user_suites_yaml=None,
+         blueprints_yaml=None):
+    settings.write_settings(basedir,
+                            main_suites_yaml,
+                            user_suites_yaml,
+                            blueprints_yaml)
 
 
 @command
@@ -134,3 +142,47 @@ def global_status():
     for directory in settings.basedir.dirs():
         configuration = directory.basename()
         yield '{0}: {1}'.format(configuration, status(configuration))
+
+
+@command
+@arg('configuration', completer=completion.existing_configurations)
+@arg('blueprint', completer=completion.all_blueprints)
+def deploy(configuration, blueprint):
+    conf = Configuration(configuration)
+    if not conf.exists():
+        return NO_INIT
+    blueprints_yaml = settings.load_blueprints_yaml()
+    blueprint = Blueprint(blueprint, conf)
+
+    blueprint_configuration = blueprints_yaml[blueprint.blueprint]
+
+    original_inputs_path = os.path.expanduser(
+        blueprint_configuration['inputs'])
+    original_blueprint_path = os.path.expanduser(
+        blueprint_configuration['blueprint'])
+
+    _, manager_blueprint_path = util.generate_unique_configurations(
+        workdir=conf.dir,
+        original_inputs_path=original_inputs_path,
+        original_manager_blueprint_path=original_manager_blueprint_path)
+    shutil.move(manager_blueprint_path, conf.manager_blueprint_path)
+
+    handler_configuration['inputs'] = str(conf.inputs_path)
+    handler_configuration['manager_blueprint'] = str(
+        conf.manager_blueprint_path)
+    handler_configuration['install_manager_blueprint_dependencies'] = False
+
+    def apply_override(yaml_path, prop):
+        with util.YamlPatcher(yaml_path, default_flow_style=False) as patch:
+            override = util.process_variables(
+                suites_yaml, handler_configuration.get(prop, {}))
+            for key, value in override.items():
+                patch.set_value(key, value)
+        if prop in handler_configuration:
+            del handler_configuration[prop]
+
+    apply_override(blueprint.inputs_path, 'inputs_override')
+    apply_override(conf.manager_blueprint_path,
+                                   'blueprint_override')
+
+    blueprint.blueprint_configuration = blueprint_configuration
