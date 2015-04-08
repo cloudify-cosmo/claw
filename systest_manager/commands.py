@@ -147,12 +147,14 @@ def global_status():
 @command
 @arg('configuration', completer=completion.existing_configurations)
 @arg('blueprint', completer=completion.all_blueprints)
-def generate_blueprint(configuration, blueprint):
+def generate_blueprint(configuration, blueprint, reset=False):
     conf = Configuration(configuration)
     if not conf.exists():
         return NO_INIT
     blueprints_yaml = settings.load_blueprints_yaml()
     blueprint = Blueprint(blueprint, conf)
+    if blueprint.dir.exists() and reset:
+        shutil.rmtree(blueprint.dir)
     blueprint.dir.makedirs()
     blueprint_configuration = blueprints_yaml['blueprints'][
         blueprint.blueprint]
@@ -189,12 +191,13 @@ def generate_blueprint(configuration, blueprint):
 @command
 @arg('configuration', completer=completion.existing_configurations)
 @arg('blueprint', completer=completion.all_blueprints)
-def deploy(configuration, blueprint):
+def deploy(configuration, blueprint, skip_generation=False):
     conf = Configuration(configuration)
     if not conf.dir.isdir():
         return NO_INIT
     bp = Blueprint(blueprint, conf)
-    generate_blueprint(configuration, blueprint)
+    if not skip_generation:
+        generate_blueprint(configuration, blueprint)
     with conf.dir:
         cfy.blueprints.upload(blueprint_path=bp.blueprint_path,
                               blueprint_id=blueprint).wait()
