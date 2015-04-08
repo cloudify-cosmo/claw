@@ -184,3 +184,39 @@ def generate_blueprint(configuration, blueprint):
                                    'blueprint_override')
 
     blueprint.blueprint_configuration = blueprint_configuration
+
+
+@command
+@arg('configuration', completer=completion.existing_configurations)
+@arg('blueprint', completer=completion.all_blueprints)
+def deploy(configuration, blueprint):
+    conf = Configuration(configuration)
+    if not conf.dir.isdir():
+        return NO_INIT
+    bp = Blueprint(blueprint, conf)
+    generate_blueprint(configuration, blueprint)
+    with conf.dir:
+        cfy.blueprints.upload(blueprint_path=bp.blueprint_path,
+                              blueprint_id=blueprint).wait()
+        cfy.deployments.create(blueprint_id=blueprint,
+                               deployment_id=blueprint,
+                               inputs=bp.inputs_path).wait()
+        cfy.executions.start(workflow='install',
+                             deployment_id=blueprint,
+                             include_logs=True).wait()
+
+
+@command
+@arg('configuration', completer=completion.existing_configurations)
+@arg('blueprint', completer=completion.all_blueprints)
+def undeploy(configuration, blueprint):
+    conf = Configuration(configuration)
+    if not conf.dir.isdir():
+        return NO_INIT
+    with conf.dir:
+        cfy.executions.start(workflow='uninstall',
+                             deployment_id=blueprint,
+                             include_logs=True).wait()
+        cfy.deployments.delete(deployment_id=blueprint,
+                               ignore_live_nodes=True).wait()
+        cfy.blueprints.delete(blueprint_id=blueprint).wait()

@@ -12,8 +12,8 @@ class Completion(object):
             'blueprints'].keys()
 
     def all_blueprints(self, prefix, **kwargs):
-        return (c for c in self._blueprints()
-                if c.startswith(prefix))
+        return (b for b in self._blueprints()
+                if b.startswith(prefix))
 
     def all_configurations(self, prefix, **kwargs):
         return (c for c in self._configurations()
