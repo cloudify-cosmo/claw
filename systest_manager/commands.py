@@ -1,3 +1,4 @@
+import importlib
 import sys
 import os
 import shutil
@@ -223,3 +224,22 @@ def undeploy(configuration, blueprint):
         cfy.deployments.delete(deployment_id=blueprint,
                                ignore_live_nodes=True).wait()
         cfy.blueprints.delete(blueprint_id=blueprint).wait()
+
+
+@command
+@arg('configuration', completer=completion.all_configurations)
+def cleanup(configuration):
+    conf = Configuration(configuration)
+    temp_configuration = False
+    if not conf.exists():
+        temp_configuration = True
+        generate(configuration)
+    try:
+        handler_name = conf.handler_configuration['handler']
+        handler = importlib.import_module(
+            'systest_manager.handlers.{0}'.format(handler_name))
+        cleanup_handler = handler.CleanupHandler(conf)
+        cleanup_handler.cleanup()
+    finally:
+        if temp_configuration:
+            conf.dir.rmtree_p()
