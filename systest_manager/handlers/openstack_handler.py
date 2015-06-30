@@ -72,27 +72,28 @@ class CleanupHandler(object):
     def delete_ports(self):
         print "Deleting Ports"
         for port in self.neut.list_ports()['ports']:
-            print "Deleting port {0}".format(port['name'])
+            print "\tDeleting port {0}".format(port['name'])
             self.neut.delete_port(port['id'])
 
     def delete_networks(self):
         print "Deleting Networks"
         for network in self.neut.list_networks()['networks']:
             if not network['router:external']:
-                print "Deleting network {0}".format(network['name'])
+                print "\tDeleting network {0}".format(network['name'])
                 self.neut.delete_network(network['id'])
 
     def delete_security_groups(self):
         print "Deleting Security Groups"
         for sg in self.neut.list_security_groups()['security_groups']:
             if sg['name'] != 'default':
-                print "Deleting security group {0}".format(sg['name'])
+                print "\tDeleting security group {0}".format(sg['name'])
                 self.neut.delete_security_group(sg['id'])
 
     def delete_floatingips(self):
         print "Deleting Floating IPs"
         for fip in self.neut.list_floatingips()['floatingips']:
-            print "Deleting floating IP {0}".format(fip['floating_ip_address'])
+            print "\tDeleting floating IP {0}".format(
+                fip['floating_ip_address'])
             self.neut.delete_floatingip(fip['id'])
 
     @staticmethod
