@@ -68,6 +68,18 @@ class Configuration(object):
         self.dump(value, self.handler_configuration_path)
 
     @property
+    def cli_config_path(self):
+        return self.dir / '.cloudify' / 'config.yaml'
+
+    @property
+    def cli_config(self):
+        return self.load(self.cli_config_path)
+
+    @cli_config.setter
+    def cli_config(self, value):
+        self.dump(value, self.cli_config_path)
+
+    @property
     def client(self):
         return cloudify_rest_client.CloudifyClient(
             self.handler_configuration['manager_ip'])
