@@ -4,6 +4,7 @@ import os
 import shutil
 
 import argh
+import jinja2
 import sh
 import requests
 from argh.decorators import arg
@@ -15,7 +16,7 @@ from systest_manager.blueprint import Blueprint
 from systest_manager.configuration import Configuration
 from systest_manager.settings import Settings
 from systest_manager.completion import Completion
-
+from systest_manager import resources
 
 NO_INIT = 'Not initialized'
 NO_BOOTSTRAP = 'Not bootstrapped'
@@ -246,3 +247,38 @@ def cleanup(configuration):
     finally:
         if temp_configuration:
             conf.dir.rmtree_p()
+
+
+@command
+@arg('configuration', completer=completion.existing_configurations)
+def overview(configuration):
+    conf = Configuration(configuration)
+    if not conf.exists():
+        return NO_INIT
+    client = conf.client
+
+    import bottle
+
+    @bottle.route('/')
+    def content():
+
+        deployments = {d.id: {'node_instances': {},
+                              'executions': {}}
+                       for d in client.deployments.list(_include=['id'])}
+        node_instances = client.node_instances.list()
+        executions = client.executions.list()
+
+        for node_instance in node_instances:
+            deployment = deployments[node_instance.deployment_id]
+            deployment['node_instances'][node_instance.id] = node_instance
+        for execution in executions:
+            deployment = deployments[execution.deployment_id]
+            deployment['executions'][execution.id] = execution
+
+        template = jinja2.Template(resources.get('overview.html'))
+        return template.render(version=client.manager.get_version()['version'],
+                               host=client._client.host,
+                               configuration=configuration,
+                               deployments=deployments)
+
+    bottle.run()
