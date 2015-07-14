@@ -195,13 +195,13 @@ def generate_blueprint(configuration, blueprint, reset=False):
 @command
 @arg('configuration', completer=completion.existing_configurations)
 @arg('blueprint', completer=completion.all_blueprints)
-def deploy(configuration, blueprint, skip_generation=False):
+def deploy(configuration, blueprint, skip_generation=False, reset=False):
     conf = Configuration(configuration)
     if not conf.dir.isdir():
         return NO_INIT
     bp = Blueprint(blueprint, conf)
     if not skip_generation:
-        generate_blueprint(configuration, blueprint)
+        generate_blueprint(configuration, blueprint, reset)
     with conf.dir:
         cfy.blueprints.upload(blueprint_path=bp.blueprint_path,
                               blueprint_id=blueprint).wait()
