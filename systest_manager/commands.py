@@ -259,14 +259,14 @@ def overview(configuration):
 
     import bottle
 
-    @bottle.route('/')
-    def content():
-
-        deployments = {d.id: {'node_instances': {},
+    def _content(deployment_ids):
+        deployments = {d_id: {'node_instances': {},
                               'executions': {}}
-                       for d in client.deployments.list(_include=['id'])}
-        node_instances = client.node_instances.list()
-        executions = client.executions.list()
+                       for d_id in deployment_ids}
+        deployment_id = deployment_ids[0] if len(deployment_ids) == 1 else None
+        node_instances = client.node_instances.list(
+            deployment_id=deployment_id)
+        executions = client.executions.list(deployment_id=deployment_id)
 
         for node_instance in node_instances:
             deployment = deployments[node_instance.deployment_id]
@@ -280,5 +280,14 @@ def overview(configuration):
                                host=client._client.host,
                                configuration=configuration,
                                deployments=deployments)
+
+    @bottle.route('/')
+    def all_deployments():
+        return _content([d.id for d in
+                         client.deployments.list(_include=['id'])])
+
+    @bottle.route('/<deployment_id>')
+    def single_deployment(deployment_id):
+        return _content([deployment_id])
 
     bottle.run()
