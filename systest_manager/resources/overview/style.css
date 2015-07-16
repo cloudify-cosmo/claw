@@ -1,0 +1,12 @@
+.node-instance-started {
+    color: green;
+}
+.execution-terminated {
+    color: green;
+}
+.execution-failed {
+    color: red;
+}
+.execution-started {
+    color: yellow;
+}

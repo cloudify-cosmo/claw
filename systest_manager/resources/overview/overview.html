@@ -1,21 +1,9 @@
 <!doctype html>
+<!--suppress HtmlUnknownTarget -->
 <html>
 <head>
-<title>{{configuration}}: {{host}} [{{version}}]</title>
-<style>
-    .node-instance-started {
-        color: green;
-    }
-    .execution-terminated {
-        color: green;
-    }
-    .execution-failed {
-        color: red;
-    }
-    .execution-started {
-        color: yellow;
-    }
-</style>
+    <title>{{configuration}}: {{host}} [{{version}}]</title>
+    <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
     {% for deployment_id, deployment in deployments.iteritems() %}

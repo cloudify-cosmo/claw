@@ -1,3 +1,5 @@
+import os
+
 import jinja2
 import bottle
 
@@ -28,7 +30,7 @@ class Overview(object):
             deployment = deployments[execution.deployment_id]
             deployment['executions'][execution.id] = execution
 
-        template = jinja2.Template(resources.get('overview.html'))
+        template = jinja2.Template(resources.get('overview/overview.html'))
         return template.render(
             version=self.client.manager.get_version()['version'],
             host=self.host,
@@ -42,10 +44,16 @@ class Overview(object):
     def single_deployment(self, deployment_id):
         return self._content([deployment_id])
 
+    @staticmethod
+    def static(filename):
+        return bottle.static_file(filename,
+                                  root=os.path.join(resources.DIR, 'overview'))
+
     def serve(self):
         routes = {
             '/': self.all_deployments,
-            '/<deployment_id>': self.single_deployment
+            '/<deployment_id>': self.single_deployment,
+            '/static/<filename>': self.static
         }
         for route, handler in routes.items():
             self.app.route(route)(handler)
