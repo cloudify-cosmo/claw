@@ -10,6 +10,7 @@ class Overview(object):
         self.app = bottle.app()
         self.configuration = configuration
         self.client = configuration.client
+        self.host = self.client._client.host
 
     def _content(self, deployment_ids):
         deployments = {d_id: {'node_instances': {},
@@ -30,7 +31,7 @@ class Overview(object):
         template = jinja2.Template(resources.get('overview.html'))
         return template.render(
             version=self.client.manager.get_version()['version'],
-            host=self.client._client.host,
+            host=self.host,
             configuration=self.configuration.configuration,
             deployments=deployments)
 
