@@ -1,0 +1,31 @@
+<!doctype html>
+<!--suppress HtmlUnknownTarget -->
+<html ng-app="">
+<head>
+    <link rel="stylesheet" href="/static/style/style.css" />
+    <script src="/static/script/angular-1.2.22.js"></script>
+    <script src="/static/script/lodash-2.4.1.js"></script>
+</head>
+<body ng-controller="OverviewController">
+    <div ng-repeat="(deployment_id, deployment) in deployments">
+        <h1>{{deployment_id}}</h1>
+        <h2>Node Instances</h2>
+        <ul>
+            <li ng-repeat="node_instance in deployment.node_instances"
+                class="node-instance-{{node_instance.state}}">
+                {{node_instance.id}}: {{node_instance.state}}
+            </li>
+        </ul>
+        <h2>Executions</h2>
+        <ul>
+            <li ng-repeat="execution in deployment.executions"
+                class="execution-{{execution.status}}">
+                {{execution.id}} [{{execution.workflow_id}}]: {{execution.status}}
+            </li>
+        </ul>
+    </div>
+    <sub>{{configuration}}: {{host}} [{{version}}]</sub>
+
+    <script src="/static/script/script.js"></script>
+</body>
+</html>
