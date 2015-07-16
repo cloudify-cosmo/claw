@@ -4,7 +4,6 @@ import os
 import shutil
 
 import argh
-import jinja2
 import sh
 import requests
 from argh.decorators import arg
@@ -16,7 +15,7 @@ from systest_manager.blueprint import Blueprint
 from systest_manager.configuration import Configuration
 from systest_manager.settings import Settings
 from systest_manager.completion import Completion
-from systest_manager import resources
+from systest_manager import overview as _overview
 
 NO_INIT = 'Not initialized'
 NO_BOOTSTRAP = 'Not bootstrapped'
@@ -255,39 +254,4 @@ def overview(configuration):
     conf = Configuration(configuration)
     if not conf.exists():
         return NO_INIT
-    client = conf.client
-
-    import bottle
-
-    def _content(deployment_ids):
-        deployments = {d_id: {'node_instances': {},
-                              'executions': {}}
-                       for d_id in deployment_ids}
-        deployment_id = deployment_ids[0] if len(deployment_ids) == 1 else None
-        node_instances = client.node_instances.list(
-            deployment_id=deployment_id)
-        executions = client.executions.list(deployment_id=deployment_id)
-
-        for node_instance in node_instances:
-            deployment = deployments[node_instance.deployment_id]
-            deployment['node_instances'][node_instance.id] = node_instance
-        for execution in executions:
-            deployment = deployments[execution.deployment_id]
-            deployment['executions'][execution.id] = execution
-
-        template = jinja2.Template(resources.get('overview.html'))
-        return template.render(version=client.manager.get_version()['version'],
-                               host=client._client.host,
-                               configuration=configuration,
-                               deployments=deployments)
-
-    @bottle.route('/')
-    def all_deployments():
-        return _content([d.id for d in
-                         client.deployments.list(_include=['id'])])
-
-    @bottle.route('/<deployment_id>')
-    def single_deployment(deployment_id):
-        return _content([deployment_id])
-
-    bottle.run()
+    _overview.serve(conf)
