@@ -13,6 +13,13 @@ class Overview(object):
         self.client = configuration.client
         self.host = self.client._client.host
 
+    def metadata(self):
+        return {
+            'version': self.client.manager.get_version()['version'],
+            'host': self.host,
+            'configuration': self.configuration.configuration
+        }
+
     def state(self):
         deployment_ids = [d.id for d in
                           self.client.deployments.list(_include=['id'])]
@@ -29,12 +36,7 @@ class Overview(object):
             deployment = deployments[execution.deployment_id]
             deployment['executions'].append(execution)
 
-        return dict(
-            version=self.client.manager.get_version()['version'],
-            host=self.host,
-            configuration=self.configuration.configuration,
-            deployments=deployments
-        )
+        return {'deployments': deployments}
 
     @staticmethod
     def static(filename):
@@ -47,6 +49,7 @@ class Overview(object):
     def serve(self):
         routes = {
             '/': self.index,
+            '/metadata': self.metadata,
             '/state': self.state,
             '/static/<filename:path>': self.static,
         }
