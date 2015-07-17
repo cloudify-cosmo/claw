@@ -250,8 +250,8 @@ def cleanup(configuration):
 
 @command
 @arg('configuration', completer=completion.existing_configurations)
-def overview(configuration):
+def overview(configuration, port=8080):
     conf = Configuration(configuration)
     if not conf.exists():
         return NO_INIT
-    _overview.serve(conf)
+    _overview.serve(conf, port)

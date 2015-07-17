@@ -38,6 +38,21 @@ class Overview(object):
 
         return {'deployments': deployments}
 
+    def events(self, execution_id):
+        node_id = bottle.request.query.get('node_id')
+        events, _ = self.client.events.get(
+            execution_id=execution_id,
+            batch_size=1000,
+            include_logs=True)
+        if node_id:
+            events = [e for e in events
+                      if e['context'].get('node_id') == node_id]
+        for event in events:
+            event['type'] = ('LOG' if 'cloudify_log' in event['type']
+                             else 'CFY')
+
+        return {'events': events}
+
     @staticmethod
     def static(filename):
         return bottle.static_file(filename,
@@ -46,17 +61,19 @@ class Overview(object):
     def index(self):
         return self.static('index.html')
 
-    def serve(self):
+    def serve(self, port):
         routes = {
             '/': self.index,
             '/metadata': self.metadata,
             '/state': self.state,
+            '/events/<execution_id>': self.events,
             '/static/<filename:path>': self.static,
         }
         for route, handler in routes.items():
             self.app.route(route)(handler)
-        self.app.run()
+        print 'http://localhost:{0}'.format(port)
+        self.app.run(debug=True, port=port)
 
 
-def serve(configuration):
-    Overview(configuration).serve()
+def serve(configuration, port):
+    Overview(configuration).serve(port=port)

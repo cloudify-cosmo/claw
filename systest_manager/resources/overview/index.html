@@ -2,30 +2,49 @@
 <!--suppress HtmlUnknownTarget -->
 <html ng-app="">
 <head>
+    <link rel="stylesheet" href="/static/style/simple-grid.css" />
     <link rel="stylesheet" href="/static/style/style.css" />
     <script src="/static/script/angular-1.2.22.js"></script>
     <script src="/static/script/lodash-2.4.1.js"></script>
 </head>
-<body ng-controller="OverviewController">
-    <div ng-repeat="(deployment_id, deployment) in deployments">
-        <h1>{{deployment_id}}</h1>
-        <h2>Node Instances</h2>
-        <ul>
-            <li ng-repeat="node_instance in deployment.node_instances"
-                class="node-instance-{{node_instance.state}}">
-                {{node_instance.id}}: {{node_instance.state}}
-            </li>
-        </ul>
-        <h2>Executions</h2>
-        <ul>
-            <li ng-repeat="execution in deployment.executions"
-                class="execution-{{execution.status}}">
-                {{execution.id}} [{{execution.workflow_id}}]: {{execution.status}}
-            </li>
-        </ul>
+<body ng-controller="OverviewController" class="grid">
+
+    <div class="section">
+        <div class="col">
+            <div ng-repeat="(deployment_id, deployment) in deployments">
+                <h1>{{deployment_id}}</h1>
+                <h1>Node Instances</h1>
+
+                    <div ng-repeat="node_instance in deployment.node_instances"
+                        class="node-instance-{{node_instance.state}}">
+                        <div>
+                            <span class="col">
+                                <a ng-click="fetch_events(node_instance.id)">
+                                    {{node_instance.id}}
+                                </a>
+                            </span>
+                            <span class="col">{{node_instance.state}}</span>
+                        </div>
+                    </div>
+
+                <h1>Executions</h1>
+                <div ng-repeat="execution in deployment.executions"
+                    class="execution-{{execution.status}}">
+                    <span>{{execution.id}} [{{execution.workflow_id}}]: {{execution.status}}</span>
+                </div>
+            </div>
+        </div>
+        <div id="events" class="col">
+            <h2>{{events[0].context.node_id}}</h2>
+            <div ng-repeat="event in events">
+                <pre>[{{event.type}}] {{event.message.text}}</pre><hr/>
+            </div>
+        </div>
     </div>
+
     <sub>{{configuration}}: {{host}} [{{version}}]</sub>
 
     <script src="/static/script/script.js"></script>
+
 </body>
 </html>
