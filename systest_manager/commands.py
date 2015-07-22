@@ -202,7 +202,10 @@ def generate_blueprint(configuration, blueprint, reset=False):
 @command
 @arg('configuration', completer=completion.existing_configurations)
 @arg('blueprint', completer=completion.all_blueprints)
-def deploy(configuration, blueprint, skip_generation=False, reset=False):
+def deploy(configuration, blueprint,
+           skip_generation=False,
+           reset=False,
+           timeout=1800):
     conf = Configuration(configuration)
     if not conf.dir.isdir():
         return NO_INIT
@@ -217,7 +220,8 @@ def deploy(configuration, blueprint, skip_generation=False, reset=False):
                                inputs=bp.inputs_path).wait()
         cfy.executions.start(workflow='install',
                              deployment_id=blueprint,
-                             include_logs=True).wait()
+                             include_logs=True,
+                             timeout=timeout).wait()
 
 
 @command
