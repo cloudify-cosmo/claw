@@ -2,6 +2,7 @@ import importlib
 import sys
 import os
 import shutil
+import tempfile
 
 import argh
 import sh
@@ -163,9 +164,15 @@ def generate_blueprint(configuration, blueprint, reset=False):
     blueprint_configuration = blueprints_yaml['blueprints'][
         blueprint.blueprint]
     original_inputs_path = os.path.expanduser(
-        blueprint_configuration['inputs'])
+        blueprint_configuration.get('inputs', ''))
     original_blueprint_path = os.path.expanduser(
         blueprint_configuration['blueprint'])
+
+    if not original_inputs_path:
+        _, original_inputs_path = tempfile.mkstemp()
+        with open(original_inputs_path, 'w') as f:
+            f.write('{}')
+
     _, blueprint_path = util.generate_unique_configurations(
         workdir=blueprint.dir,
         original_inputs_path=original_inputs_path,

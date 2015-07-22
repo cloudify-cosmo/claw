@@ -19,7 +19,7 @@
                         class="node-instance-{{node_instance.state}}">
                         <div>
                             <span class="col">
-                                <a ng-click="fetch_events(node_instance.id)">
+                                <a ng-click="fetchEvents(node_instance.id)">
                                     {{node_instance.id}}
                                 </a>
                             </span>
@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    <sub>{{configuration}}: {{host}} [{{version}}]</sub>
+    <sub>{{metadata.configuration}}: {{metadata.host}} [{{metadata.version}}]</sub>
 
     <script src="/static/script/script.js"></script>
 
