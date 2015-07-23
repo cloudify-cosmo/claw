@@ -1,4 +1,5 @@
 import importlib
+import json
 import sys
 import os
 import shutil
@@ -9,6 +10,7 @@ import sh
 import requests
 from argh.decorators import arg
 
+from cloudify_cli.execution_events_fetcher import ExecutionEventsFetcher
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
@@ -266,3 +268,39 @@ def overview(configuration, port=8080):
     if not conf.exists():
         return NO_INIT
     _overview.serve(conf, port)
+
+
+@command
+@arg('configuration', completer=completion.existing_configurations)
+def events(configuration,
+           execution_id,
+           output=None,
+           batch_size=1000,
+           include_logs=False,
+           timeout=3600):
+    conf = Configuration(configuration)
+    if not conf.exists():
+        return NO_INIT
+    fetcher = ExecutionEventsFetcher(execution_id=execution_id,
+                                     client=conf.client,
+                                     batch_size=batch_size,
+                                     include_logs=include_logs)
+
+    class Handler(object):
+        def __init__(self):
+            self.events = []
+
+        def handle(self, batch):
+            self.events += batch
+            print 'Fetched: {0}'.format(len(self.events))
+    handler = Handler()
+
+    fetcher.fetch_and_process_events(events_handler=handler.handle,
+                                     timeout=timeout)
+
+    events_json = json.dumps(handler.events)
+    if not output:
+        sys.stdout.write(events_json)
+    else:
+        with open(output, 'w') as f:
+            f.write(events_json)
