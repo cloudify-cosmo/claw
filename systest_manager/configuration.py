@@ -3,6 +3,8 @@ import os
 import yaml
 
 import cloudify_rest_client
+from cosmo_tester.framework import util
+
 
 from systest_manager.settings import Settings
 
@@ -62,6 +64,17 @@ class Configuration(object):
     @property
     def handler_configuration(self):
         return self.load(self.handler_configuration_path)
+
+    @property
+    def properties(self):
+        handler_configuration = self.handler_configuration
+        properties_name = handler_configuration.get('properties')
+        if not properties_name:
+            return {}
+        suites_yaml = self.load(settings.main_suites_yaml)
+        handler_properties = suites_yaml.get('handler_properties')
+        properties = handler_properties.get(properties_name, {})
+        return util.process_variables(suites_yaml, properties)
 
     @handler_configuration.setter
     def handler_configuration(self, value):

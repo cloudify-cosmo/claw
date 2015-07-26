@@ -185,6 +185,8 @@ def generate_blueprint(configuration, blueprint, reset=False):
     blueprint_configuration['inputs'] = str(blueprint.inputs_path)
     blueprint_configuration['blueprint'] = str(blueprint.blueprint_path)
 
+    blueprints_yaml['variables']['properties'] = conf.properties
+
     def apply_override_and_remove_prop(yaml_path, prop):
         with util.YamlPatcher(yaml_path, default_flow_style=False) as patch:
             override = util.process_variables(
