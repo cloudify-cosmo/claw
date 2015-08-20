@@ -1,4 +1,3 @@
-import importlib
 import json
 import sys
 import os
@@ -253,10 +252,7 @@ def cleanup(configuration):
         temp_configuration = True
         generate(configuration)
     try:
-        handler_name = conf.handler_configuration['handler']
-        handler = importlib.import_module(
-            'systest_manager.handlers.{0}'.format(handler_name))
-        cleanup_handler = handler.CleanupHandler(conf)
+        cleanup_handler = conf.systest_handler.CleanupHandler(conf)
         cleanup_handler.cleanup()
     finally:
         if temp_configuration:

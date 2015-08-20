@@ -1,4 +1,5 @@
 import os
+import importlib
 
 import yaml
 
@@ -13,7 +14,7 @@ settings = Settings()
 
 class Configuration(object):
 
-    def __init__(self, configuration):
+    def __init__(self, configuration='.'):
         if os.path.isdir(configuration):
             configuration = os.path.basename(os.path.abspath(configuration))
         self.configuration = configuration
@@ -96,6 +97,12 @@ class Configuration(object):
     def client(self):
         return cloudify_rest_client.CloudifyClient(
             self.handler_configuration['manager_ip'])
+
+    @property
+    def systest_handler(self):
+        handler_name = self.handler_configuration['handler']
+        return importlib.import_module(
+            'systest_manager.handlers.{0}'.format(handler_name))
 
     @staticmethod
     def load(obj_path):

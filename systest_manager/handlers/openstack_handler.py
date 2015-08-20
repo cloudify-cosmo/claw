@@ -11,7 +11,7 @@ class CleanupHandler(object):
     def __init__(self, configuration):
         self.should_delete_keypairs = configuration.handler_configuration.get(
             'delete_keypairs', False)
-        keys, neut, nova, cind = self._connect(configuration.inputs)
+        keys, neut, nova, cind = connect(configuration.inputs)
         self.keys = keys
         self.neut = neut
         self.nova = nova
@@ -96,31 +96,31 @@ class CleanupHandler(object):
                 fip['floating_ip_address'])
             self.neut.delete_floatingip(fip['id'])
 
-    @staticmethod
-    def _connect(inputs):
-        username = inputs['keystone_username']
-        password = inputs['keystone_password']
-        tenant_name = inputs['keystone_tenant_name']
-        region_name = inputs['region']
-        auth_url = inputs['keystone_url']
-        clients_std_keys_kw = {
-            'username': username,
-            'password': password,
-            'tenant_name': tenant_name,
-            'auth_url': auth_url
-        }
-        clients_old_keys_kw = {
-            'username': username,
-            'api_key': password,
-            'project_id': tenant_name,
-            'auth_url': auth_url,
-            'region_name': region_name
-        }
 
-        keys = keystone_client.Client(**clients_std_keys_kw)
-        clients_std_keys_kw['region_name'] = region_name
-        neut = neutron_client.Client(**clients_std_keys_kw)
-        nova = nova_client.Client(**clients_old_keys_kw)
-        cind = cinder_client.Client(**clients_old_keys_kw)
+def connect(inputs):
+    username = inputs['keystone_username']
+    password = inputs['keystone_password']
+    tenant_name = inputs['keystone_tenant_name']
+    region_name = inputs['region']
+    auth_url = inputs['keystone_url']
+    clients_std_keys_kw = {
+        'username': username,
+        'password': password,
+        'tenant_name': tenant_name,
+        'auth_url': auth_url
+    }
+    clients_old_keys_kw = {
+        'username': username,
+        'api_key': password,
+        'project_id': tenant_name,
+        'auth_url': auth_url,
+        'region_name': region_name
+    }
 
-        return keys, neut, nova, cind
+    keys = keystone_client.Client(**clients_std_keys_kw)
+    clients_std_keys_kw['region_name'] = region_name
+    neut = neutron_client.Client(**clients_std_keys_kw)
+    nova = nova_client.Client(**clients_old_keys_kw)
+    cind = cinder_client.Client(**clients_old_keys_kw)
+
+    return keys, neut, nova, cind
