@@ -252,8 +252,7 @@ def cleanup(configuration):
         temp_configuration = True
         generate(configuration)
     try:
-        cleanup_handler = conf.systest_handler.CleanupHandler(conf)
-        cleanup_handler.cleanup()
+        conf.systest_handler.cleanup()
     finally:
         if temp_configuration:
             conf.dir.rmtree_p()

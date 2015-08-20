@@ -101,8 +101,9 @@ class Configuration(object):
     @property
     def systest_handler(self):
         handler_name = self.handler_configuration['handler']
-        return importlib.import_module(
+        module = importlib.import_module(
             'systest_manager.handlers.{0}'.format(handler_name))
+        return module.Handler(self)
 
     @staticmethod
     def load(obj_path):
