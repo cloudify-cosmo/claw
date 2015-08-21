@@ -12,11 +12,11 @@ class CleanupHandler(object):
         configuration = handler.configuration
         self.should_delete_keypairs = configuration.handler_configuration.get(
             'delete_keypairs', False)
-        keys, neut, nova, cind = handler.clients()
-        self.keys = keys
-        self.neut = neut
-        self.nova = nova
-        self.cind = cind
+        clients = handler.clients()
+        self.keystone = clients['keystone']
+        self.neutron = clients['neutron']
+        self.nova = clients['nova']
+        self.cinder = clients['cinder']
 
     def cleanup(self):
         self.delete_servers()
@@ -50,52 +50,53 @@ class CleanupHandler(object):
 
     def delete_volumes(self):
         print "Deleting Volumes"
-        for volume in self.cind.volumes.list():
+        for volume in self.cinder.volumes.list():
             print "\tdeleting volume {0}".format(volume.display_name)
-            self.cind.volumes.delete(volume.id)
+            self.cinder.volumes.delete(volume.id)
 
-        while self.cind.volumes.list():
+        while self.cinder.volumes.list():
             print "Waiting for all volumes to delete..."
             time.sleep(5)
 
     def delete_routers(self):
         print "Deleting Routers"
-        for router in self.neut.list_routers()['routers']:
-            for port in self.neut.list_ports(device_id=router['id'])['ports']:
+        for router in self.neutron.list_routers()['routers']:
+            for port in self.neutron.list_ports(device_id=router['id'])[
+                    'ports']:
                 subnet_id = port['fixed_ips'][0]['subnet_id']
                 print "\tDeleting router interface to subnet ID {0}".format(
                     subnet_id)
-                self.neut.remove_interface_router(router['id'],
+                self.neutron.remove_interface_router(router['id'],
                                                   {'subnet_id': subnet_id})
             print "\tDeleting router {0}".format(router['name'])
-            self.neut.delete_router(router['id'])
+            self.neutron.delete_router(router['id'])
 
     def delete_ports(self):
         print "Deleting Ports"
-        for port in self.neut.list_ports()['ports']:
+        for port in self.neutron.list_ports()['ports']:
             print "\tDeleting port {0}".format(port['name'])
-            self.neut.delete_port(port['id'])
+            self.neutron.delete_port(port['id'])
 
     def delete_networks(self):
         print "Deleting Networks"
-        for network in self.neut.list_networks()['networks']:
+        for network in self.neutron.list_networks()['networks']:
             if not network['router:external']:
                 print "\tDeleting network {0}".format(network['name'])
-                self.neut.delete_network(network['id'])
+                self.neutron.delete_network(network['id'])
 
     def delete_security_groups(self):
         print "Deleting Security Groups"
-        for sg in self.neut.list_security_groups()['security_groups']:
+        for sg in self.neutron.list_security_groups()['security_groups']:
             if sg['name'] != 'default':
                 print "\tDeleting security group {0}".format(sg['name'])
-                self.neut.delete_security_group(sg['id'])
+                self.neutron.delete_security_group(sg['id'])
 
     def delete_floatingips(self):
         print "Deleting Floating IPs"
-        for fip in self.neut.list_floatingips()['floatingips']:
+        for fip in self.neutron.list_floatingips()['floatingips']:
             print "\tDeleting floating IP {0}".format(
                 fip['floating_ip_address'])
-            self.neut.delete_floatingip(fip['id'])
+            self.neutron.delete_floatingip(fip['id'])
 
 
 class Handler(object):
@@ -127,10 +128,15 @@ class Handler(object):
             'region_name': region_name
         }
 
-        keys = keystone_client.Client(**clients_std_keys_kw)
+        keystone = keystone_client.Client(**clients_std_keys_kw)
         clients_std_keys_kw['region_name'] = region_name
-        neut = neutron_client.Client(**clients_std_keys_kw)
+        neutron = neutron_client.Client(**clients_std_keys_kw)
         nova = nova_client.Client(**clients_old_keys_kw)
-        cind = cinder_client.Client(**clients_old_keys_kw)
+        cinder = cinder_client.Client(**clients_old_keys_kw)
 
-        return keys, neut, nova, cind
+        return {
+            'keystone': keystone,
+            'neutron': neutron,
+            'nova': nova,
+            'cinder': cinder
+        }
