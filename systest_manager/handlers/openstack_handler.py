@@ -67,7 +67,7 @@ class CleanupHandler(object):
                 print "\tDeleting router interface to subnet ID {0}".format(
                     subnet_id)
                 self.neutron.remove_interface_router(router['id'],
-                                                  {'subnet_id': subnet_id})
+                                                     {'subnet_id': subnet_id})
             print "\tDeleting router {0}".format(router['name'])
             self.neutron.delete_router(router['id'])
 

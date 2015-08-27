@@ -3,6 +3,7 @@ import sys
 import os
 import shutil
 import tempfile
+import time
 
 import argh
 import sh
@@ -230,11 +231,24 @@ def deploy(configuration, blueprint,
 @command
 @arg('configuration', completer=completion.existing_configurations)
 @arg('blueprint', completer=completion.all_blueprints)
-def undeploy(configuration, blueprint):
+def undeploy(configuration, blueprint, cancel_executions=False):
     conf = Configuration(configuration)
     if not conf.dir.isdir():
         return NO_INIT
     with conf.dir:
+        if cancel_executions:
+            for e in conf.client.executions.list(blueprint):
+                if e.status in e.END_STATES:
+                    continue
+                conf.client.executions.cancel(e.id)
+                iterations = 0
+                while e.status != e.CANCELLED:
+                    if iterations >= 3:
+                        conf.client.executions.update(e.id, e.CANCELLED)
+                        break
+                    time.sleep(1)
+                    e = conf.client.executions.get(e.id)
+                    iterations += 1
         cfy.executions.start(workflow='uninstall',
                              deployment_id=blueprint,
                              include_logs=True).wait()
