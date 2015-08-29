@@ -241,14 +241,12 @@ def undeploy(configuration, blueprint, cancel_executions=False):
                 if e.status in e.END_STATES:
                     continue
                 conf.client.executions.cancel(e.id)
-                iterations = 0
                 while e.status != e.CANCELLED:
-                    if iterations >= 3:
-                        conf.client.executions.update(e.id, e.CANCELLED)
-                        break
+                    print "Waiting for execution {0} to be cancelled. " \
+                          "Current status is {1}".format(e.id, e.status)
                     time.sleep(1)
                     e = conf.client.executions.get(e.id)
-                    iterations += 1
+            time.sleep(2)
         cfy.executions.start(workflow='uninstall',
                              deployment_id=blueprint,
                              include_logs=True).wait()
