@@ -107,7 +107,7 @@ class Configuration(object):
 
     @staticmethod
     def load(obj_path):
-        return yaml.load(obj_path.text())
+        return yaml.load(obj_path.text()) or {}
 
     @staticmethod
     def dump(obj, obj_path):
