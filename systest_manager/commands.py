@@ -237,22 +237,48 @@ def undeploy(configuration, blueprint, cancel_executions=False):
         return NO_INIT
     with conf.dir:
         if cancel_executions:
-            for e in conf.client.executions.list(blueprint):
-                if e.status in e.END_STATES:
-                    continue
-                conf.client.executions.cancel(e.id)
-                while e.status != e.CANCELLED:
-                    print "Waiting for execution {0} to be cancelled. " \
-                          "Current status is {1}".format(e.id, e.status)
-                    time.sleep(1)
-                    e = conf.client.executions.get(e.id)
-            time.sleep(2)
+            _cancel_executions(conf.client,
+                               conf.client.executions.list(blueprint))
         cfy.executions.start(workflow='uninstall',
                              deployment_id=blueprint,
                              include_logs=True).wait()
         cfy.deployments.delete(deployment_id=blueprint,
                                ignore_live_nodes=True).wait()
         cfy.blueprints.delete(blueprint_id=blueprint).wait()
+
+
+@command
+@arg('configuration', completer=completion.existing_configurations)
+def cleanup_deployments(configuration, cancel_executions=False):
+    conf = Configuration(configuration)
+    if not conf.dir.isdir():
+        return NO_INIT
+    with conf.dir:
+        if cancel_executions:
+            _cancel_executions(conf.client, conf.client.executions.list())
+
+        for deployment in conf.client.deployments.list(_include=['id']):
+            cfy.executions.start(workflow='uninstall',
+                                 deployment_id=deployment.id,
+                                 include_logs=True).wait()
+            cfy.deployments.delete(deployment_id=deployment.id,
+                                   ignore_live_nodes=True).wait()
+
+        for blueprint in conf.client.blueprints.list(_include=['id']):
+            cfy.blueprints.delete(blueprint_id=blueprint.id).wait()
+
+
+def _cancel_executions(client, executions):
+    for e in executions:
+        if e.status in e.END_STATES:
+            continue
+        client.executions.cancel(e.id)
+        while e.status != e.CANCELLED:
+            print "Waiting for execution {0} to be cancelled. " \
+                  "Current status is {1}".format(e.id, e.status)
+            time.sleep(1)
+            e = client.executions.get(e.id)
+    time.sleep(2)
 
 
 @command
