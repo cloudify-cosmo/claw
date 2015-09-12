@@ -1,6 +1,10 @@
 import os
 import importlib
+from contextlib import contextmanager
 
+import fabric
+import fabric.context_managers
+import fabric.api
 import yaml
 
 import cloudify_rest_client
@@ -104,6 +108,14 @@ class Configuration(object):
         module = importlib.import_module(
             'systest_manager.handlers.{0}'.format(handler_name))
         return module.Handler(self)
+
+    @contextmanager
+    def ssh(self):
+        with fabric.context_managers.settings(
+                host_string=self.handler_configuration.get('manager_ip'),
+                user=self.handler_configuration.get('manager_user'),
+                key_filename=self.handler_configuration.get('manager_key')):
+            yield fabric.api
 
     @staticmethod
     def load(obj_path):

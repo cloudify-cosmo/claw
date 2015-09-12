@@ -37,11 +37,6 @@ settings = Settings()
 completion = Completion(settings)
 
 
-def get_manager_ip():
-    cli_settings = load_cloudify_working_dir_settings()
-    return cli_settings.get_management_server()
-
-
 @command
 @arg('--basedir', required=True)
 @arg('--main_suites_yaml', required=True)
@@ -112,7 +107,7 @@ def status(configuration):
         version = conf.client.manager.get_version()['version']
         return '[{0}] Running ({1})'.format(manager_ip, version)
     except requests.exceptions.ConnectionError:
-        return '[{0}] Not reachable'.format(manager_ip)
+        raise argh.CommandError('[{0}] Not reachable'.format(manager_ip))
 
 
 @command
@@ -129,7 +124,12 @@ def bootstrap(configuration, reset_config=False):
         cfy.bootstrap(blueprint_path=conf.manager_blueprint_path,
                       inputs=conf.inputs_path).wait()
         handler_configuration = conf.handler_configuration
-        handler_configuration['manager_ip'] = get_manager_ip()
+        cli_settings = load_cloudify_working_dir_settings()
+        handler_configuration.update({
+            'manager_ip': cli_settings.get_management_server(),
+            'manager_key': cli_settings.get_management_key(),
+            'manager_user': cli_settings.get_management_user()
+        })
         conf.handler_configuration = handler_configuration
 
 
@@ -356,7 +356,7 @@ def script(configuration, script_path, func='script'):
                 script_path = possible_script_path
                 break
         else:
-            raise RuntimeError('Could not locate {0}'.format(script_path))
+            raise argh.CommandError('Could not locate {0}'.format(script_path))
     exec_globs = exec_env.exec_globals(script_path)
     execfile(script_path, exec_globs)
     script_func = exec_globs.get(func)
