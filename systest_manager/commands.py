@@ -21,8 +21,8 @@ from systest_manager.settings import Settings
 from systest_manager.completion import Completion
 from systest_manager import overview as _overview
 
-NO_INIT = 'Not initialized'
-NO_BOOTSTRAP = 'Not bootstrapped'
+NO_INIT = argh.CommandError('Not initialized')
+NO_BOOTSTRAP = argh.CommandError('Not bootstrapped')
 
 
 def bake(cmd):
@@ -103,11 +103,11 @@ def generate(configuration, reset_config=False):
 def status(configuration):
     conf = Configuration(configuration)
     if not conf.exists():
-        return NO_INIT
+        raise NO_INIT
     with conf.dir:
         manager_ip = conf.handler_configuration.get('manager_ip')
     if not manager_ip:
-        return NO_BOOTSTRAP
+        raise NO_BOOTSTRAP
     try:
         version = conf.client.manager.get_version()['version']
         return '[{0}] Running ({1})'.format(manager_ip, version)
@@ -138,7 +138,7 @@ def bootstrap(configuration, reset_config=False):
 def teardown(configuration):
     conf = Configuration(configuration)
     if not conf.exists():
-        return NO_INIT
+        raise NO_INIT
     with conf.dir:
         cfy.teardown(force=True, ignore_deployments=True).wait()
 
@@ -158,7 +158,7 @@ def global_status():
 def generate_blueprint(configuration, blueprint, reset=False):
     conf = Configuration(configuration)
     if not conf.exists():
-        return NO_INIT
+        raise NO_INIT
     blueprints_yaml = settings.load_blueprints_yaml()
     blueprint = Blueprint(blueprint, conf)
     if blueprint.dir.exists() and reset:
@@ -213,7 +213,7 @@ def deploy(configuration, blueprint,
            timeout=1800):
     conf = Configuration(configuration)
     if not conf.dir.isdir():
-        return NO_INIT
+        raise NO_INIT
     bp = Blueprint(blueprint, conf)
     if not skip_generation:
         generate_blueprint(configuration, blueprint, reset)
@@ -235,7 +235,7 @@ def deploy(configuration, blueprint,
 def undeploy(configuration, blueprint, cancel_executions=False):
     conf = Configuration(configuration)
     if not conf.dir.isdir():
-        return NO_INIT
+        raise NO_INIT
     with conf.dir:
         if cancel_executions:
             _cancel_executions(conf.client,
@@ -253,7 +253,7 @@ def undeploy(configuration, blueprint, cancel_executions=False):
 def cleanup_deployments(configuration, cancel_executions=False):
     conf = Configuration(configuration)
     if not conf.dir.isdir():
-        return NO_INIT
+        raise NO_INIT
     with conf.dir:
         if cancel_executions:
             _cancel_executions(conf.client, conf.client.executions.list())
@@ -302,7 +302,7 @@ def cleanup(configuration):
 def overview(configuration, port=8080):
     conf = Configuration(configuration)
     if not conf.exists():
-        return NO_INIT
+        raise NO_INIT
     _overview.serve(conf, port)
 
 
@@ -316,7 +316,7 @@ def events(configuration,
            timeout=3600):
     conf = Configuration(configuration)
     if not conf.exists():
-        return NO_INIT
+        raise NO_INIT
     fetcher = ExecutionEventsFetcher(execution_id=execution_id,
                                      client=conf.client,
                                      batch_size=batch_size,
@@ -348,7 +348,7 @@ def events(configuration,
 def script(configuration, script_path, func='script'):
     conf = Configuration(configuration)
     if not conf.exists():
-        return NO_INIT
+        raise NO_INIT
     if not os.path.isfile(script_path):
         for scripts_dir in settings.scripts:
             possible_script_path = scripts_dir / script_path
