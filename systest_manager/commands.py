@@ -10,6 +10,7 @@ import sh
 import requests
 from argh.decorators import arg
 
+from cloudify_cli import exec_env
 from cloudify_cli.execution_events_fetcher import ExecutionEventsFetcher
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
@@ -339,3 +340,24 @@ def events(configuration,
     else:
         with open(output, 'w') as f:
             f.write(events_json)
+
+
+@command
+@arg('configuration', completer=completion.existing_configurations)
+@arg('script_path', completer=completion.script_paths)
+def script(configuration, script_path, func='script'):
+    conf = Configuration(configuration)
+    if not conf.exists():
+        return NO_INIT
+    if not os.path.isfile(script_path):
+        for scripts_dir in settings.scripts:
+            possible_script_path = scripts_dir / script_path
+            if possible_script_path.isfile():
+                script_path = possible_script_path
+                break
+        else:
+            raise RuntimeError('Could not locate {0}'.format(script_path))
+    exec_globs = exec_env.exec_globals(script_path)
+    execfile(script_path, exec_globs)
+    script_func = exec_globs.get(func)
+    script_func(conf)

@@ -34,6 +34,12 @@ class Settings(object):
         self._load_settings()
         return path(self._settings['basedir'])
 
+    @property
+    def scripts(self):
+        self._load_settings()
+        return [path(scripts_dir) for scripts_dir
+                in self._settings.get('scripts', [])]
+
     def _load_settings(self):
         if self._settings:
             return

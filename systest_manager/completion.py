@@ -22,3 +22,10 @@ class Completion(object):
     def existing_configurations(self, prefix, **kwargs):
         return (c for c in self.all_configurations(prefix)
                 if (self._settings.basedir / c).exists())
+
+    def script_paths(self, prefix, **kwargs):
+        for script_dir in self._settings.scripts:
+            for script_path in script_dir.files():
+                basename = script_path.basename()
+                if basename.startswith(prefix):
+                    yield basename
