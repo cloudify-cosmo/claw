@@ -92,6 +92,11 @@ def generate(configuration, reset_config=False):
 
     conf.handler_configuration = handler_configuration
 
+    with settings.basedir:
+        if os.path.exists('+'):
+            os.remove('+')
+        os.symlink(configuration, '+')
+
 
 @command
 @arg('configuration', completer=completion.existing_configurations)
@@ -141,15 +146,6 @@ def teardown(configuration):
         raise NO_INIT
     with conf.dir:
         cfy.teardown(force=True, ignore_deployments=True).wait()
-
-
-@command
-def global_status():
-    if not settings.basedir.exists():
-        return
-    for directory in settings.basedir.dirs():
-        configuration = directory.basename()
-        yield '{0}: {1}'.format(configuration, status(configuration))
 
 
 @command
