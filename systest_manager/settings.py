@@ -16,36 +16,32 @@ class Settings(object):
 
     @property
     def main_suites_yaml(self):
-        self._load_settings()
-        return path(self._settings['main_suites_yaml'])
+        return path(self.settings['main_suites_yaml'])
 
     @property
     def user_suites_yaml(self):
-        self._load_settings()
-        return path(self._settings['user_suites_yaml'])
+        return path(self.settings['user_suites_yaml'])
 
     @property
     def blueprints_yaml(self):
-        self._load_settings()
-        return path(self._settings['blueprints_yaml'])
+        return path(self.settings['blueprints_yaml'])
 
     @property
     def basedir(self):
-        self._load_settings()
-        return path(self._settings['basedir'])
+        return path(self.settings['basedir'])
 
     @property
     def scripts(self):
-        self._load_settings()
         return [path(scripts_dir) for scripts_dir
-                in self._settings.get('scripts', [])]
+                in self.settings.get('scripts', [])]
 
-    def _load_settings(self):
-        if self._settings:
-            return
+    @property
+    def settings(self):
         if not self.settings_path.exists():
             raise argh.CommandError('Run `systest init` to configure systest')
-        self._settings = yaml.safe_load(self.settings_path.text())
+        if not self._settings:
+            self._settings = yaml.safe_load(self.settings_path.text())
+        return self._settings
 
     def write_settings(self,
                        basedir,
