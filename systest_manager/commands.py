@@ -346,7 +346,7 @@ def events(configuration,
 @argh.decorators.expects_obj
 def script(args):
     configuration = args.configuration
-    script_path = args.script_path
+    script_path = os.path.expanduser(args.script_path)
     script_args = args.script_args
     conf = Configuration(configuration)
     if not conf.exists():
