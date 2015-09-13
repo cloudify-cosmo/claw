@@ -341,7 +341,7 @@ def events(configuration,
 @command
 @arg('configuration', completer=completion.existing_configurations)
 @arg('script_path', completer=completion.script_paths)
-def script(configuration, script_path, func='script'):
+def script(configuration, script_path, *args):
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -355,5 +355,10 @@ def script(configuration, script_path, func='script'):
             raise argh.CommandError('Could not locate {0}'.format(script_path))
     exec_globs = exec_env.exec_globals(script_path)
     execfile(script_path, exec_globs)
+    if len(args) > 1:
+        raise argh.CommandError('Too many arguments: {0}'.format(args))
+    func = args[0] if args else 'script'
     script_func = exec_globs.get(func)
+    if not script_func:
+        raise argh.CommandError('No such function: {0}'.format(func))
     script_func(conf)
