@@ -343,11 +343,7 @@ def events(configuration,
 @arg('configuration', completer=completion.existing_configurations)
 @arg('script_path', completer=completion.script_paths)
 @arg('script_args', nargs='...')
-@argh.decorators.expects_obj
-def script(args):
-    configuration = args.configuration
-    script_path = os.path.expanduser(args.script_path)
-    script_args = args.script_args
+def script(configuration, script_path, script_args):
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
