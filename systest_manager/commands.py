@@ -15,6 +15,7 @@ from cloudify_cli.execution_events_fetcher import ExecutionEventsFetcher
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
+from systest_manager.state import current_conf
 from systest_manager.blueprint import Blueprint
 from systest_manager.configuration import Configuration
 from systest_manager.settings import Settings
@@ -341,7 +342,12 @@ def events(configuration,
 @command
 @arg('configuration', completer=completion.existing_configurations)
 @arg('script_path', completer=completion.script_paths)
-def script(configuration, script_path, *args):
+@arg('script_args', nargs='...')
+@argh.decorators.expects_obj
+def script(args):
+    configuration = args.configuration
+    script_path = args.script_path
+    script_args = args.script_args
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -355,10 +361,14 @@ def script(configuration, script_path, *args):
             raise argh.CommandError('Could not locate {0}'.format(script_path))
     exec_globs = exec_env.exec_globals(script_path)
     execfile(script_path, exec_globs)
-    if len(args) > 1:
-        raise argh.CommandError('Too many arguments: {0}'.format(args))
-    func = args[0] if args else 'script'
+    func = script_args[0] if script_args else 'script'
+    if script_args:
+        script_args = script_args[1:]
     script_func = exec_globs.get(func)
     if not script_func:
         raise argh.CommandError('No such function: {0}'.format(func))
-    script_func(conf)
+    try:
+        current_conf.set(conf)
+        argh.dispatch_command(script_func, argv=script_args)
+    finally:
+        current_conf.clear()
