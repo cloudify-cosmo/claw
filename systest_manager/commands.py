@@ -22,6 +22,8 @@ from systest_manager.settings import Settings
 from systest_manager.completion import Completion
 from systest_manager import overview as _overview
 
+
+CURRENT_CONFIGURATION = '+'
 NO_INIT = argh.CommandError('Not initialized')
 NO_BOOTSTRAP = argh.CommandError('Not bootstrapped')
 
@@ -94,9 +96,9 @@ def generate(configuration, reset_config=False):
     conf.handler_configuration = handler_configuration
 
     with settings.basedir:
-        if os.path.exists('+'):
-            os.remove('+')
-        os.symlink(configuration, '+')
+        if os.path.exists(CURRENT_CONFIGURATION):
+            os.remove(CURRENT_CONFIGURATION)
+        os.symlink(configuration, CURRENT_CONFIGURATION)
 
 
 @command
@@ -357,12 +359,15 @@ def script(configuration, script_path, script_args):
             raise argh.CommandError('Could not locate {0}'.format(script_path))
     exec_globs = exec_env.exec_globals(script_path)
     execfile(script_path, exec_globs)
-    func = script_args[0] if script_args else 'script'
-    if script_args:
+    if script_args and script_args[0] in exec_globs:
+        func = script_args[0]
         script_args = script_args[1:]
+    else:
+        func = 'script'
     script_func = exec_globs.get(func)
     if not script_func:
-        raise argh.CommandError('No such function: {0}'.format(func))
+        raise argh.CommandError('Cannot find a function to execute. Did you '
+                                'add a default "script" function?')
     try:
         current_conf.set(conf)
         argh.dispatch_command(script_func, argv=script_args)
