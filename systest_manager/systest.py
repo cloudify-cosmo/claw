@@ -4,7 +4,7 @@ from StringIO import StringIO
 
 import argh
 
-import commands
+from systest_manager import commands
 
 
 def main():
