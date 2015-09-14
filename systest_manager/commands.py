@@ -15,6 +15,7 @@ from cloudify_cli.execution_events_fetcher import ExecutionEventsFetcher
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
+from systest_manager import resources
 from systest_manager.state import current_conf
 from systest_manager.blueprint import Blueprint
 from systest_manager.configuration import Configuration
@@ -373,3 +374,12 @@ def script(configuration, script_path, script_args):
         argh.dispatch_command(script_func, argv=script_args)
     finally:
         current_conf.clear()
+
+
+@command
+def generate_script(script_path, rewrite=False):
+    if os.path.exists(script_path) and not rewrite:
+        raise argh.CommandError('{0} already exists'.format(script_path))
+    with open(script_path, 'w') as f:
+        f.write(resources.get('templates/script.template.py'))
+    os.chmod(script_path, 0755)
