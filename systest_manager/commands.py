@@ -17,7 +17,6 @@ from cosmo_tester.framework import util
 
 from systest_manager import resources
 from systest_manager.state import current_conf
-from systest_manager.blueprint import Blueprint
 from systest_manager.configuration import Configuration
 from systest_manager.settings import Settings
 from systest_manager.completion import Completion
@@ -158,12 +157,12 @@ def generate_blueprint(configuration, blueprint, reset=False):
     if not conf.exists():
         raise NO_INIT
     blueprints_yaml = settings.load_blueprints_yaml()
-    blueprint = Blueprint(blueprint, conf)
+    blueprint = conf.blueprint(blueprint)
     if blueprint.dir.exists() and reset:
         shutil.rmtree(blueprint.dir)
     blueprint.dir.makedirs()
     blueprint_configuration = blueprints_yaml['blueprints'][
-        blueprint.blueprint]
+        blueprint.blueprint_name]
     original_inputs_path = os.path.expanduser(
         blueprint_configuration.get('inputs', ''))
     original_blueprint_path = os.path.expanduser(
@@ -212,7 +211,7 @@ def deploy(configuration, blueprint,
     conf = Configuration(configuration)
     if not conf.dir.isdir():
         raise NO_INIT
-    bp = Blueprint(blueprint, conf)
+    bp = conf.blueprint(blueprint)
     if not skip_generation:
         generate_blueprint(configuration, blueprint, reset)
     with conf.dir:
