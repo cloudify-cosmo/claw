@@ -31,6 +31,14 @@ class Configuration(object):
         return settings.basedir / self.configuration
 
     @property
+    def manager_blueprint_dir(self):
+        return self.dir / 'manager-blueprint'
+
+    @property
+    def blueprints_dir(self):
+        return self.dir / 'blueprints'
+
+    @property
     def inputs_path(self):
         return self.dir / 'inputs.yaml'
 
@@ -43,16 +51,8 @@ class Configuration(object):
         self.dump(value, self.inputs_path)
 
     @property
-    def manager_blueprint_dir(self):
-        return self.dir / 'manager-blueprint'
-
-    @property
     def manager_blueprint_path(self):
         return self.manager_blueprint_dir / 'manager-blueprint.yaml'
-
-    @property
-    def blueprints_dir(self):
-        return self.dir / 'blueprints'
 
     @property
     def manager_blueprint(self):
@@ -70,17 +70,6 @@ class Configuration(object):
     def handler_configuration(self):
         return self.load(self.handler_configuration_path)
 
-    @property
-    def properties(self):
-        handler_configuration = self.handler_configuration
-        properties_name = handler_configuration.get('properties')
-        if not properties_name:
-            return {}
-        suites_yaml = self.load(settings.main_suites_yaml)
-        handler_properties = suites_yaml.get('handler_properties')
-        properties = handler_properties.get(properties_name, {})
-        return util.process_variables(suites_yaml, properties)
-
     @handler_configuration.setter
     def handler_configuration(self, value):
         self.dump(value, self.handler_configuration_path)
@@ -96,6 +85,17 @@ class Configuration(object):
     @cli_config.setter
     def cli_config(self, value):
         self.dump(value, self.cli_config_path)
+
+    @property
+    def properties(self):
+        handler_configuration = self.handler_configuration
+        properties_name = handler_configuration.get('properties')
+        if not properties_name:
+            return {}
+        suites_yaml = self.load(settings.main_suites_yaml)
+        handler_properties = suites_yaml.get('handler_properties')
+        properties = handler_properties.get(properties_name, {})
+        return util.process_variables(suites_yaml, properties)
 
     @property
     def client(self):
