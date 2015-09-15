@@ -109,6 +109,10 @@ class Configuration(object):
             'systest_manager.handlers.{0}'.format(handler_name))
         return module.Handler(self)
 
+    @property
+    def patch(self):
+        return ConfigurationPatcher(self)
+
     @contextmanager
     def ssh(self):
         with fabric.context_managers.settings(
@@ -124,3 +128,15 @@ class Configuration(object):
     @staticmethod
     def dump(obj, obj_path):
         obj_path.write_text(yaml.safe_dump(obj, default_flow_style=False))
+
+
+class ConfigurationPatcher(object):
+
+    def __init__(self, obj):
+        self.obj = obj
+
+    @contextmanager
+    def __getattr__(self, item):
+        path = getattr(self.obj, '{0}_path'.format(item))
+        with util.YamlPatcher(path, default_flow_style=False) as patch:
+            yield patch

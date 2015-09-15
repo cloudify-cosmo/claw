@@ -127,19 +127,17 @@ def bootstrap(configuration, reset_config=False):
         generate(configuration, reset_config=reset_config)
     with conf.dir:
         cfy.init().wait()
-        cli_config = conf.cli_config
-        cli_config['colors'] = True
-        conf.cli_config = cli_config
+        with conf.patch.cli_config as patch:
+            patch.obj['colors'] = True
         cfy.bootstrap(blueprint_path=conf.manager_blueprint_path,
                       inputs=conf.inputs_path).wait()
-        handler_configuration = conf.handler_configuration
         cli_settings = load_cloudify_working_dir_settings()
-        handler_configuration.update({
-            'manager_ip': cli_settings.get_management_server(),
-            'manager_key': cli_settings.get_management_key(),
-            'manager_user': cli_settings.get_management_user()
-        })
-        conf.handler_configuration = handler_configuration
+        with conf.patch.handler_configuration as patch:
+            patch.obj.update({
+                'manager_ip': cli_settings.get_management_server(),
+                'manager_key': cli_settings.get_management_key(),
+                'manager_user': cli_settings.get_management_user()
+            })
 
 
 @command
