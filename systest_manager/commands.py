@@ -26,6 +26,7 @@ from systest_manager import overview as _overview
 CURRENT_CONFIGURATION = '+'
 NO_INIT = argh.CommandError('Not initialized')
 NO_BOOTSTRAP = argh.CommandError('Not bootstrapped')
+STOP_DEPLOYMENT_ENVIRONMENT = '_stop_deployment_environment'
 
 
 def bake(cmd):
@@ -230,53 +231,54 @@ def deploy(configuration, blueprint,
 @arg('configuration', completer=completion.existing_configurations)
 @arg('blueprint', completer=completion.all_blueprints)
 def undeploy(configuration, blueprint, cancel_executions=False):
-    conf = Configuration(configuration)
-    if not conf.dir.isdir():
-        raise NO_INIT
-    with conf.dir:
-        if cancel_executions:
-            _cancel_executions(conf.client,
-                               conf.client.executions.list(blueprint))
-        cfy.executions.start(workflow='uninstall',
-                             deployment_id=blueprint,
-                             include_logs=True).wait()
-        cfy.deployments.delete(deployment_id=blueprint,
-                               ignore_live_nodes=True).wait()
-        cfy.blueprints.delete(blueprint_id=blueprint).wait()
+    _cleanup_deployments(configuration, cancel_executions, blueprint)
 
 
 @command
 @arg('configuration', completer=completion.existing_configurations)
 def cleanup_deployments(configuration, cancel_executions=False):
+    _cleanup_deployments(configuration, cancel_executions)
+
+
+def _cleanup_deployments(configuration, cancel_executions, blueprint=None):
     conf = Configuration(configuration)
     if not conf.dir.isdir():
         raise NO_INIT
     with conf.dir:
-        if cancel_executions:
-            _cancel_executions(conf.client, conf.client.executions.list())
-
-        for deployment in conf.client.deployments.list(_include=['id']):
+        _wait_for_executions(conf.client, blueprint, cancel_executions)
+        if blueprint:
+            deployments = blueprints = [blueprint]
+        else:
+            deployments = [d.id for d in
+                           conf.client.deployments.list(_include=['id'])]
+            blueprints = [b.id for b in
+                          conf.client.blueprints.list(_include=['id'])]
+        for deployment_id in deployments:
             cfy.executions.start(workflow='uninstall',
-                                 deployment_id=deployment.id,
+                                 deployment_id=deployment_id,
                                  include_logs=True).wait()
-            cfy.deployments.delete(deployment_id=deployment.id,
+            _wait_for_executions(conf.client, deployment_id, cancel_executions)
+            cfy.deployments.delete(deployment_id=deployment_id,
                                    ignore_live_nodes=True).wait()
+        for blueprint_id in blueprints:
+            cfy.blueprints.delete(blueprint_id=blueprint_id).wait()
 
-        for blueprint in conf.client.blueprints.list(_include=['id']):
-            cfy.blueprints.delete(blueprint_id=blueprint.id).wait()
 
-
-def _cancel_executions(client, executions):
+def _wait_for_executions(client, deployment_id, cancel_executions):
+    executions = client.executions.list(deployment_id,
+                                        include_system_workflows=True)
     for e in executions:
         if e.status in e.END_STATES:
             continue
-        client.executions.cancel(e.id)
-        while e.status != e.CANCELLED:
-            print "Waiting for execution {0} to be cancelled. " \
-                  "Current status is {1}".format(e.id, e.status)
+        if e.workflow_id != STOP_DEPLOYMENT_ENVIRONMENT and cancel_executions:
+            client.executions.cancel(e.id)
+        while e.status not in e.END_STATES:
+            print "Waiting for execution {0}[{1}] to end. " \
+                  "Current status is {2}".format(e.id,
+                                                 e.workflow_id,
+                                                 e.status)
             time.sleep(1)
             e = client.executions.get(e.id)
-    time.sleep(2)
 
 
 @command
