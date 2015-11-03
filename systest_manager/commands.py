@@ -253,6 +253,7 @@ def _cleanup_deployments(configuration, cancel_executions, blueprint=None):
                            conf.client.deployments.list(_include=['id'])]
             blueprints = [b.id for b in
                           conf.client.blueprints.list(_include=['id'])]
+        _wait_for_executions(conf.client, blueprint, cancel_executions)
         for deployment_id in deployments:
             cfy.executions.start(workflow='uninstall',
                                  deployment_id=deployment_id,
