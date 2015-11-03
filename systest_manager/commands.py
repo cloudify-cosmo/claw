@@ -255,14 +255,23 @@ def _cleanup_deployments(configuration, cancel_executions, blueprint=None):
                           conf.client.blueprints.list(_include=['id'])]
         _wait_for_executions(conf.client, blueprint, cancel_executions)
         for deployment_id in deployments:
-            cfy.executions.start(workflow='uninstall',
-                                 deployment_id=deployment_id,
-                                 include_logs=True).wait()
-            _wait_for_executions(conf.client, deployment_id, cancel_executions)
-            cfy.deployments.delete(deployment_id=deployment_id,
-                                   ignore_live_nodes=True).wait()
+            try:
+                cfy.executions.start(workflow='uninstall',
+                                     deployment_id=deployment_id,
+                                     include_logs=True).wait()
+                _wait_for_executions(conf.client, deployment_id,
+                                     cancel_executions)
+                cfy.deployments.delete(deployment_id=deployment_id,
+                                       ignore_live_nodes=True).wait()
+            except Exception as e:
+                print 'Failed cleaning deployment: {0} [1]'.format(
+                    deployment_id, e)
         for blueprint_id in blueprints:
-            cfy.blueprints.delete(blueprint_id=blueprint_id).wait()
+            try:
+                cfy.blueprints.delete(blueprint_id=blueprint_id).wait()
+            except Exception as e:
+                print 'Failed cleaning blueprint: {0} [1]'.format(
+                    blueprint_id, e)
 
 
 def _wait_for_executions(client, deployment_id, cancel_executions):
