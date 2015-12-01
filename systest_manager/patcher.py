@@ -33,8 +33,10 @@ class YamlPatcher(util.YamlPatcher):
             super(YamlPatcher, self).set_value(prop_path, new_value)
 
 
-# Some prebuilt functions to use
-def filter_list(current_value, include=None):
+# Some prebuilt functions
+#########################
+
+def filter_list(current_value, include):
     def is_included(_item):
         for included in include:
             if isinstance(included, basestring):
@@ -48,3 +50,7 @@ def filter_list(current_value, include=None):
                 raise NotImplementedError(str(included))
         return False
     return filter(is_included, current_value)
+
+
+def filter_dict(current_value, exclude):
+    return {k: v for k, v in current_value.items() if k not in exclude}
