@@ -15,6 +15,7 @@ from cloudify_cli.execution_events_fetcher import ExecutionEventsFetcher
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
+from systest_manager import patcher
 from systest_manager import resources
 from systest_manager.state import current_conf
 from systest_manager.configuration import Configuration
@@ -82,7 +83,7 @@ def generate(configuration, reset_config=False):
     handler_configuration['install_manager_blueprint_dependencies'] = False
 
     def apply_override_and_remove_prop(yaml_path, prop):
-        with util.YamlPatcher(yaml_path, default_flow_style=False) as patch:
+        with patcher.YamlPatcher(yaml_path, default_flow_style=False) as patch:
             override = util.process_variables(
                 suites_yaml, handler_configuration.get(prop, {}))
             for key, value in override.items():
@@ -187,7 +188,7 @@ def generate_blueprint(configuration, blueprint, reset=False):
     blueprints_yaml['variables']['properties'] = conf.properties
 
     def apply_override_and_remove_prop(yaml_path, prop):
-        with util.YamlPatcher(yaml_path, default_flow_style=False) as patch:
+        with patcher.YamlPatcher(yaml_path, default_flow_style=False) as patch:
             override = util.process_variables(
                 blueprints_yaml, blueprint_configuration.get(prop, {}))
             for key, value in override.items():

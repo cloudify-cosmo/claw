@@ -10,7 +10,7 @@ import yaml
 import cloudify_rest_client
 from cosmo_tester.framework import util
 
-
+from systest_manager import patcher
 from systest_manager.settings import Settings
 
 settings = Settings()
@@ -111,7 +111,7 @@ class Configuration(object):
 
     @property
     def patch(self):
-        return ConfigurationPatcher(self)
+        return patcher.ConfigurationPatcher(self)
 
     @contextmanager
     def ssh(self):
@@ -181,16 +181,4 @@ class Blueprint(object):
 
     @property
     def patch(self):
-        return ConfigurationPatcher(self)
-
-
-class ConfigurationPatcher(object):
-
-    def __init__(self, obj):
-        self.obj = obj
-
-    @contextmanager
-    def __getattr__(self, item):
-        path = getattr(self.obj, '{0}_path'.format(item))
-        with util.YamlPatcher(path, default_flow_style=False) as patch:
-            yield patch
+        return patcher.ConfigurationPatcher(self)
