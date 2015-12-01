@@ -59,11 +59,27 @@ def init(basedir=None,
 
 @command
 @arg('configuration', completer=completion.all_configurations)
-def generate(configuration, reset_config=False):
+@arg('-i', '--inputs-override',
+     action='append',
+     completer=completion.input_override_templates)
+@arg('-b', '--manager-blueprint-override',
+     action='append',
+     completer=completion.manager_blueprint_override_templates)
+def generate(configuration,
+             inputs_override=None,
+             manager_blueprint_override=None,
+             reset_config=False):
     conf = Configuration(configuration)
     suites_yaml = settings.load_suites_yaml()
     handler_configuration = suites_yaml[
         'handler_configurations'][configuration]
+    if inputs_override:
+        inputs_override = [suites_yaml['inputs_override_templates'][key]
+                           for key in inputs_override]
+    if manager_blueprint_override:
+        manager_blueprint_override = [
+            suites_yaml['manager_blueprint_override_templates'][key]
+            for key in manager_blueprint_override]
     original_inputs_path = os.path.expanduser(handler_configuration['inputs'])
     original_manager_blueprint_path = os.path.expanduser(
         handler_configuration['manager_blueprint'])
@@ -82,18 +98,23 @@ def generate(configuration, reset_config=False):
         conf.manager_blueprint_path)
     handler_configuration['install_manager_blueprint_dependencies'] = False
 
-    def apply_override_and_remove_prop(yaml_path, prop):
+    def apply_override_and_remove_prop(yaml_path, prop, additional_overrides):
         with patcher.YamlPatcher(yaml_path, default_flow_style=False) as patch:
-            override = util.process_variables(
-                suites_yaml, handler_configuration.get(prop, {}))
-            for key, value in override.items():
-                patch.set_value(key, value)
+            additional_overrides = additional_overrides or []
+            unprocessed = handler_configuration.get(prop, {})
+            for additional in additional_overrides:
+                unprocessed.update(additional)
+            override = util.process_variables(suites_yaml, unprocessed)
+            for k, v in override.items():
+                patch.set_value(k, v)
         if prop in handler_configuration:
             del handler_configuration[prop]
 
-    apply_override_and_remove_prop(conf.inputs_path, 'inputs_override')
+    apply_override_and_remove_prop(conf.inputs_path, 'inputs_override',
+                                   inputs_override)
     apply_override_and_remove_prop(conf.manager_blueprint_path,
-                                   'manager_blueprint_override')
+                                   'manager_blueprint_override',
+                                   manager_blueprint_override)
 
     conf.handler_configuration = handler_configuration
 
@@ -122,10 +143,22 @@ def status(configuration):
 
 @command
 @arg('configuration', completer=completion.all_configurations)
-def bootstrap(configuration, reset_config=False):
+@arg('-i', '--inputs-override',
+     action='append',
+     completer=completion.input_override_templates)
+@arg('-b', '--manager-blueprint-override',
+     action='append',
+     completer=completion.manager_blueprint_override_templates)
+def bootstrap(configuration,
+              inputs_override=None,
+              manager_blueprint_override=None,
+              reset_config=False):
     conf = Configuration(configuration)
     if not conf.exists() or reset_config:
-        generate(configuration, reset_config=reset_config)
+        generate(configuration,
+                 inputs_override=inputs_override,
+                 manager_blueprint_override=manager_blueprint_override,
+                 reset_config=reset_config)
     with conf.dir:
         cfy.init().wait()
         with conf.patch.cli_config as patch:
