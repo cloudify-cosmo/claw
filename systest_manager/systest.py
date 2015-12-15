@@ -4,13 +4,14 @@ from StringIO import StringIO
 
 import argh
 
+from systest_manager import configuration
 from systest_manager import commands
 
 
 def main():
     if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
         try:
-            commands.script(configuration=commands.CURRENT_CONFIGURATION,
+            commands.script(configuration=configuration.CURRENT_CONFIGURATION,
                             script_path=sys.argv[1],
                             script_args=sys.argv[2:])
         except argh.CommandError as e:

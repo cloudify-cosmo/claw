@@ -1,4 +1,6 @@
+import sys
 import os
+import logging
 import importlib
 from contextlib import contextmanager
 
@@ -13,6 +15,8 @@ from cosmo_tester.framework import util
 from systest_manager import patcher
 from systest_manager.settings import Settings
 
+CURRENT_CONFIGURATION = '+'
+
 settings = Settings()
 
 
@@ -22,6 +26,9 @@ class Configuration(object):
         if os.path.isdir(configuration):
             configuration = os.path.basename(os.path.abspath(configuration))
         self.configuration = configuration
+        if configuration == CURRENT_CONFIGURATION and self.exists():
+            self.configuration = os.path.basename(os.path.realpath(self.dir))
+        self._logger = None
 
     def exists(self):
         return self.inputs_path.exists()
@@ -120,6 +127,20 @@ class Configuration(object):
                 user=self.handler_configuration.get('manager_user'),
                 key_filename=self.handler_configuration.get('manager_key')):
             yield fabric.api
+
+    @property
+    def logger(self):
+        if not self._logger:
+            logger = logging.getLogger(self.configuration)
+            logger.handlers = []
+            handler = logging.StreamHandler(sys.stdout)
+            fmt = '%(asctime)s [%(levelname)s] [%(name)s] %(message)s'
+            handler.setFormatter(logging.Formatter(fmt))
+            handler.setLevel(logging.DEBUG)
+            logger.setLevel(logging.DEBUG)
+            logger.addHandler(handler)
+            self._logger = logger
+        return self._logger
 
     def blueprint(self, blueprint):
         return Blueprint(blueprint, self)

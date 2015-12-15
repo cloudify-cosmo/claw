@@ -18,13 +18,12 @@ from cosmo_tester.framework import util
 from systest_manager import patcher
 from systest_manager import resources
 from systest_manager.state import current_conf
-from systest_manager.configuration import Configuration
+from systest_manager.configuration import Configuration, CURRENT_CONFIGURATION
 from systest_manager.settings import Settings
 from systest_manager.completion import Completion
 from systest_manager import overview as _overview
 
 
-CURRENT_CONFIGURATION = '+'
 NO_INIT = argh.CommandError('Not initialized')
 NO_BOOTSTRAP = argh.CommandError('Not bootstrapped')
 STOP_DEPLOYMENT_ENVIRONMENT = '_stop_deployment_environment'
@@ -279,7 +278,7 @@ def _cleanup_deployments(configuration, cancel_executions, blueprint=None):
     if not conf.dir.isdir():
         raise NO_INIT
     with conf.dir:
-        _wait_for_executions(conf.client, blueprint, cancel_executions)
+        _wait_for_executions(conf, blueprint, cancel_executions)
         if blueprint:
             deployments = blueprints = [blueprint]
         else:
@@ -287,28 +286,29 @@ def _cleanup_deployments(configuration, cancel_executions, blueprint=None):
                            conf.client.deployments.list(_include=['id'])]
             blueprints = [b.id for b in
                           conf.client.blueprints.list(_include=['id'])]
-        _wait_for_executions(conf.client, blueprint, cancel_executions)
+        _wait_for_executions(conf, blueprint, cancel_executions)
         for deployment_id in deployments:
             try:
                 cfy.executions.start(workflow='uninstall',
                                      deployment_id=deployment_id,
                                      include_logs=True).wait()
-                _wait_for_executions(conf.client, deployment_id,
+                _wait_for_executions(conf, deployment_id,
                                      cancel_executions)
                 cfy.deployments.delete(deployment_id=deployment_id,
                                        ignore_live_nodes=True).wait()
             except Exception as e:
-                print 'Failed cleaning deployment: {0} [1]'.format(
-                    deployment_id, e)
+                conf.logger.warn('Failed cleaning deployment: {0} [1]'.format(
+                    deployment_id, e))
         for blueprint_id in blueprints:
             try:
                 cfy.blueprints.delete(blueprint_id=blueprint_id).wait()
             except Exception as e:
-                print 'Failed cleaning blueprint: {0} [1]'.format(
-                    blueprint_id, e)
+                conf.logger.warn('Failed cleaning blueprint: {0} [1]'.format(
+                    blueprint_id, e))
 
 
-def _wait_for_executions(client, deployment_id, cancel_executions):
+def _wait_for_executions(conf, deployment_id, cancel_executions):
+    client = conf.client
     executions = client.executions.list(deployment_id,
                                         include_system_workflows=True)
     for e in executions:
@@ -317,10 +317,10 @@ def _wait_for_executions(client, deployment_id, cancel_executions):
         if e.workflow_id != STOP_DEPLOYMENT_ENVIRONMENT and cancel_executions:
             client.executions.cancel(e.id)
         while e.status not in e.END_STATES:
-            print "Waiting for execution {0}[{1}] to end. " \
-                  "Current status is {2}".format(e.id,
-                                                 e.workflow_id,
-                                                 e.status)
+            conf.logger.info("Waiting for execution {0}[{1}] to end. "
+                             "Current status is {2}".format(e.id,
+                                                            e.workflow_id,
+                                                            e.status))
             time.sleep(1)
             e = client.executions.get(e.id)
 
@@ -371,7 +371,7 @@ def events(configuration,
 
         def handle(self, batch):
             self.events += batch
-            print 'Fetched: {0}'.format(len(self.events))
+            conf.logger.debug('Fetched: {0}'.format(len(self.events)))
     handler = Handler()
 
     fetcher.fetch_and_process_events(events_handler=handler.handle,
