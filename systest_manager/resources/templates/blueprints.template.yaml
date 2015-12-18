@@ -1,0 +1,12 @@
+variables:
+  agent_user: ubuntu
+
+blueprints:
+
+  openstack_nodecellar:
+    blueprint: ~/dev/cloudify/cloudify-nodecellar-example/openstack-blueprint.yaml
+    inputs: ~/dev/cloudify/cloudify-nodecellar-example/inputs/openstack.yaml.template
+    inputs_override:
+      image: '{{properties.ubuntu_trusty_image_id}}'
+      flavor: '{{properties.small_flavor_id}}'
+      agent_user: '{{agent_user}}'

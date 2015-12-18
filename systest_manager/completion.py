@@ -29,7 +29,7 @@ class Completion(object):
 
     def existing_configurations(self, prefix, **kwargs):
         return (c for c in self.all_configurations(prefix)
-                if (self._settings.basedir / c).exists())
+                if (self._settings.configurations / c).exists())
 
     def input_override_templates(self, prefix, **kwargs):
         return (io for io in self._input_override_templates()

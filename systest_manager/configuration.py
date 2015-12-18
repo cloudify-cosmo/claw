@@ -35,7 +35,7 @@ class Configuration(object):
 
     @property
     def dir(self):
-        return settings.basedir / self.configuration
+        return settings.configurations / self.configuration
 
     @property
     def manager_blueprint_dir(self):

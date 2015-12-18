@@ -20,8 +20,8 @@ class Overview(object):
     def comments(self):
         return {
             'comments': [
-                {'id': 1, 'author': "Pete Hunt", 'text': "This is one comment"},
-                {'id': 2, 'author': "Jordan Walk!", 'text': "This is *another* comment"}
+                {'id': 1, 'author': "Pete Hunt", 'text': "Comment 1"},
+                {'id': 2, 'author': "Jordan Walk!", 'text': "Comment 2"}
             ]
         }
 

@@ -9,11 +9,8 @@ setup(
     description='Manages cloudify system tests configurations',
     zip_safe=False,
     install_requires=[
-        'requests',
+        'cloudify-system-tests',
         'argh',
-        'sh',
-        'path.py',
-        'pyyaml'
     ],
     entry_points={
         'console_scripts': [

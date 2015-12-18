@@ -24,6 +24,8 @@ from systest_manager.completion import Completion
 from systest_manager import overview as _overview
 
 
+INIT_EXISTS = argh.CommandError('Configuration already exists. Use --reset'
+                                ' to overwrite.')
 NO_INIT = argh.CommandError('Not initialized')
 NO_BOOTSTRAP = argh.CommandError('Not bootstrapped')
 STOP_DEPLOYMENT_ENVIRONMENT = '_stop_deployment_environment'
@@ -42,18 +44,23 @@ completion = Completion(settings)
 
 
 @command
-@arg('--basedir', required=True)
-@arg('--main_suites_yaml', required=True)
-@arg('--user_suites_yaml', required=True)
-@arg('--blueprints_yaml', required=False)
-def init(basedir=None,
-         main_suites_yaml=None,
-         user_suites_yaml=None,
-         blueprints_yaml=None):
-    settings.write_settings(basedir,
-                            main_suites_yaml,
-                            user_suites_yaml,
-                            blueprints_yaml)
+@arg('-s', '--suites-yaml', required=True)
+def init(suites_yaml=None,
+         basedir=None,
+         reset=False):
+    if settings.settings_path.exists() and not reset:
+        raise INIT_EXISTS
+    if not os.path.exists(os.path.expanduser(suites_yaml)):
+        raise argh.CommandError(
+            'suites.yaml not found at {0}'.format(suites_yaml))
+    if not basedir:
+        basedir = os.getcwd()
+    settings.write_settings(basedir, suites_yaml)
+    settings.user_suites_yaml.write_text(resources.get(
+        'templates/suites.template.yaml'))
+    settings.blueprints_yaml.write_text(resources.get(
+        'templates/blueprints.template.yaml'))
+    settings.configurations.mkdir_p()
 
 
 @command
@@ -117,7 +124,7 @@ def generate(configuration,
 
     conf.handler_configuration = handler_configuration
 
-    with settings.basedir:
+    with settings.configurations:
         if os.path.exists(CURRENT_CONFIGURATION):
             os.remove(CURRENT_CONFIGURATION)
         os.symlink(configuration, CURRENT_CONFIGURATION)

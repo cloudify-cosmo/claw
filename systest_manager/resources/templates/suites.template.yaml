@@ -1,0 +1,66 @@
+variables:
+  cloudify_org: https://github.com/cloudify-cosmo
+  branch: CFY-XXX-some-feature-branch
+  flavor: small.1
+
+manager_blueprint_override_templates:
+
+  openstack_dns: &openstack_dns_servers_blueprint_override
+    node_templates.management_subnet.properties.subnet.dns_nameservers: [8.8.4.4, 8.8.8.8]
+
+  openstack_influx_port: &openstack_openinflux_port_blueprint_override
+    node_templates.management_security_group.properties.rules[append]:
+      port: 8086
+      remote_ip_prefix: 0.0.0.0/0
+
+inputs_override_templates:
+
+  branches: &branches_inputs
+    install_python_compilers:  'true'
+    # uncomment branches you want installed
+#    rest_service_source_url:   '{{cloudify_org}}/cloudify-manager/archive/{{branch}}.tar.gz'
+#    plugins_common_source_url: '{{cloudify_org}}/cloudify-plugins-common/archive/{{branch}}.tar.gz'
+#    agent_source_url:          '{{cloudify_org}}/cloudify-agent/archive/{{branch}}.tar.gz'
+#    cli_source_url:            '{{cloudify_org}}/cloudify-cli/archive/{{branch}}.tar.gz'
+#    dsl_parser_source_url:     '{{cloudify_org}}/cloudify-dsl-parser/archive/{{branch}}.tar.gz'
+#    rest_client_source_url:    '{{cloudify_org}}/cloudify-rest-client/archive/{{branch}}.tar.gz'
+#    script_plugin_source_url:  '{{cloudify_org}}/cloudify-script-plugin/archive/{{branch}}.tar.gz'
+#    amqpinflux_source_url:     '{{cloudify_org}}/cloudify-amqp-influxdb/archive/{{branch}}.tar.gz'
+#    securest_source_url:       '{{cloudify_org}}/flask-securest/archive/{{branch}}.tar.gz'
+
+  some_openstack_env: &some_openstack_env_inputs
+    keystone_username: _
+    keystone_password: _
+    keystone_tenant_name: _
+    keystone_url: _
+    external_network_name: _
+    # Can reference variables defined in this file as well as variables
+    # defined the the main suites.yaml file
+    image_id: '{{openstack_centos_7_image_id}}'
+    flavor_id: '{{flavor}}'
+    region: ''
+
+
+handler_configuration_templates:
+
+  - &openstack_handler_configuration
+    handler: openstack_handler
+    inputs: ~/dev/cloudify/cloudify-manager-blueprints/openstack-manager-blueprint-inputs.yaml
+    manager_blueprint: ~/dev/cloudify/cloudify-manager-blueprints/openstack-manager-blueprint.yaml
+
+
+handler_configurations:
+
+  some_openstack_env:
+    <<: *openstack_handler_configuration
+    properties: openstack_env_properties_name
+    inputs_override:
+      <<: *some_openstack_env_inputs
+      # Uncomment to override branches inputs
+#      <<: *branches
+    manager_blueprint_override:
+      <<: *openstack_dns_servers_blueprint_override
+      <<: *openstack_openinflux_port_blueprint_override
+      # Uncomment if running in a private tenant, so cleanup
+      # will also remove keypairs
+#    delete_keypairs: true
