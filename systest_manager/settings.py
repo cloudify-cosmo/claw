@@ -5,14 +5,19 @@ import yaml
 from path import path
 
 
-class Settings(object):
+SYSTEST_SETTINGS = 'SYSTEST_SETTINGS'
+DEFAULT_SETTINGS_PATH = '~/.cloudify-systest'
 
-    settings_path = path(
-        os.path.expanduser(os.environ.get('SYSTEST_SETTINGS',
-                                          '~/.cloudify-systest')))
+
+class Settings(object):
 
     def __init__(self):
         self._settings = None
+
+    @property
+    def settings_path(self):
+        return path(os.path.expanduser(
+            os.environ.get(SYSTEST_SETTINGS, DEFAULT_SETTINGS_PATH)))
 
     @property
     def basedir(self):
