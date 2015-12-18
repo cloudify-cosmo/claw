@@ -4,4 +4,4 @@ from systest_manager import conf
 
 
 def script():
-    print conf.handler_configuration
+    conf.logger.info(conf.handler_configuration)
