@@ -14,6 +14,7 @@ setup(
         'cloudify-system-tests',
         'argh',
     ],
+    include_package_data=True,
     entry_points={
         'console_scripts': [
             'systest = systest_manager.systest:main',
