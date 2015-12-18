@@ -50,7 +50,11 @@ def init(suites_yaml=None,
          reset=False):
     if settings.settings_path.exists() and not reset:
         raise INIT_EXISTS
-    if not os.path.exists(os.path.expanduser(suites_yaml)):
+    suites_yaml = os.path.expanduser(suites_yaml)
+    if os.path.isdir(suites_yaml):
+        suites_yaml = os.path.join(suites_yaml, 'suites', 'suites',
+                                   'suites.yaml')
+    if not os.path.exists(suites_yaml):
         raise argh.CommandError(
             'suites.yaml not found at {0}'.format(suites_yaml))
     if not basedir:
