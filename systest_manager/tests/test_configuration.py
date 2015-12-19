@@ -2,11 +2,16 @@ import os
 
 from path import path
 
+from systest_manager import settings
 from systest_manager import configuration
 from systest_manager import tests
 
 
 class TestConfiguration(tests.BaseTest):
+
+    def cleanup(self):
+        configuration.settings = settings.Settings()
+        super(TestConfiguration, self).cleanup()
 
     def test_init_from_dir(self):
         conf = configuration.Configuration(self.workdir)
