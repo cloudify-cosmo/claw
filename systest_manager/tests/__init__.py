@@ -15,6 +15,7 @@ systest = sh.systest
 
 
 STUB_CONFIGURATION = 'some_openstack_env'
+STUB_BLUEPRINT = 'openstack_nodecellar'
 
 
 class BaseTest(unittest.TestCase):
