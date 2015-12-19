@@ -198,13 +198,9 @@ class TestConfiguration(tests.BaseTest):
         return configuration.Configuration(tests.STUB_CONFIGURATION)
 
     def _init_configuration_and_blueprint(self):
-        import sh
         conf = self._init_configuration()
-        try:
-            self.systest('generate-blueprint',
-                         tests.STUB_CONFIGURATION,
-                         tests.STUB_BLUEPRINT)
-        except sh.ErrorReturnCode as e:
-            raise RuntimeError(e.stderr)
+        self.systest('generate-blueprint',
+                     tests.STUB_CONFIGURATION,
+                     tests.STUB_BLUEPRINT)
         blueprint = conf.blueprint(tests.STUB_BLUEPRINT)
         return conf, blueprint
