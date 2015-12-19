@@ -100,7 +100,7 @@ class Configuration(object):
         if not properties_name:
             return {}
         suites_yaml = self.load(settings.main_suites_yaml)
-        handler_properties = suites_yaml.get('handler_properties')
+        handler_properties = suites_yaml.get('handler_properties', {})
         properties = handler_properties.get(properties_name, {})
         return util.process_variables(suites_yaml, properties)
 
