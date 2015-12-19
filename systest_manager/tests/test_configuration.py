@@ -2,7 +2,6 @@ import os
 
 from path import path
 
-from systest_manager import settings
 from systest_manager import configuration
 from systest_manager import tests
 
