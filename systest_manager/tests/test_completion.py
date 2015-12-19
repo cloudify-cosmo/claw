@@ -90,7 +90,7 @@ class TestCompletion(tests.BaseTest):
     def test_generate_blueprint(self):
         options = self.help_args + ['-r', '--reset']
         self._test_generate_blueprint_and_deploy_and_undeploy(
-                'generate-blueprint', options)
+            'generate-blueprint', options)
 
     def test_deploy(self):
         options = self.help_args + ['-r', '--reset',
