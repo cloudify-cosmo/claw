@@ -32,7 +32,7 @@ class TestConfiguration(tests.BaseTest):
         conf = configuration.Configuration(tests.STUB_CONFIGURATION)
         self.assertFalse(conf.exists())
         self.systest.generate(tests.STUB_CONFIGURATION)
-        conf = configuration.Configuration(configuration.CURRENT_CONFIGURATION)
+        conf = configuration.Configuration(tests.STUB_CONFIGURATION)
         self.assertTrue(conf.exists())
 
     def test_configuration_properties(self):
