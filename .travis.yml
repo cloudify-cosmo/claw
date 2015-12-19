@@ -10,7 +10,7 @@ install:
       if [ $TOX_ENV == 'py27' ]; then
         mkdir -p ~/dev/cloudify
         wget https://github.com/cloudify-cosmo/cloudify-manager-blueprints/archive/master.tar.gz
-        tar zxf master.zip
+        tar zxf master.tar.gz
         mv cloudify-manager-blueprints-master ~/dev/cloudify/cloudify-manager-blueprints
       fi
 script:
