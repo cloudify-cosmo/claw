@@ -1,5 +1,6 @@
 import os
 
+import yaml
 from path import path
 
 from systest_manager import settings
@@ -60,3 +61,32 @@ class TestConfiguration(tests.BaseTest):
         self.assertEqual(conf.cli_config_path,
                          conf_dir / '.cloudify' / 'config.yaml')
         self.assertEqual(conf.properties, {})
+
+    def test_yaml_files(self):
+        self.init()
+        self.systest.generate(tests.STUB_CONFIGURATION)
+        conf = configuration.Configuration(tests.STUB_CONFIGURATION)
+        inputs = {'one': 1}
+        manager_blueprint = {'two': 2}
+        handler_configuration = {'three': 3}
+        cli_config = {'four': 4}
+        conf.inputs = inputs
+        conf.manager_blueprint = manager_blueprint
+        conf.handler_configuration = handler_configuration
+        conf.cli_config_path.dirname().mkdir_p()
+        conf.cli_config = cli_config
+        new_conf = configuration.Configuration(tests.STUB_CONFIGURATION)
+        self.assertEqual(new_conf.inputs, inputs)
+        self.assertEqual(new_conf.manager_blueprint, manager_blueprint)
+        self.assertEqual(new_conf.handler_configuration, handler_configuration)
+        self.assertEqual(new_conf.cli_config, cli_config)
+        conf_dir = self.workdir / 'configurations' / tests.STUB_CONFIGURATION
+
+        def assert_path(_path, content):
+            self.assertEqual(yaml.safe_load(_path.text()), content)
+        assert_path(conf_dir / 'inputs.yaml', inputs)
+        assert_path(conf_dir / 'handler-configuration.yaml',
+                    handler_configuration)
+        assert_path(conf_dir / '.cloudify' / 'config.yaml', cli_config)
+        assert_path(conf_dir / 'manager-blueprint' / 'manager-blueprint.yaml',
+                    manager_blueprint)
