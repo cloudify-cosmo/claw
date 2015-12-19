@@ -10,6 +10,7 @@ class CleanupHandler(object):
 
     def __init__(self, handler):
         configuration = handler.configuration
+        self.logger = configuration.logger
         self.should_delete_keypairs = configuration.handler_configuration.get(
             'delete_keypairs', False)
         clients = handler.clients()
@@ -27,75 +28,78 @@ class CleanupHandler(object):
         self.delete_networks()
         self.delete_security_groups()
         self.delete_floatingips()
-        print "Done!"
+        self.logger.info('Done!')
 
     def delete_servers(self):
-        print "Deleting Servers"
+        self.logger.info('Deleting Servers')
         for server in self.nova.servers.list():
-            print "\tDeleting server {0}".format(server.name)
+            self.logger.info('\tDeleting server {0}'.format(server.name))
             self.nova.servers.delete(server.id)
 
         while self.nova.servers.list():
-            print "Waiting for all servers to delete..."
+            self.logger.info('Waiting for all servers to delete...')
             time.sleep(5)
 
     def delete_keys(self):
-        print "Deleting Keypairs"
+        self.logger.info('Deleting Keypairs')
         for keypair in self.nova.keypairs.list():
             if self.should_delete_keypairs:
-                print "\tDeleting keypair {0}".format(keypair.name)
+                self.logger.info('\tDeleting keypair {0}'.format(keypair.name))
                 self.nova.keypairs.delete(keypair.id)
             else:
-                print "\tSkipping keypair {0}".format(keypair.name)
+                self.logger.info('\tSkipping keypair {0}'.format(keypair.name))
 
     def delete_volumes(self):
-        print "Deleting Volumes"
+        self.logger.info('Deleting Volumes')
         for volume in self.cinder.volumes.list():
-            print "\tdeleting volume {0}".format(volume.display_name)
+            self.logger.info('\tdeleting volume {0}'.format(
+                volume.display_name))
             self.cinder.volumes.delete(volume.id)
 
         while self.cinder.volumes.list():
-            print "Waiting for all volumes to delete..."
+            self.logger.info('Waiting for all volumes to delete...')
             time.sleep(5)
 
     def delete_routers(self):
-        print "Deleting Routers"
+        self.logger.info('Deleting Routers')
         for router in self.neutron.list_routers()['routers']:
             for port in self.neutron.list_ports(device_id=router['id'])[
                     'ports']:
                 subnet_id = port['fixed_ips'][0]['subnet_id']
-                print "\tDeleting router interface to subnet ID {0}".format(
-                    subnet_id)
+                self.logger.info('\tDeleting router interface to subnet ID {0}'
+                                 .format(subnet_id))
                 self.neutron.remove_interface_router(router['id'],
                                                      {'subnet_id': subnet_id})
-            print "\tDeleting router {0}".format(router['name'])
+            self.logger.info('\tDeleting router {0}'.format(router['name']))
             self.neutron.delete_router(router['id'])
 
     def delete_ports(self):
-        print "Deleting Ports"
+        self.logger.info('Deleting Ports')
         for port in self.neutron.list_ports()['ports']:
-            print "\tDeleting port {0}".format(port['name'])
+            self.logger.info('\tDeleting port {0}'.format(port['name']))
             self.neutron.delete_port(port['id'])
 
     def delete_networks(self):
-        print "Deleting Networks"
+        self.logger.info('Deleting Networks')
         for network in self.neutron.list_networks()['networks']:
             if not network['router:external']:
-                print "\tDeleting network {0}".format(network['name'])
+                self.logger.info('\tDeleting network {0}'.format(
+                    network['name']))
                 self.neutron.delete_network(network['id'])
 
     def delete_security_groups(self):
-        print "Deleting Security Groups"
+        self.logger.info('Deleting Security Groups')
         for sg in self.neutron.list_security_groups()['security_groups']:
             if sg['name'] != 'default':
-                print "\tDeleting security group {0}".format(sg['name'])
+                self.logger.info('\tDeleting security group {0}'.format(
+                    sg['name']))
                 self.neutron.delete_security_group(sg['id'])
 
     def delete_floatingips(self):
-        print "Deleting Floating IPs"
+        self.logger.info('Deleting Floating IPs')
         for fip in self.neutron.list_floatingips()['floatingips']:
-            print "\tDeleting floating IP {0}".format(
-                fip['floating_ip_address'])
+            self.logger.info('\tDeleting floating IP {0}'.format(
+                fip['floating_ip_address']))
             self.neutron.delete_floatingip(fip['id'])
 
 
