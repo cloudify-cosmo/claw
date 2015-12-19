@@ -1,3 +1,4 @@
+import copy
 import importlib
 from contextlib import contextmanager
 
@@ -25,7 +26,7 @@ class YamlPatcher(util.YamlPatcher):
             module, func = func_name.split(':')
             module = importlib.import_module(module)
             func = getattr(module, func)
-            args = new_value.get('args', [])
+            args = copy.copy(new_value.get('args', []))
             args.insert(0, obj.get(prop_name))
             kwargs = new_value.get('kwargs', {})
             obj[prop_name] = func(*args, **kwargs)
@@ -43,7 +44,7 @@ def filter_list(current_value, include):
                 if included in _item:
                     return True
             elif isinstance(included, dict):
-                if all([value in _item[key]
+                if all([value in (_item.get(key) or '')
                         for key, value in included.items()]):
                     return True
             else:
