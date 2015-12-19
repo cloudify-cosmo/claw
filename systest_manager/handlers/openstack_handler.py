@@ -6,6 +6,9 @@ import cinderclient.v1.client as cinder_client
 import novaclient.v2.client as nova_client
 
 
+from systest_manager import handlers
+
+
 class CleanupHandler(object):
 
     def __init__(self, handler):
@@ -103,10 +106,7 @@ class CleanupHandler(object):
             self.neutron.delete_floatingip(fip['id'])
 
 
-class Handler(object):
-
-    def __init__(self, configuration):
-        self.configuration = configuration
+class Handler(handlers.Handler):
 
     def cleanup(self):
         CleanupHandler(self).cleanup()

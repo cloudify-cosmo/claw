@@ -8,7 +8,7 @@ from path import path
 from systest_manager import settings
 from systest_manager import configuration
 from systest_manager import tests
-from systest_manager.handlers import openstack_handler
+from systest_manager.handlers import stub_handler
 
 
 class TestConfiguration(tests.BaseTest):
@@ -143,9 +143,10 @@ class TestConfiguration(tests.BaseTest):
 
     def test_systest_handler(self):
         conf = self._init_configuration()
+        with conf.patch.handler_configuration as patch:
+            patch.set_value('handler', 'stub_handler')
         systest_handler = conf.systest_handler
-        self.assertTrue(isinstance(systest_handler,
-                                   openstack_handler.Handler))
+        self.assertTrue(isinstance(systest_handler, stub_handler.Handler))
         self.assertIs(systest_handler.configuration, conf)
 
     def test_patch(self):
