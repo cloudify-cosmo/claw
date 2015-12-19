@@ -1,20 +1,7 @@
 import copy
 import importlib
-from contextlib import contextmanager
 
 from cosmo_tester.framework import util
-
-
-class ConfigurationPatcher(object):
-
-    def __init__(self, obj):
-        self.obj = obj
-
-    @contextmanager
-    def __getattr__(self, item):
-        path = getattr(self.obj, '{0}_path'.format(item))
-        with YamlPatcher(path, default_flow_style=False) as patch:
-            yield patch
 
 
 class YamlPatcher(util.YamlPatcher):

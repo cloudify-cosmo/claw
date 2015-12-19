@@ -90,3 +90,36 @@ class TestConfiguration(tests.BaseTest):
         assert_path(conf_dir / '.cloudify' / 'config.yaml', cli_config)
         assert_path(conf_dir / 'manager-blueprint' / 'manager-blueprint.yaml',
                     manager_blueprint)
+
+    def test_properties(self):
+        pass
+
+    def test_client(self):
+        pass
+
+    def test_systest_handler(self):
+        pass
+
+    def test_patch(self):
+        pass
+
+    def test_ssh(self):
+        pass
+
+    def test_logger(self):
+        pass
+
+    def blueprint(self):
+        pass
+
+
+class TestConfigurationBlueprint(tests.BaseTest):
+
+    def test_configuration_blueprint_properties(self):
+        pass
+
+    def test_yaml_files(self):
+        pass
+
+    def test_patch(self):
+        pass

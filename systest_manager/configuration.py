@@ -118,7 +118,7 @@ class Configuration(object):
 
     @property
     def patch(self):
-        return patcher.ConfigurationPatcher(self)
+        return ConfigurationPatcher(self)
 
     @contextmanager
     def ssh(self):
@@ -202,4 +202,16 @@ class Blueprint(object):
 
     @property
     def patch(self):
-        return patcher.ConfigurationPatcher(self)
+        return ConfigurationPatcher(self)
+
+
+class ConfigurationPatcher(object):
+
+    def __init__(self, obj):
+        self.obj = obj
+
+    @contextmanager
+    def __getattr__(self, item):
+        path = getattr(self.obj, '{0}_path'.format(item))
+        with patcher.YamlPatcher(path, default_flow_style=False) as patch:
+            yield patch
