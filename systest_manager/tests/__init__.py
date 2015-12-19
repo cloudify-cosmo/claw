@@ -21,7 +21,8 @@ class BaseTest(unittest.TestCase):
 
     def setUp(self):
         self.workdir = path(tempfile.mkdtemp(prefix='systest-tests-'))
-        os.environ[settings.SYSTEST_SETTINGS] = str(self.workdir / 'settings')
+        self.settings_path = self.workdir / 'settings'
+        os.environ[settings.SYSTEST_SETTINGS] = str(self.settings_path)
         self.addCleanup(self.cleanup)
 
         system_tests_dir = path(cosmo_tester.__file__).dirname().dirname()
@@ -32,7 +33,7 @@ class BaseTest(unittest.TestCase):
 
     def cleanup(self):
         shutil.rmtree(self.workdir, ignore_errors=True)
-        del os.environ[settings.SYSTEST_SETTINGS]
+        os.environ.pop(settings.SYSTEST_SETTINGS, None)
 
     def init(self):
         with self.workdir:
