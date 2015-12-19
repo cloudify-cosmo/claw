@@ -36,6 +36,7 @@ class BaseTest(unittest.TestCase):
         shutil.rmtree(self.workdir, ignore_errors=True)
         os.environ.pop(settings.SYSTEST_SETTINGS, None)
 
-    def init(self):
+    def init(self, suites_yaml=None):
+        suites_yaml = suites_yaml or self.main_suites_yaml_path
         with self.workdir:
-            self.systest.init(suites_yaml=self.main_suites_yaml_path)
+            self.systest.init(suites_yaml=suites_yaml)

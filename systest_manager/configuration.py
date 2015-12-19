@@ -106,8 +106,9 @@ class Configuration(object):
 
     @property
     def client(self):
-        return cloudify_rest_client.CloudifyClient(
-            self.handler_configuration['manager_ip'])
+        handler_configuration = self.handler_configuration
+        manager_ip = handler_configuration.get('manager_ip', 'localhost')
+        return cloudify_rest_client.CloudifyClient(manager_ip)
 
     @property
     def systest_handler(self):

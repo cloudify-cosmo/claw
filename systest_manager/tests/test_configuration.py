@@ -1,11 +1,14 @@
+import logging
 import os
 
 import yaml
+import fabric.api
 from path import path
 
 from systest_manager import settings
 from systest_manager import configuration
 from systest_manager import tests
+from systest_manager.handlers import openstack_handler
 
 
 class TestConfiguration(tests.BaseTest):
@@ -16,13 +19,11 @@ class TestConfiguration(tests.BaseTest):
 
     def test_init_from_dir(self):
         conf = configuration.Configuration(self.workdir)
-        self.assertEqual(conf.configuration,
-                         self.workdir.basename())
+        self.assertEqual(conf.configuration, self.workdir.basename())
 
     def test_init_from_current_dir(self):
         conf = configuration.Configuration()
-        self.assertEqual(conf.configuration,
-                         path(os.getcwd()).basename())
+        self.assertEqual(conf.configuration, path(os.getcwd()).basename())
 
     def test_init_from_current_configuration(self):
         self.init()
@@ -42,9 +43,8 @@ class TestConfiguration(tests.BaseTest):
         self.assertTrue(conf.exists())
 
     def test_configuration_properties(self):
-        self.init()
-        self.systest.generate(tests.STUB_CONFIGURATION)
-        conf = configuration.Configuration(tests.STUB_CONFIGURATION)
+        conf, blueprint = self._init_configuration_and_blueprint()
+
         conf_dir = self.workdir / 'configurations' / tests.STUB_CONFIGURATION
         self.assertEqual(conf.dir, conf_dir)
         self.assertEqual(conf.manager_blueprint_dir,
@@ -60,66 +60,146 @@ class TestConfiguration(tests.BaseTest):
                          conf_dir / 'handler-configuration.yaml')
         self.assertEqual(conf.cli_config_path,
                          conf_dir / '.cloudify' / 'config.yaml')
-        self.assertEqual(conf.properties, {})
+
+        blueprint_dir = conf.blueprints_dir / tests.STUB_BLUEPRINT
+        self.assertIs(blueprint.configuration, conf)
+        self.assertEqual(blueprint.blueprint_name, tests.STUB_BLUEPRINT)
+        self.assertEqual(blueprint.dir, blueprint_dir)
+        self.assertEqual(blueprint.blueprint_configuration_path,
+                         blueprint_dir / 'blueprint-configuration.yaml')
+        self.assertEqual(blueprint.inputs_path,
+                         blueprint_dir / 'inputs.yaml')
+        self.assertEqual(blueprint.blueprint_path,
+                         blueprint_dir / 'blueprint' / 'blueprint.yaml')
 
     def test_yaml_files(self):
-        self.init()
-        self.systest.generate(tests.STUB_CONFIGURATION)
-        conf = configuration.Configuration(tests.STUB_CONFIGURATION)
-        inputs = {'one': 1}
-        manager_blueprint = {'two': 2}
-        handler_configuration = {'three': 3}
-        cli_config = {'four': 4}
-        conf.inputs = inputs
-        conf.manager_blueprint = manager_blueprint
-        conf.handler_configuration = handler_configuration
-        conf.cli_config_path.dirname().mkdir_p()
-        conf.cli_config = cli_config
-        new_conf = configuration.Configuration(tests.STUB_CONFIGURATION)
-        self.assertEqual(new_conf.inputs, inputs)
-        self.assertEqual(new_conf.manager_blueprint, manager_blueprint)
-        self.assertEqual(new_conf.handler_configuration, handler_configuration)
-        self.assertEqual(new_conf.cli_config, cli_config)
+        conf, blueprint = self._init_configuration_and_blueprint()
         conf_dir = self.workdir / 'configurations' / tests.STUB_CONFIGURATION
+        blueprint_dir = conf.blueprints_dir / tests.STUB_BLUEPRINT
+        conf.cli_config_path.dirname().mkdir_p()
 
-        def assert_path(_path, content):
-            self.assertEqual(yaml.safe_load(_path.text()), content)
-        assert_path(conf_dir / 'inputs.yaml', inputs)
-        assert_path(conf_dir / 'handler-configuration.yaml',
-                    handler_configuration)
-        assert_path(conf_dir / '.cloudify' / 'config.yaml', cli_config)
-        assert_path(conf_dir / 'manager-blueprint' / 'manager-blueprint.yaml',
-                    manager_blueprint)
+        configuration_files = [
+            ('inputs', conf_dir / 'inputs.yaml'),
+            ('handler_configuration', conf_dir / 'handler-configuration.yaml'),
+            ('manager_blueprint',
+             conf_dir / 'manager-blueprint' / 'manager-blueprint.yaml'),
+            ('cli_config', conf_dir / '.cloudify' / 'config.yaml'),
+        ]
+        blueprint_files = [
+            ('inputs', blueprint_dir / 'inputs.yaml'),
+            ('blueprint', blueprint_dir / 'blueprint' / 'blueprint.yaml'),
+            ('blueprint_configuration',
+             blueprint_dir / 'blueprint-configuration.yaml')
+        ]
+
+        def assert_files(obj, files):
+            content = {'some': 'value'}
+            for _file in files:
+                setattr(obj, _file[0], content)
+            if isinstance(obj, configuration.Configuration):
+                new_obj = configuration.Configuration(tests.STUB_CONFIGURATION)
+            else:
+                new_obj = conf.blueprint(tests.STUB_BLUEPRINT)
+            for _file in files:
+                self.assertEqual(content, getattr(new_obj, _file[0]))
+                self.assertEqual(yaml.safe_load(_file[1].text()), content)
+        assert_files(conf, configuration_files)
+        assert_files(blueprint, blueprint_files)
 
     def test_properties(self):
-        pass
+        props_name = 'props1'
+        main_suites_yaml_path = self.workdir / 'main-suites.yaml'
+        main_suites_yaml = {
+            'variables': {'a': '123'},
+            'handler_properties': {
+                props_name: {
+                    'a_from_var': '{{a}}',
+                    'b': 'b_val'
+                }
+            }
+        }
+        main_suites_yaml_path.write_text(yaml.safe_dump(main_suites_yaml))
+        conf = self._init_configuration(main_suites_yaml_path)
+        with conf.patch.handler_configuration as patch:
+            patch.obj.pop('properties', None)
+        self.assertEqual(conf.properties, {})
+        with conf.patch.handler_configuration as patch:
+            patch.obj['properties'] = 'no_such_properties'
+        self.assertEqual(conf.properties, {})
+        with conf.patch.handler_configuration as patch:
+            patch.obj['properties'] = props_name
+        self.assertEqual(conf.properties, {
+            'a_from_var': '123',
+            'b': 'b_val'
+        })
 
     def test_client(self):
-        pass
+        conf = self._init_configuration()
+        self.assertEqual(conf.client._client.host, 'localhost')
+        ip = '1.1.1.1'
+        with conf.patch.handler_configuration as patch:
+            patch.obj['manager_ip'] = ip
+        self.assertEqual(conf.client._client.host, ip)
 
     def test_systest_handler(self):
-        pass
+        conf = self._init_configuration()
+        systest_handler = conf.systest_handler
+        self.assertTrue(isinstance(systest_handler,
+                                   openstack_handler.Handler))
+        self.assertIs(systest_handler.configuration, conf)
 
     def test_patch(self):
-        pass
+        conf, blueprint = self._init_configuration_and_blueprint()
+        key = 'some_key'
+        value = 'some_value'
+        conf.cli_config_path.dirname().makedirs_p()
+        conf.cli_config_path.write_text('{}')
+
+        def _assert_patching(obj, props):
+            for prop in props:
+                with getattr(obj.patch, prop) as patch:
+                    patch.set_value(key, value)
+                self.assertEqual(getattr(obj, prop)[key], value)
+        _assert_patching(conf, ['inputs',
+                                'manager_blueprint',
+                                'handler_configuration',
+                                'cli_config'])
+        _assert_patching(blueprint, ['inputs',
+                                     'blueprint',
+                                     'blueprint_configuration'])
 
     def test_ssh(self):
-        pass
+        conf = self._init_configuration()
+        ip = '1.1.1.1'
+        user = 'user'
+        key = '~/key'
+        with conf.patch.handler_configuration as patch:
+            patch.obj.update({
+                'manager_ip': ip,
+                'manager_user': user,
+                'manager_key': key
+            })
+        with conf.ssh() as ssh:
+            self.assertEqual(ssh, fabric.api)
+            self.assertEqual(fabric.api.env['host_string'], ip)
+            self.assertEqual(fabric.api.env['user'], user)
+            self.assertEqual(fabric.api.env['key_filename'], key)
 
     def test_logger(self):
-        pass
+        conf = self._init_configuration()
+        logger = conf.logger
+        self.assertTrue(isinstance(logger, logging.Logger))
+        self.assertEqual(1, len(logger.handlers))
 
-    def blueprint(self):
-        pass
+    def _init_configuration(self, suites_yaml=None):
+        self.init(suites_yaml)
+        self.systest.generate(tests.STUB_CONFIGURATION)
+        return configuration.Configuration(tests.STUB_CONFIGURATION)
 
-
-class TestConfigurationBlueprint(tests.BaseTest):
-
-    def test_configuration_blueprint_properties(self):
-        pass
-
-    def test_yaml_files(self):
-        pass
-
-    def test_patch(self):
-        pass
+    def _init_configuration_and_blueprint(self):
+        conf = self._init_configuration()
+        self.systest('generate-blueprint',
+                     tests.STUB_CONFIGURATION,
+                     tests.STUB_BLUEPRINT)
+        blueprint = conf.blueprint(tests.STUB_BLUEPRINT)
+        return conf, blueprint
