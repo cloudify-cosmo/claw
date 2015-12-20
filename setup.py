@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'systest = systest.systest:main',
+            'systest = systest.main:main',
         ],
     }
 )
