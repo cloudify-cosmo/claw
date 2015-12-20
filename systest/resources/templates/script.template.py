@@ -1,6 +1,6 @@
 #! /usr/bin/env systest
 
-from systest_manager import conf
+from systest import conf
 
 
 def script():

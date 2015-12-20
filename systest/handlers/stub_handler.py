@@ -1,4 +1,4 @@
-from systest_manager import handlers
+from systest import handlers
 
 
 class Handler(handlers.Handler):

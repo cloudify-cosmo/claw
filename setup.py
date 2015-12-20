@@ -5,9 +5,9 @@ setup(
     version='0.1',
     author='Dan Kilman',
     author_email='dankilman@gmail.com',
-    packages=['systest_manager',
-              'systest_manager.handlers',
-              'systest_manager.resources'],
+    packages=['systest',
+              'systest.handlers',
+              'systest.resources'],
     description='Manages cloudify system tests configurations',
     zip_safe=False,
     install_requires=[
@@ -17,7 +17,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'systest = systest_manager.systest:main',
+            'systest = systest.systest:main',
         ],
     }
 )

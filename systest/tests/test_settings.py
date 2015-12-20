@@ -5,8 +5,8 @@ import yaml
 from path import path
 from mock import patch
 
-from systest_manager import settings as _settings
-from systest_manager import tests
+from systest import settings as _settings
+from systest import tests
 
 
 class TestSettings(tests.BaseTest):

@@ -2,7 +2,7 @@ import os
 
 import bottle
 
-from systest_manager import resources
+from systest import resources
 
 
 class Overview(object):

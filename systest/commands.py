@@ -15,13 +15,13 @@ from cloudify_cli.execution_events_fetcher import ExecutionEventsFetcher
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
-from systest_manager import patcher
-from systest_manager import resources
-from systest_manager.state import current_conf
-from systest_manager.configuration import Configuration, CURRENT_CONFIGURATION
-from systest_manager.settings import Settings
-from systest_manager.completion import Completion
-from systest_manager import overview as _overview
+from systest import patcher
+from systest import resources
+from systest.state import current_conf
+from systest.configuration import Configuration, CURRENT_CONFIGURATION
+from systest.settings import Settings
+from systest.completion import Completion
+from systest import overview as _overview
 
 
 INIT_EXISTS = argh.CommandError('Configuration already exists. Use --reset'

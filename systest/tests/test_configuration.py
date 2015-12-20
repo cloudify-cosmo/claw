@@ -5,10 +5,10 @@ import yaml
 import fabric.api
 from path import path
 
-from systest_manager import settings
-from systest_manager import configuration
-from systest_manager import tests
-from systest_manager.handlers import stub_handler
+from systest import settings
+from systest import configuration
+from systest import tests
+from systest.handlers import stub_handler
 
 
 class TestConfiguration(tests.BaseTest):

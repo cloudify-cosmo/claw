@@ -6,7 +6,7 @@ import cinderclient.v1.client as cinder_client
 import novaclient.v2.client as nova_client
 
 
-from systest_manager import handlers
+from systest import handlers
 
 
 class CleanupHandler(object):

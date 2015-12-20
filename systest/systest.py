@@ -4,8 +4,8 @@ from StringIO import StringIO
 
 import argh
 
-from systest_manager import configuration
-from systest_manager import commands
+from systest import configuration
+from systest import commands
 
 
 def main():

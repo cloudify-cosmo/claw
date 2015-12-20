@@ -1,6 +1,6 @@
 import sh
 
-from systest_manager import tests
+from systest import tests
 
 
 class EntryPointTests(tests.BaseTest):
@@ -16,7 +16,7 @@ class EntryPointTests(tests.BaseTest):
     def test_direct_script_execution(self):
         text = 'TEXT'
         script = '''
-from systest_manager import conf
+from systest import conf
 def script(arg):
     print arg + ':' + conf.configuration
 '''

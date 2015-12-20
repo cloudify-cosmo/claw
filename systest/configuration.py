@@ -12,8 +12,8 @@ import yaml
 import cloudify_rest_client
 from cosmo_tester.framework import util
 
-from systest_manager import patcher
-from systest_manager.settings import Settings
+from systest import patcher
+from systest.settings import Settings
 
 CURRENT_CONFIGURATION = '+'
 
@@ -114,7 +114,7 @@ class Configuration(object):
     def systest_handler(self):
         handler_name = self.handler_configuration['handler']
         module = importlib.import_module(
-            'systest_manager.handlers.{0}'.format(handler_name))
+            'systest.handlers.{0}'.format(handler_name))
         return module.Handler(self)
 
     @property

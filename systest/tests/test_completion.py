@@ -1,9 +1,9 @@
 import sh
 
-from systest_manager import settings as _settings
-from systest_manager import patcher
-from systest_manager import commands
-from systest_manager import tests
+from systest import settings as _settings
+from systest import patcher
+from systest import commands
+from systest import tests
 
 
 class TestCompletion(tests.BaseTest):

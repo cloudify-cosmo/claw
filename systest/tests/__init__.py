@@ -8,7 +8,7 @@ from path import path
 
 import cosmo_tester
 
-from systest_manager import settings
+from systest import settings
 
 
 systest = sh.systest

@@ -1,7 +1,7 @@
 import unittest
 
-from systest_manager import conf
-from systest_manager import state
+from systest import conf
+from systest import state
 
 
 class TestState(unittest.TestCase):

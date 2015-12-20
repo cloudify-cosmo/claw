@@ -1,1 +1,1 @@
-recursive-include systest_manager/resources *
+recursive-include systest/resources *
