@@ -8,7 +8,8 @@ setup(
     packages=['systest',
               'systest.handlers',
               'systest.resources'],
-    description='Manages cloudify system tests configurations',
+    description='Manages Cloudify manager environments by leveraging the'
+                'system tests framework',
     zip_safe=False,
     install_requires=[
         'cloudify-system-tests',
