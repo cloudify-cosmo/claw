@@ -14,25 +14,198 @@
 # limitations under the License.
 ############
 
+import sh
+import yaml
+
+from systest import settings
 from systest import tests
 
 
 class GenerateTest(tests.BaseTest):
 
+    def setUp(self):
+        super(GenerateTest, self).setUp()
+        self.init()
+        self.settings = settings.Settings()
+        self.inputs = {'some': 'input'}
+        self.variables = {'a': 'AAA', 'b': 'BBB'}
+
     def test_basic(self):
-        pass
+        self._test()
 
-    def test_inputs_override(self):
-        pass
+    def test_inputs(self):
+        self._test(inputs=self.inputs)
 
-    def test_manager_blueprint_override(self):
-        pass
+    def test_inputs_override_in_handler_configuration_with_inputs(self):
+        self._test_inputs_override_in_handler_configuration(inputs=self.inputs)
+
+    def test_inputs_override_in_handler_configuration_no_inputs(self):
+        self._test_inputs_override_in_handler_configuration()
+
+    def _test_inputs_override_in_handler_configuration(self, inputs=None):
+        inputs_override = {'override': 'inputs {{a}}'}
+        processed_inputs_override = {'override': 'inputs AAA'}
+        self._test(inputs=inputs,
+                   inputs_override=inputs_override,
+                   processed_inputs_override=processed_inputs_override)
+
+    def test_manager_blueprint_override_in_handler_configuration(self):
+        blueprint_override = {'override': 'blueprint {{a}}'}
+        processed_blueprint_override = {'override': 'blueprint AAA'}
+        self._test(inputs=self.inputs,
+                   blueprint_override=blueprint_override,
+                   processed_blueprint_override=processed_blueprint_override)
+
+    def test_inputs_override_in_command_line_no_handler_inputs_override(self):
+        self._test_inputs_override_in_command_line()
+
+    def test_inputs_override_in_command_line_with_handler_inputs_override(self):  # noqa
+        inputs_override = {'override': 'inputs {{a}}'}
+        processed_inputs_override = {'override': 'inputs AAA'}
+        self._test_inputs_override_in_command_line(
+            handler_inputs_override=inputs_override,
+            processed_handler_inputs_override=processed_inputs_override)
+
+    def _test_inputs_override_in_command_line(
+            self,
+            handler_inputs_override=None,
+            processed_handler_inputs_override=None):  # noqa
+        cmd_inputs_override = {
+            'from_cmd1': {'cmd_override': 'cmd_inputs {{b}}'},
+            'from_cmd2': {'cmd_override2': 'cmd_inputs2 {{b}}'}
+        }
+        processed_inputs_override = {'cmd_override': 'cmd_inputs BBB',
+                                     'cmd_override2': 'cmd_inputs2 BBB'}
+        if processed_handler_inputs_override:
+            processed_inputs_override.update(processed_handler_inputs_override)
+        self._test(inputs_override=handler_inputs_override,
+                   cmd_inputs_override=cmd_inputs_override,
+                   processed_inputs_override=processed_inputs_override)
+
+    def test_manager_blueprint_override_in_command_line_no_handler_blueprint_override(self):  # noqa
+        self._test_manager_blueprint_override_in_command_line()
+
+    def test_manager_blueprint_override_in_command_line_with_handler_blueprint_override(self):  # noqa
+        blueprint_override = {'override': 'blueprint {{a}}'}
+        processed_blueprint_override = {'override': 'blueprint AAA'}
+        self._test_manager_blueprint_override_in_command_line(
+            handler_blueprint_override=blueprint_override,
+            processed_handler_blueprint_override=processed_blueprint_override)
+
+    def _test_manager_blueprint_override_in_command_line(
+            self,
+            handler_blueprint_override=None,
+            processed_handler_blueprint_override=None):  # noqa
+        cmd_blueprint_override = {
+            'from_cmd1': {'cmd_override': 'cmd_blueprint {{b}}'},
+            'from_cmd2': {'cmd_override2': 'cmd_blueprint2 {{b}}'}
+        }
+        processed_blueprint_override = {'cmd_override': 'cmd_blueprint BBB',
+                                        'cmd_override2': 'cmd_blueprint2 BBB'}
+        if processed_handler_blueprint_override:
+            processed_blueprint_override.update(
+                processed_handler_blueprint_override)
+        self._test(blueprint_override=handler_blueprint_override,
+                   cmd_blueprint_override=cmd_blueprint_override,
+                   processed_blueprint_override=processed_blueprint_override)
 
     def test_existing_configuration_no_reset(self):
-        pass
+        with self.assertRaises(sh.ErrorReturnCode):
+            self._test()
+            self._test()
 
     def test_existing_configuration_reset(self):
-        pass
+        self._test()
+        self._test(reset=True)
 
     def test_existing_current_configuration(self):
-        pass
+        self._test()
+        self._test(configuration='some_other_conf')
+
+    def _test(self,
+              inputs=None,
+              inputs_override=None,
+              cmd_inputs_override=None,
+              processed_inputs_override=None,
+              blueprint_override=None,
+              cmd_blueprint_override=None,
+              processed_blueprint_override=None,
+              reset=False,
+              configuration=None):
+        configuration = configuration or 'conf1'
+        blueprint_dir = self.workdir / 'blueprint'
+        blueprint_dir.mkdir_p()
+        inputs_path = blueprint_dir / 'inputs.yaml'
+        blueprint_path = blueprint_dir / 'manager-blueprint.yaml'
+
+        config_dir = self.workdir / 'configurations' / configuration
+        new_inputs_path = config_dir / 'inputs.yaml'
+        new_blueprint_path = (config_dir / 'manager-blueprint' /
+                              'manager-blueprint.yaml')
+        handler_configuration_path = config_dir / 'handler-configuration.yaml'
+
+        blueprint = {'some_other': 'manager_blueprint'}
+
+        if inputs:
+            inputs_path.write_text(yaml.safe_dump(inputs))
+        blueprint_path.write_text(yaml.safe_dump(blueprint))
+
+        handler_configuration = {
+            'handler': 'stub_handler',
+            'manager_blueprint': str(blueprint_path),
+        }
+
+        if inputs:
+            handler_configuration['inputs'] = str(inputs_path)
+        if inputs_override:
+            handler_configuration['inputs_override'] = inputs_override
+        if blueprint_override:
+            handler_configuration[
+                'manager_blueprint_override'] = blueprint_override
+
+        command_args = [configuration]
+
+        suites_yaml = {
+            'variables': self.variables,
+            'handler_configurations': {
+                configuration: handler_configuration
+            }
+        }
+        if cmd_inputs_override:
+            suites_yaml['inputs_override_templates'] = cmd_inputs_override
+            for name in cmd_inputs_override:
+                command_args += ['-i', name]
+        if cmd_blueprint_override:
+            suites_yaml['manager_blueprint_override_templates'] = (
+                cmd_blueprint_override)
+            for name in cmd_blueprint_override:
+                command_args += ['-b', name]
+
+        self.settings.user_suites_yaml.write_text(yaml.safe_dump(suites_yaml))
+
+        self.systest.generate(*command_args, reset=reset)
+
+        if inputs_override:
+            expected_inputs = (inputs or {}).copy()
+            expected_inputs.update(processed_inputs_override)
+            self.assertEqual(expected_inputs,
+                             yaml.safe_load(new_inputs_path.text()))
+
+        if blueprint_override:
+            expected_blueprint = blueprint.copy()
+            expected_blueprint.update(processed_blueprint_override)
+            self.assertEqual(expected_blueprint,
+                             yaml.safe_load(new_blueprint_path.text()))
+
+        expected_handler_configuration = handler_configuration.copy()
+        expected_handler_configuration.pop('inputs_override', {})
+        expected_handler_configuration.pop('manager_blueprint_override', {})
+        expected_handler_configuration.update({
+            'install_manager_blueprint_dependencies': False,
+            'manager_blueprint': new_blueprint_path,
+            'inputs': new_inputs_path
+        })
+        self.assertEqual(expected_handler_configuration,
+                         yaml.safe_load(handler_configuration_path.text()))
+        self.assertEqual((self.workdir / 'configurations' / '+').readlink(),
+                         configuration)

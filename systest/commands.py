@@ -99,6 +99,11 @@ def generate(configuration,
     suites_yaml = settings.load_suites_yaml()
     handler_configuration = suites_yaml[
         'handler_configurations'][configuration]
+    if 'inputs' not in handler_configuration:
+        tmp = tempfile.mktemp()
+        with open(tmp, 'w') as f:
+            f.write('{}')
+        handler_configuration['inputs'] = tmp
     if inputs_override:
         inputs_override = [suites_yaml['inputs_override_templates'][key]
                            for key in inputs_override]
