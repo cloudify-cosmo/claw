@@ -44,6 +44,7 @@ INIT_EXISTS = argh.CommandError('Configuration already exists. Use --reset'
                                 ' to overwrite.')
 NO_INIT = argh.CommandError('Not initialized')
 NO_BOOTSTRAP = argh.CommandError('Not bootstrapped')
+NO_SUCH_CONFIGURATION = argh.CommandError('No such configuration')
 STOP_DEPLOYMENT_ENVIRONMENT = '_stop_deployment_environment'
 
 
@@ -97,6 +98,9 @@ def generate(configuration,
              reset_config=False):
     conf = Configuration(configuration)
     suites_yaml = settings.load_suites_yaml()
+    handler_configurations = suites_yaml['handler_configurations']
+    if configuration not in handler_configurations:
+        raise NO_SUCH_CONFIGURATION
     handler_configuration = suites_yaml[
         'handler_configurations'][configuration]
     if 'inputs' not in handler_configuration:

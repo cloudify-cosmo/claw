@@ -109,6 +109,11 @@ class GenerateTest(tests.BaseTest):
                    cmd_blueprint_override=cmd_blueprint_override,
                    processed_blueprint_override=processed_blueprint_override)
 
+    def test_no_such_configuration(self):
+        with self.assertRaises(sh.ErrorReturnCode) as c:
+            self.systest.generate('no_such_configuration')
+        self.assertIn('No such configuration', c.exception.stderr)
+
     def test_existing_configuration_no_reset(self):
         with self.assertRaises(sh.ErrorReturnCode):
             self._test()

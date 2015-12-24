@@ -14,16 +14,27 @@
 # limitations under the License.
 ############
 
+import sh
+
 from systest import tests
 
 
 class BootstrapTest(tests.BaseTest):
 
+    def setUp(self):
+        super(BootstrapTest, self).setUp()
+        self.init()
+
+    def test_basic(self):
+        pass
+
+    def test_no_such_configuration(self):
+        with self.assertRaises(sh.ErrorReturnCode) as c:
+            self.systest.bootstrap('no_such_configuration')
+        self.assertIn('No such configuration', c.exception.stderr)
+
     def test_existing_configuration_no_reset(self):
         pass
 
     def test_existing_configuration_reset(self):
-        pass
-
-    def test_no_existing_configuration(self):
         pass

@@ -14,22 +14,21 @@
 # limitations under the License.
 ############
 
+import sh
+
 from systest import tests
 
 
 class TeardownTest(tests.BaseTest):
 
+    def setUp(self):
+        super(TeardownTest, self).setUp()
+        self.init()
+
     def test_basic(self):
         pass
 
-    def test_no_existing_configuration(self):
-        pass
-
-    def test_existing_blueprint_reset(self):
-        pass
-
-    def test_existing_blueprint_no_reset(self):
-        pass
-
-    def test_no_inputs_file(self):
-        pass
+    def test_no_configuration(self):
+        with self.assertRaises(sh.ErrorReturnCode) as c:
+            self.systest.teardown(tests.STUB_CONFIGURATION)
+        self.assertIn('Not initialized', c.exception.stderr)
