@@ -21,17 +21,12 @@ import yaml
 import fabric.api
 from path import path
 
-from systest import settings
 from systest import configuration
 from systest import tests
 from systest.handlers import stub_handler
 
 
 class TestConfiguration(tests.BaseTest):
-
-    def cleanup(self):
-        configuration.settings = settings.Settings()
-        super(TestConfiguration, self).cleanup()
 
     def test_init_from_dir(self):
         conf = configuration.Configuration(self.workdir)

@@ -25,6 +25,7 @@ from path import path
 import cosmo_tester
 
 from systest import settings
+from systest import configuration
 
 
 systest = sh.systest
@@ -49,6 +50,7 @@ class BaseTest(unittest.TestCase):
         self.systest = systest
 
     def cleanup(self):
+        configuration.settings = settings.Settings()
         shutil.rmtree(self.workdir, ignore_errors=True)
         os.environ.pop(settings.SYSTEST_SETTINGS, None)
 
