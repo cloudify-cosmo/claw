@@ -19,3 +19,9 @@ class Handler(object):
 
     def __init__(self, configuration):
         self.configuration = configuration
+
+    def cleanup(self):
+        pass
+
+    def clients(self):
+        return {}

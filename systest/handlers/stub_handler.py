@@ -18,4 +18,10 @@ from systest import handlers
 
 
 class Handler(handlers.Handler):
-    pass
+
+    def cleanup(self):
+        self.configuration.logger.info('Stub handler cleanup')
+
+    def clients(self):
+        self.configuration.logger.info('Stub handler clients')
+        return {}
