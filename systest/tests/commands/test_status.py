@@ -19,11 +19,7 @@ from systest import configuration
 from systest import tests
 
 
-class StatusTest(tests.BaseTest):
-
-    def setUp(self):
-        super(StatusTest, self).setUp()
-        self.init()
+class StatusTest(tests.BaseTestWithInit):
 
     def test_basic(self):
         # TODO

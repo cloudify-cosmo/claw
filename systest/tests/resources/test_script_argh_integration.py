@@ -14,17 +14,17 @@
 # limitations under the License.
 ############
 
-import sh
 
-from systest import tests
+import json
 
 
-class TeardownTest(tests.BaseTestWithInit):
-
-    def test_basic(self):
-        pass
-
-    def test_no_configuration(self):
-        with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.systest.teardown(tests.STUB_CONFIGURATION)
-        self.assertIn('Not initialized', c.exception.stderr)
+def script(arg1, arg2, str_kwarg='str', boolean_flag=False,
+           int_kwarg=3):
+    print json.dumps({
+        'args': [arg1, arg2],
+        'kwargs': {
+            'str_kwarg': str_kwarg,
+            'int_kwarg': int_kwarg,
+            'boolean_flag': boolean_flag
+        }
+    })

@@ -18,11 +18,10 @@ import sh
 from systest import tests
 
 
-class GenerateScriptTest(tests.BaseTest):
+class GenerateScriptTest(tests.BaseTestWithInit):
 
     def setUp(self):
         super(GenerateScriptTest, self).setUp()
-        self.init()
         self.systest.generate(tests.STUB_CONFIGURATION)
 
     def test_basic(self, rewrite=False):

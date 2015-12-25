@@ -14,17 +14,8 @@
 # limitations under the License.
 ############
 
-import sh
-
-from systest import tests
+import pkgutil
 
 
-class TeardownTest(tests.BaseTestWithInit):
-
-    def test_basic(self):
-        pass
-
-    def test_no_configuration(self):
-        with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.systest.teardown(tests.STUB_CONFIGURATION)
-        self.assertIn('Not initialized', c.exception.stderr)
+def get(resource):
+    return pkgutil.get_data(__package__, resource)

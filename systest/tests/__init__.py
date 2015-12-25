@@ -58,3 +58,10 @@ class BaseTest(unittest.TestCase):
         suites_yaml = suites_yaml or self.main_suites_yaml_path
         with self.workdir:
             self.systest.init(suites_yaml=suites_yaml)
+
+
+class BaseTestWithInit(BaseTest):
+
+    def setUp(self):
+        super(BaseTestWithInit, self).setUp()
+        self.init()

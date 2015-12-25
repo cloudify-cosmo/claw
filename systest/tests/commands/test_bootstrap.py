@@ -19,11 +19,7 @@ import sh
 from systest import tests
 
 
-class BootstrapTest(tests.BaseTest):
-
-    def setUp(self):
-        super(BootstrapTest, self).setUp()
-        self.init()
+class BootstrapTest(tests.BaseTestWithInit):
 
     def test_basic(self):
         pass

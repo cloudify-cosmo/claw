@@ -21,11 +21,10 @@ from systest import settings
 from systest import tests
 
 
-class GenerateTest(tests.BaseTest):
+class GenerateTest(tests.BaseTestWithInit):
 
     def setUp(self):
         super(GenerateTest, self).setUp()
-        self.init()
         self.settings = settings.Settings()
         self.inputs = {'some': 'input'}
         self.variables = {'a': 'AAA', 'b': 'BBB'}
