@@ -22,7 +22,7 @@ from systest import settings
 from systest import tests
 
 
-class GenerateBlueprintTest(tests.BaseTestWithInit):
+class GenerateBlueprintTest(tests.BaseTest):
 
     def setUp(self):
         super(GenerateBlueprintTest, self).setUp()
@@ -57,7 +57,12 @@ class GenerateBlueprintTest(tests.BaseTestWithInit):
                    processed_blueprint_override=processed_blueprint_override)
 
     def test_properties_in_variables(self):
-        pass
+        properties = {'some_property': 'some_value'}
+        inputs_override = {'override': 'inputs {{properties.some_property}}'}
+        processed_inputs_override = {'override': 'inputs some_value'}
+        self._test(inputs_override=inputs_override,
+                   processed_inputs_override=processed_inputs_override,
+                   properties=properties)
 
     def test_existing_blueprint_no_reset(self):
         self._test()
@@ -69,6 +74,7 @@ class GenerateBlueprintTest(tests.BaseTestWithInit):
         self._test(reset=True, skip_conf_generate=True)
 
     def test_no_configuration(self):
+        self.init()
         with self.assertRaises(sh.ErrorReturnCode) as c:
             self.systest('generate-blueprint', 'no_such_configuration',
                          tests.STUB_BLUEPRINT)
@@ -80,15 +86,27 @@ class GenerateBlueprintTest(tests.BaseTestWithInit):
               processed_inputs_override=None,
               blueprint_override=None,
               processed_blueprint_override=None,
-              blueprint_name=None,
+              properties=None,
               reset=False,
               skip_conf_generate=False):
-        blueprint_name = blueprint_name or 'blueprint1'
+        configuration_name = 'conf1'
+        blueprint_name = 'blueprint1'
+        properties_name = 'some_properties'
+
         if not skip_conf_generate:
-            self.systest.generate(tests.STUB_CONFIGURATION)
-        conf = configuration.Configuration(tests.STUB_CONFIGURATION)
+            main_suites_yaml = {
+                'handler_properties': {
+                    properties_name: properties or {}
+                }
+            }
+            main_suites_yaml_path = self.workdir / 'main-suites.yaml'
+            main_suites_yaml_path.write_text(yaml.safe_dump(main_suites_yaml))
+            self.init(main_suites_yaml_path)
+
+        conf = configuration.Configuration(configuration_name)
         blueprint_dir = self.workdir / 'blueprint'
         blueprint_dir.mkdir_p()
+        manager_blueprint_path = blueprint_dir / 'manager-blueprint.yaml'
         inputs_path = blueprint_dir / 'inputs.yaml'
         blueprint_path = blueprint_dir / 'some-blueprint.yaml'
         new_blueprint_dir = conf.dir / 'blueprints' / blueprint_name
@@ -98,11 +116,13 @@ class GenerateBlueprintTest(tests.BaseTestWithInit):
         blueprint_configuration_path = (new_blueprint_dir /
                                         'blueprint-configuration.yaml')
 
+        manager_blueprint = {'some': 'manager_blueprint'}
         blueprint = {'some_user': 'blueprint_content'}
 
         if inputs:
             inputs_path.write_text(yaml.safe_dump(inputs))
         blueprint_path.write_text(yaml.safe_dump(blueprint))
+        manager_blueprint_path.write_text(yaml.safe_dump(manager_blueprint))
 
         blueprint_configuration = {
             'blueprint': str(blueprint_path)
@@ -115,17 +135,27 @@ class GenerateBlueprintTest(tests.BaseTestWithInit):
         if blueprint_override:
             blueprint_configuration['blueprint_override'] = blueprint_override
 
+        user_suites_yaml = {
+            'handler_configurations': {
+                configuration_name: {
+                    'manager_blueprint': str(manager_blueprint_path),
+                    'properties': properties_name
+                }
+            }
+        }
         blueprints_yaml = {
             'variables': self.variables,
             'blueprints': {
                 blueprint_name: blueprint_configuration
             }
         }
-
         sett = settings.Settings()
+        sett.user_suites_yaml.write_text(yaml.safe_dump(user_suites_yaml))
         sett.blueprints_yaml.write_text(yaml.safe_dump(blueprints_yaml))
 
-        self.systest('generate-blueprint', tests.STUB_CONFIGURATION,
+        if not skip_conf_generate:
+            self.systest.generate(configuration_name)
+        self.systest('generate-blueprint', configuration_name,
                      blueprint_name, reset=reset)
 
         expected_inputs = (inputs or {}).copy()
