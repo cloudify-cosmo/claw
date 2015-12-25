@@ -25,7 +25,6 @@ class GenerateTest(tests.BaseTestWithInit):
 
     def setUp(self):
         super(GenerateTest, self).setUp()
-        self.settings = settings.Settings()
         self.inputs = {'some': 'input'}
         self.variables = {'a': 'AAA', 'b': 'BBB'}
 
@@ -114,8 +113,8 @@ class GenerateTest(tests.BaseTestWithInit):
         self.assertIn('No such configuration', c.exception.stderr)
 
     def test_existing_configuration_no_reset(self):
+        self._test()
         with self.assertRaises(sh.ErrorReturnCode):
-            self._test()
             self._test()
 
     def test_existing_configuration_reset(self):
@@ -140,7 +139,7 @@ class GenerateTest(tests.BaseTestWithInit):
         blueprint_dir = self.workdir / 'blueprint'
         blueprint_dir.mkdir_p()
         inputs_path = blueprint_dir / 'inputs.yaml'
-        blueprint_path = blueprint_dir / 'manager-blueprint.yaml'
+        blueprint_path = blueprint_dir / 'some-manager-blueprint.yaml'
 
         config_dir = self.workdir / 'configurations' / configuration
         new_inputs_path = config_dir / 'inputs.yaml'
@@ -185,21 +184,20 @@ class GenerateTest(tests.BaseTestWithInit):
             for name in cmd_blueprint_override:
                 command_args += ['-b', name]
 
-        self.settings.user_suites_yaml.write_text(yaml.safe_dump(suites_yaml))
+        sett = settings.Settings()
+        sett.user_suites_yaml.write_text(yaml.safe_dump(suites_yaml))
 
         self.systest.generate(*command_args, reset=reset)
 
-        if inputs_override:
-            expected_inputs = (inputs or {}).copy()
-            expected_inputs.update(processed_inputs_override)
-            self.assertEqual(expected_inputs,
-                             yaml.safe_load(new_inputs_path.text()))
+        expected_inputs = (inputs or {}).copy()
+        expected_inputs.update((processed_inputs_override or {}))
+        self.assertEqual(expected_inputs,
+                         yaml.safe_load(new_inputs_path.text()))
 
-        if blueprint_override:
-            expected_blueprint = blueprint.copy()
-            expected_blueprint.update(processed_blueprint_override)
-            self.assertEqual(expected_blueprint,
-                             yaml.safe_load(new_blueprint_path.text()))
+        expected_blueprint = blueprint.copy()
+        expected_blueprint.update((processed_blueprint_override or {}))
+        self.assertEqual(expected_blueprint,
+                         yaml.safe_load(new_blueprint_path.text()))
 
         expected_handler_configuration = handler_configuration.copy()
         expected_handler_configuration.pop('inputs_override', {})
@@ -211,5 +209,7 @@ class GenerateTest(tests.BaseTestWithInit):
         })
         self.assertEqual(expected_handler_configuration,
                          yaml.safe_load(handler_configuration_path.text()))
+        self.assertEqual(suites_yaml,
+                         yaml.safe_load(sett.user_suites_yaml.text()))
         self.assertEqual((self.workdir / 'configurations' / '+').readlink(),
                          configuration)

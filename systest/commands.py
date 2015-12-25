@@ -103,11 +103,6 @@ def generate(configuration,
         raise NO_SUCH_CONFIGURATION
     handler_configuration = suites_yaml[
         'handler_configurations'][configuration]
-    if 'inputs' not in handler_configuration:
-        tmp = tempfile.mktemp()
-        with open(tmp, 'w') as f:
-            f.write('{}')
-        handler_configuration['inputs'] = tmp
     if inputs_override:
         inputs_override = [suites_yaml['inputs_override_templates'][key]
                            for key in inputs_override]
@@ -115,12 +110,18 @@ def generate(configuration,
         manager_blueprint_override = [
             suites_yaml['manager_blueprint_override_templates'][key]
             for key in manager_blueprint_override]
-    original_inputs_path = os.path.expanduser(handler_configuration['inputs'])
+    original_inputs_path = os.path.expanduser(
+        handler_configuration.get('inputs', ''))
     original_manager_blueprint_path = os.path.expanduser(
         handler_configuration['manager_blueprint'])
     if reset_config and conf.dir.exists():
         shutil.rmtree(conf.dir)
     conf.dir.makedirs()
+
+    if not original_inputs_path:
+        _, original_inputs_path = tempfile.mkstemp()
+        with open(original_inputs_path, 'w') as f:
+            f.write('{}')
 
     _, manager_blueprint_path = util.generate_unique_configurations(
         workdir=conf.dir,
