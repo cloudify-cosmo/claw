@@ -18,11 +18,14 @@ import os
 import shutil
 import tempfile
 import unittest
+import multiprocessing
 
+import bottle
 import sh
 from path import path
 
 import cosmo_tester
+from cloudify.proxy.server import get_unused_port
 
 from systest import settings
 from systest import configuration
@@ -60,6 +63,17 @@ class BaseTest(unittest.TestCase):
             options['suites_yaml'] = suites_yaml
         with self.workdir:
             self.systest.init(**options)
+
+    def server(self, routes):
+        port = get_unused_port()
+        app = bottle.app()
+        for route, handler in routes.items():
+            app.route(route)(handler)
+        p = multiprocessing.Process(target=lambda: app.run(port=port,
+                                                           quiet=True))
+        p.start()
+        self.addCleanup(lambda: (p.terminate(), p.join()))
+        return port
 
 
 class BaseTestWithInit(BaseTest):

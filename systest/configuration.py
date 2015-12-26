@@ -124,7 +124,8 @@ class Configuration(object):
     def client(self):
         handler_configuration = self.handler_configuration
         manager_ip = handler_configuration.get('manager_ip', 'localhost')
-        return cloudify_rest_client.CloudifyClient(manager_ip)
+        manager_port = handler_configuration.get('manager_port', 80)
+        return cloudify_rest_client.CloudifyClient(manager_ip, manager_port)
 
     @property
     def systest_handler(self):

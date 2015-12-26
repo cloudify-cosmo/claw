@@ -13,7 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ############
+
 import sh
+
+from cloudify_rest_client.client import DEFAULT_API_VERSION
 
 from systest import configuration
 from systest import tests
@@ -22,8 +25,16 @@ from systest import tests
 class StatusTest(tests.BaseTestWithInit):
 
     def test_basic(self):
-        # TODO
-        pass
+        test_version = 'TEST_VERSION'
+        route = '/api/{0}/version'.format(DEFAULT_API_VERSION)
+        port = self.server({route: lambda: {'version': test_version}})
+        self.systest.generate(tests.STUB_CONFIGURATION)
+        conf = configuration.Configuration(tests.STUB_CONFIGURATION)
+        with conf.patch.handler_configuration as patch:
+            patch.set_value('manager_ip', 'localhost')
+            patch.set_value('manager_port', port)
+        output = self.systest.status(tests.STUB_CONFIGURATION).stdout
+        self.assertIn(test_version, output)
 
     def test_no_configuration(self):
         with self.assertRaises(sh.ErrorReturnCode) as c:

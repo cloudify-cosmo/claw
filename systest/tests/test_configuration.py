@@ -153,9 +153,16 @@ class TestConfiguration(tests.BaseTest):
         conf = self._init_configuration()
         self.assertEqual(conf.client._client.host, 'localhost')
         ip = '1.1.1.1'
+        default_port = 80
+        custom_port = 12345
         with conf.patch.handler_configuration as patch:
             patch.obj['manager_ip'] = ip
         self.assertEqual(conf.client._client.host, ip)
+        self.assertEqual(conf.client._client.port, default_port)
+        with conf.patch.handler_configuration as patch:
+            patch.obj['manager_port'] = custom_port
+        self.assertEqual(conf.client._client.host, ip)
+        self.assertEqual(conf.client._client.port, custom_port)
 
     def test_systest_handler(self):
         conf = self._init_configuration()
