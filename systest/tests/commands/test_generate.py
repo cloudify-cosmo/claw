@@ -114,8 +114,9 @@ class GenerateTest(tests.BaseTestWithInit):
 
     def test_existing_configuration_no_reset(self):
         self._test()
-        with self.assertRaises(sh.ErrorReturnCode):
+        with self.assertRaises(sh.ErrorReturnCode) as c:
             self._test()
+        self.assertIn('Already initialized', c.exception.stderr)
 
     def test_existing_configuration_reset(self):
         self._test()

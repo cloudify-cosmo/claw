@@ -44,6 +44,7 @@ from systest import overview as _overview
 INIT_EXISTS = argh.CommandError('Configuration already exists. Use --reset'
                                 ' to overwrite.')
 NO_INIT = argh.CommandError('Not initialized')
+ALREADY_INITIALIZED = argh.CommandError('Already initialized')
 NO_BOOTSTRAP = argh.CommandError('Not bootstrapped')
 NO_SUCH_CONFIGURATION = argh.CommandError('No such configuration')
 STOP_DEPLOYMENT_ENVIRONMENT = '_stop_deployment_environment'
@@ -111,7 +112,7 @@ def generate(configuration,
         blueprint_dir_name='manager-blueprint',
         blueprint_override_key='manager_blueprint_override',
         blueprint_override_template_key='manager_blueprint_override_templates',
-        blueprint_path_attribute='manager_blueprint_path',
+        blueprint_path=conf.manager_blueprint_path,
         reset_conf=reset_config,
         properties=None,
         user_yaml=suites_yaml)
@@ -141,7 +142,7 @@ def generate_blueprint(configuration, blueprint, reset=False):
         blueprint_dir_name='blueprint',
         blueprint_override_key='blueprint_override',
         blueprint_override_template_key=None,
-        blueprint_path_attribute='blueprint_path',
+        blueprint_path=blueprint.blueprint_path,
         reset_conf=reset,
         properties=conf.properties,
         user_yaml=blueprints_yaml)
@@ -157,57 +158,54 @@ def _generate_configuration(cmd_inputs_override,
                             blueprint_dir_name,
                             blueprint_override_key,
                             blueprint_override_template_key,
-                            blueprint_path_attribute,
+                            blueprint_path,
                             reset_conf,
                             properties,
                             user_yaml):
     if conf_name not in user_yaml[conf_key]:
         raise NO_SUCH_CONFIGURATION
-    configuration = user_yaml[conf_key][conf_name]
+    conf = user_yaml[conf_key][conf_name]
     cmd_inputs_override = [user_yaml['inputs_override_templates'][key]
                            for key in (cmd_inputs_override or [])]
     cmd_blueprint_override = [user_yaml[blueprint_override_template_key][key]
                               for key in (cmd_blueprint_override or [])]
-    original_inputs_path = os.path.expanduser(configuration.get('inputs', ''))
-    original_blueprint_path = os.path.expanduser(
-        configuration[conf_blueprint_key])
-    if reset_conf and conf_obj.dir.exists():
-        shutil.rmtree(conf_obj.dir)
+    original_inputs_path = os.path.expanduser(conf.get('inputs', ''))
+    original_blueprint_path = os.path.expanduser(conf[conf_blueprint_key])
+    if conf_obj.exists():
+        if reset_conf:
+            shutil.rmtree(conf_obj.dir)
+        else:
+            raise ALREADY_INITIALIZED
     conf_obj.dir.makedirs()
     if not original_inputs_path:
-        _, original_inputs_path = tempfile.mkstemp()
+        fd, original_inputs_path = tempfile.mkstemp()
+        os.close(fd)
         with open(original_inputs_path, 'w') as f:
             f.write('{}')
-    _, blueprint_path = util.generate_unique_configurations(
+    _, tmp_blueprint_path = util.generate_unique_configurations(
         workdir=conf_obj.dir,
         original_inputs_path=original_inputs_path,
         original_manager_blueprint_path=original_blueprint_path,
         manager_blueprint_dir_name=blueprint_dir_name)
-    shutil.move(blueprint_path, getattr(conf_obj, blueprint_path_attribute))
-    configuration['inputs'] = str(conf_obj.inputs_path)
-    configuration[conf_blueprint_key] = str(getattr(conf_obj,
-                                                    blueprint_path_attribute))
-    configuration.update(conf_additional or {})
-    user_yaml.get('variables', {})['properties'] = properties or {}
-
-    def apply_override_and_remove_prop(yaml_path, prop, additional_overrides):
+    shutil.move(tmp_blueprint_path, blueprint_path)
+    conf['inputs'] = str(conf_obj.inputs_path)
+    conf[conf_blueprint_key] = str(blueprint_path)
+    conf.update(conf_additional or {})
+    user_yaml['variables'] = user_yaml.get('variables', {})
+    user_yaml['variables']['properties'] = properties or {}
+    overrides = [
+        (conf_obj.inputs_path, 'inputs_override', cmd_inputs_override),
+        (blueprint_path, blueprint_override_key, cmd_blueprint_override)
+    ]
+    for yaml_path, prop, additional_overrides in overrides:
+        unprocessed = conf.pop(prop, {})
+        for additional in additional_overrides:
+            unprocessed.update(additional)
+        override = util.process_variables(user_yaml, unprocessed)
         with patcher.YamlPatcher(yaml_path, default_flow_style=False) as patch:
-            additional_overrides = additional_overrides or []
-            unprocessed = configuration.get(prop, {})
-            for additional in additional_overrides:
-                unprocessed.update(additional)
-            override = util.process_variables(user_yaml, unprocessed)
             for k, v in override.items():
                 patch.set_value(k, v)
-        if prop in configuration:
-            del configuration[prop]
-    apply_override_and_remove_prop(conf_obj.inputs_path,
-                                   'inputs_override',
-                                   cmd_inputs_override)
-    apply_override_and_remove_prop(getattr(conf_obj, blueprint_path_attribute),
-                                   blueprint_override_key,
-                                   cmd_blueprint_override)
-    return configuration
+    return conf
 
 
 @command

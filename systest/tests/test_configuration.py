@@ -52,6 +52,11 @@ class TestConfiguration(tests.BaseTest):
         self.systest.generate(tests.STUB_CONFIGURATION)
         conf = configuration.Configuration(tests.STUB_CONFIGURATION)
         self.assertTrue(conf.exists())
+        blueprint = conf.blueprint(tests.STUB_BLUEPRINT)
+        self.assertFalse(blueprint.exists())
+        self.systest('generate-blueprint', tests.STUB_CONFIGURATION,
+                     tests.STUB_BLUEPRINT)
+        self.assertTrue(blueprint.exists())
 
     def test_configuration_properties(self):
         conf, blueprint = self._init_configuration_and_blueprint()

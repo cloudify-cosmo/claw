@@ -177,6 +177,9 @@ class Blueprint(object):
         self.blueprint_name = blueprint
         self.configuration = configuration
 
+    def exists(self):
+        return self.inputs_path.exists()
+
     @property
     def dir(self):
         return self.configuration.blueprints_dir / self.blueprint_name
