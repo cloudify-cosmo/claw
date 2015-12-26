@@ -16,13 +16,19 @@
 
 import sh
 
+from systest import configuration
 from systest import tests
+from systest.tests.commands.test_bootstrap import BaseBootstrapTest
 
 
-class TeardownTest(tests.BaseTestWithInit):
+class TeardownTest(BaseBootstrapTest):
 
     def test_basic(self):
-        pass
+        configuration_name = self._test()
+        conf = configuration.Configuration(configuration_name)
+        self.systest.teardown(configuration_name)
+        self.assertEqual('delete invoked',
+                         (conf.dir / 'delete.output').text())
 
     def test_no_configuration(self):
         with self.assertRaises(sh.ErrorReturnCode) as c:

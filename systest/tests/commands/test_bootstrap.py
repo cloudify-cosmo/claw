@@ -24,24 +24,7 @@ from systest import tests
 from systest.tests import resources
 
 
-class BootstrapTest(tests.BaseTestWithInit):
-
-    def test_basic(self):
-        self._test()
-
-    def test_existing_configuration_no_reset(self):
-        self._test()
-        with self.assertRaises(sh.ErrorReturnCode):
-            self._test()
-
-    def test_existing_configuration_reset(self):
-        self._test()
-        self._test(reset=True)
-
-    def test_no_such_configuration(self):
-        with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.systest.bootstrap('no_such_configuration')
-        self.assertIn('No such configuration', c.exception.stderr)
+class BaseBootstrapTest(tests.BaseTestWithInit):
 
     def _test(self, reset=False):
         user = 'my_user'
@@ -92,3 +75,24 @@ class BootstrapTest(tests.BaseTestWithInit):
         self.assertEqual(conf.handler_configuration['manager_ip'], ip)
         self.assertEqual(conf.handler_configuration['manager_user'], user)
         self.assertEqual(conf.handler_configuration['manager_key'], key)
+        return configuration_name
+
+
+class BootstrapTest(BaseBootstrapTest):
+
+    def test_basic(self):
+        self._test()
+
+    def test_existing_configuration_no_reset(self):
+        self._test()
+        with self.assertRaises(sh.ErrorReturnCode):
+            self._test()
+
+    def test_existing_configuration_reset(self):
+        self._test()
+        self._test(reset=True)
+
+    def test_no_such_configuration(self):
+        with self.assertRaises(sh.ErrorReturnCode) as c:
+            self.systest.bootstrap('no_such_configuration')
+        self.assertIn('No such configuration', c.exception.stderr)

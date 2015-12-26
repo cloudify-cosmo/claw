@@ -51,3 +51,6 @@ node_templates:
           executor: central_deployment_agent
           # filled by test
           # implementation: configure.py
+        delete:
+          executor: central_deployment_agent
+          implementation: delete.py
