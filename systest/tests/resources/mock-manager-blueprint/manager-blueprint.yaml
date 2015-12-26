@@ -1,0 +1,53 @@
+########
+# Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+############
+
+tosca_definitions_version: cloudify_dsl_1_2
+
+imports:
+  - http://www.getcloudify.org/spec/cloudify/3.3.1/types.yaml
+
+inputs:
+  user: {}
+  key_filename: {}
+  rest_port: {}
+  ip: {}
+
+node_types:
+  cloudify.nodes.MyCloudifyManager:
+    derived_from: cloudify.nodes.Root
+    properties:
+      ssh_user: {}
+      ssh_key_filename: {}
+      rest_port: {}
+      ip: {}
+      cloudify: {}
+
+node_templates:
+  manager_configuration:
+    type: filled by test
+    properties:
+      ssh_user: { get_input: user }
+      ssh_key_filename: { get_input: key_filename }
+      rest_port: { get_input: rest_port }
+      ip: { get_input: ip }
+      cloudify:
+        cloudify_agent: {}
+    interfaces:
+      cloudify.interfaces.lifecycle:
+        configure:
+          executor: central_deployment_agent
+          # filled by test
+          # implementation: configure.py

@@ -14,11 +14,22 @@
 # limitations under the License.
 ############
 
-import os
-import pkgutil
+import fabric.api
+
+from cloudify import ctx
 
 
-def get(resource):
-    return pkgutil.get_data(__package__, resource)
+def stub(*args, **kwargs):
+    pass
 
-DIR = os.path.dirname(__file__)
+fabric.api.put = stub
+fabric.api.run = stub
+
+props = ctx.node.properties
+ctx.instance.runtime_properties.update({
+    'rest_port': props['rest_port'],
+    'manager_ip': props['ip'],
+    'manager_user': props['ssh_user'],
+    'manager_key_path': props['ssh_key_filename'],
+    'provider': {'some': 'key'}
+})

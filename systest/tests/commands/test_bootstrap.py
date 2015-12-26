@@ -15,22 +15,80 @@
 ############
 
 import sh
+import yaml
+from path import path
 
+from systest import settings
+from systest import configuration
 from systest import tests
+from systest.tests import resources
 
 
 class BootstrapTest(tests.BaseTestWithInit):
 
     def test_basic(self):
-        pass
+        self._test()
+
+    def test_existing_configuration_no_reset(self):
+        self._test()
+        with self.assertRaises(sh.ErrorReturnCode):
+            self._test()
+
+    def test_existing_configuration_reset(self):
+        self._test()
+        self._test(reset=True)
 
     def test_no_such_configuration(self):
         with self.assertRaises(sh.ErrorReturnCode) as c:
             self.systest.bootstrap('no_such_configuration')
         self.assertIn('No such configuration', c.exception.stderr)
 
-    def test_existing_configuration_no_reset(self):
-        pass
-
-    def test_existing_configuration_reset(self):
-        pass
+    def _test(self, reset=False):
+        user = 'my_user'
+        ip = 'my_host'
+        key = 'my_key'
+        configuration_name = 'conf'
+        blueprint_dir = path(resources.DIR) / 'mock-manager-blueprint'
+        blueprint_path = blueprint_dir / 'manager-blueprint.yaml'
+        handler_configuration = {
+            'manager_blueprint': str(blueprint_path)
+        }
+        suites_yaml = {
+            'manager_blueprint_override_templates': {
+                'mock_blueprint1': {
+                    'node_templates.manager_configuration.type':
+                        'cloudify.nodes.MyCloudifyManager'
+                },
+                'mock_blueprint2': {
+                    'node_templates.manager_configuration.interfaces.'
+                    'cloudify\.interfaces\.lifecycle.configure.implementation':
+                        'configure.py'
+                }
+            },
+            'inputs_override_templates': {
+                'mock_inputs1': {
+                    'user': user,
+                    'key_filename': key,
+                },
+                'mock_inputs2': {
+                    'ip': ip,
+                    'rest_port': 80
+                }
+            },
+            'handler_configurations': {
+                configuration_name: handler_configuration
+            }
+        }
+        sett = settings.Settings()
+        sett.user_suites_yaml.write_text(yaml.safe_dump(suites_yaml))
+        self.systest.bootstrap(configuration_name,
+                               '-i', 'mock_inputs1',
+                               '-i', 'mock_inputs2',
+                               '-b', 'mock_blueprint1',
+                               '-b', 'mock_blueprint2',
+                               reset_config=reset)
+        conf = configuration.Configuration(configuration_name)
+        self.assertTrue(conf.cli_config['colors'])
+        self.assertEqual(conf.handler_configuration['manager_ip'], ip)
+        self.assertEqual(conf.handler_configuration['manager_user'], user)
+        self.assertEqual(conf.handler_configuration['manager_key'], key)
