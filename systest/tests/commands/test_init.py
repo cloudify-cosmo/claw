@@ -15,9 +15,6 @@
 ############
 
 import sh
-from path import path
-
-import cosmo_tester
 
 from systest import resources
 from systest import settings
@@ -32,8 +29,7 @@ class InitTest(tests.BaseTest):
 
     def test_basic(self, reset=False):
         with self.workdir:
-            self.systest.init(suites_yaml=self.main_suites_yaml_path,
-                              reset=reset)
+            self.systest.init(reset=reset)
         self._verify_init(expected_basedir=self.workdir,
                           expected_suites_yaml=self.main_suites_yaml_path)
 
@@ -46,20 +42,17 @@ class InitTest(tests.BaseTest):
         self.test_basic()
         self.test_basic(reset=True)
 
-    def test_suites_yaml_points_to_system_tests_dir(self):
-        suites_yaml = path(cosmo_tester.__file__).dirname().dirname()
+    def test_explicit_suites_yaml(self):
+        suites_yaml = self.workdir / 'main-suites.yaml'
+        suites_yaml.touch()
         with self.workdir:
             self.systest.init(suites_yaml=suites_yaml)
         self._verify_init(expected_basedir=self.workdir,
-                          expected_suites_yaml=self.main_suites_yaml_path)
-
-    def test_missing_suites_yaml_argument(self):
-        with self.assertRaises(sh.ErrorReturnCode):
-            self.systest.init()
+                          expected_suites_yaml=suites_yaml)
 
     def test_suites_yaml_does_not_exist(self):
-        # sanity
         with self.workdir:
+            # sanity
             self.systest.init(suites_yaml=self.main_suites_yaml_path)
             with self.assertRaises(sh.ErrorReturnCode):
                 self.systest.init(

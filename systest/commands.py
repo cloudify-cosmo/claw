@@ -26,6 +26,7 @@ import sh
 import requests
 from argh.decorators import arg
 
+import cosmo_tester
 from cloudify_cli import exec_env
 from cloudify_cli.execution_events_fetcher import ExecutionEventsFetcher
 from cloudify_cli.utils import load_cloudify_working_dir_settings
@@ -61,16 +62,17 @@ completion = Completion(settings)
 
 
 @command
-@arg('-s', '--suites-yaml', required=True)
 def init(suites_yaml=None,
          basedir=None,
          reset=False):
     if settings.settings_path.exists() and not reset:
         raise INIT_EXISTS
-    suites_yaml = os.path.expanduser(suites_yaml)
-    if os.path.isdir(suites_yaml):
-        suites_yaml = os.path.join(suites_yaml, 'suites', 'suites',
+    if not suites_yaml:
+        system_tests_dir = os.path.dirname(os.path.dirname(
+            cosmo_tester.__file__))
+        suites_yaml = os.path.join(system_tests_dir, 'suites', 'suites',
                                    'suites.yaml')
+    suites_yaml = os.path.expanduser(suites_yaml)
     if not os.path.exists(suites_yaml):
         raise argh.CommandError(
             'suites.yaml not found at {0}'.format(suites_yaml))

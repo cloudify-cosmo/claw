@@ -55,9 +55,11 @@ class BaseTest(unittest.TestCase):
         os.environ.pop(settings.SYSTEST_SETTINGS, None)
 
     def init(self, suites_yaml=None):
-        suites_yaml = suites_yaml or self.main_suites_yaml_path
+        options = {}
+        if suites_yaml:
+            options['suites_yaml'] = suites_yaml
         with self.workdir:
-            self.systest.init(suites_yaml=suites_yaml)
+            self.systest.init(**options)
 
 
 class BaseTestWithInit(BaseTest):
