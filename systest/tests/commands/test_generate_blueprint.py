@@ -64,6 +64,14 @@ class GenerateBlueprintTest(tests.BaseTest):
                    processed_inputs_override=processed_inputs_override,
                    properties=properties)
 
+    def test_no_such_configuration(self):
+        self.init()
+        self.systest.generate(tests.STUB_CONFIGURATION)
+        with self.assertRaises(sh.ErrorReturnCode) as c:
+            self.systest('generate-blueprint', tests.STUB_CONFIGURATION,
+                         'no_such_configuration')
+        self.assertIn('No such configuration', c.exception.stderr)
+
     def test_existing_blueprint_no_reset(self):
         self._test()
         with self.assertRaises(sh.ErrorReturnCode):
