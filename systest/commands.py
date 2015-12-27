@@ -215,7 +215,7 @@ def _generate_configuration(cmd_inputs_override,
 @command
 @arg('configuration', completer=completion.existing_configurations)
 def status(configuration):
-    """See the status a environment specified by a configuration."""
+    """See the status of an environment specified by a configuration."""
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -242,7 +242,7 @@ def bootstrap(configuration,
               inputs_override=None,
               manager_blueprint_override=None,
               reset_config=False):
-    """Bootstrap based on a configuration."""
+    """Bootstrap a configuration based environment."""
     conf = Configuration(configuration)
     if not conf.exists() or reset_config:
         generate(configuration,
@@ -267,7 +267,7 @@ def bootstrap(configuration,
 @command
 @arg('configuration', completer=completion.existing_configurations)
 def teardown(configuration):
-    """Teardown configuration based environment."""
+    """Teardown a configuration based environment."""
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -406,7 +406,7 @@ def events(configuration,
            include_logs=False,
            timeout=3600):
     """Dump events of an execution in a configuration based environment in
-       json format"""
+       json format."""
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -441,7 +441,7 @@ def events(configuration,
 @arg('script_args', nargs='...')
 def script(configuration, script_path, script_args):
     """Run a script managed by systest with the provided configuration
-       as context"""
+       as context."""
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -473,7 +473,7 @@ def script(configuration, script_path, script_args):
 
 @command
 def generate_script(script_path, rewrite=False):
-    """Generate a scaffold script"""
+    """Generate a scaffold script."""
     if os.path.exists(script_path) and not rewrite:
         raise argh.CommandError('{0} already exists'.format(script_path))
     with open(script_path, 'w') as f:

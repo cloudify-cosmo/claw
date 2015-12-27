@@ -19,6 +19,7 @@ import sys
 from StringIO import StringIO
 
 import argh
+import argh.utils
 
 from systest import configuration
 from systest import commands
@@ -34,6 +35,8 @@ def main():
             sys.exit('error: {0}'.format(e))
     else:
         parser = argh.ArghParser()
+        subparsers_action = argh.utils.get_subparsers(parser, create=True)
+        subparsers_action.metavar = ''
         parser.add_commands(commands.app.commands)
         errors = StringIO()
         parser.dispatch(errors_file=errors)
