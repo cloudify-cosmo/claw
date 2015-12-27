@@ -66,6 +66,8 @@ completion = Completion(settings)
 def init(suites_yaml=None,
          basedir=None,
          reset=False):
+    """Initialize a systest environment.
+    """
     if settings.settings_path.exists() and not reset:
         raise INIT_EXISTS
     if not suites_yaml:
@@ -99,6 +101,7 @@ def generate(configuration,
              inputs_override=None,
              manager_blueprint_override=None,
              reset_config=False):
+    """Generate a configuration."""
     conf = Configuration(configuration)
     suites_yaml = settings.load_suites_yaml()
     conf.handler_configuration = _generate_configuration(
@@ -126,6 +129,7 @@ def generate(configuration,
 @arg('configuration', completer=completion.existing_configurations)
 @arg('blueprint', completer=completion.all_blueprints)
 def generate_blueprint(configuration, blueprint, reset=False):
+    """Generate a blueprint inside a configuration."""
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -211,6 +215,7 @@ def _generate_configuration(cmd_inputs_override,
 @command
 @arg('configuration', completer=completion.existing_configurations)
 def status(configuration):
+    """See the status a environment specified by a configuration."""
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -237,6 +242,7 @@ def bootstrap(configuration,
               inputs_override=None,
               manager_blueprint_override=None,
               reset_config=False):
+    """Bootstrap based on a configuration."""
     conf = Configuration(configuration)
     if not conf.exists() or reset_config:
         generate(configuration,
@@ -261,6 +267,7 @@ def bootstrap(configuration,
 @command
 @arg('configuration', completer=completion.existing_configurations)
 def teardown(configuration):
+    """Teardown configuration based environment."""
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -275,6 +282,8 @@ def deploy(configuration, blueprint,
            skip_generation=False,
            reset=False,
            timeout=1800):
+    """Deploy (upload, create deployment and install) a blueprint
+       in a configuration based environment."""
     conf = Configuration(configuration)
     if not conf.dir.isdir():
         raise NO_INIT
@@ -297,12 +306,16 @@ def deploy(configuration, blueprint,
 @arg('configuration', completer=completion.existing_configurations)
 @arg('blueprint', completer=completion.all_blueprints)
 def undeploy(configuration, blueprint, cancel_executions=False):
+    """Undeploy (uninstall, delete deployment and delete blueprint in a
+       configuration based environment."""
     _cleanup_deployments(configuration, cancel_executions, blueprint)
 
 
 @command
 @arg('configuration', completer=completion.existing_configurations)
 def cleanup_deployments(configuration, cancel_executions=False):
+    """Uninstall and delete all deployments and blueprints in an
+       environment."""
     _cleanup_deployments(configuration, cancel_executions)
 
 
@@ -361,6 +374,7 @@ def _wait_for_executions(conf, deployment_id, cancel_executions):
 @command
 @arg('configuration', completer=completion.all_configurations)
 def cleanup(configuration):
+    """Clean all infrastructure in a configuration based environment."""
     conf = Configuration(configuration)
     temp_configuration = False
     if not conf.exists():
@@ -376,6 +390,7 @@ def cleanup(configuration):
 @command
 @arg('configuration', completer=completion.existing_configurations)
 def overview(configuration, port=8080):
+    """Work in progress."""
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -390,6 +405,8 @@ def events(configuration,
            batch_size=1000,
            include_logs=False,
            timeout=3600):
+    """Dump events of an execution in a configuration based environment in
+       json format"""
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -423,6 +440,8 @@ def events(configuration,
 @arg('script_path', completer=completion.script_paths)
 @arg('script_args', nargs='...')
 def script(configuration, script_path, script_args):
+    """Run a script managed by systest with the provided configuration
+       as context"""
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
@@ -454,6 +473,7 @@ def script(configuration, script_path, script_args):
 
 @command
 def generate_script(script_path, rewrite=False):
+    """Generate a scaffold script"""
     if os.path.exists(script_path) and not rewrite:
         raise argh.CommandError('{0} already exists'.format(script_path))
     with open(script_path, 'w') as f:
