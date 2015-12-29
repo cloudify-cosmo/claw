@@ -18,7 +18,6 @@ import sh
 import yaml
 from path import path
 
-from claw import settings
 from claw import configuration
 from claw import tests
 from claw.tests import resources
@@ -62,8 +61,7 @@ class BaseBootstrapTest(tests.BaseTestWithInit):
                 configuration_name: handler_configuration
             }
         }
-        sett = settings.Settings()
-        sett.user_suites_yaml.write_text(yaml.safe_dump(suites_yaml))
+        self.settings.user_suites_yaml.write_text(yaml.safe_dump(suites_yaml))
         self.claw.bootstrap(configuration_name,
                             '-i', 'mock_inputs1',
                             '-i', 'mock_inputs2',

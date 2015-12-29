@@ -17,7 +17,6 @@
 import sh
 import yaml
 
-from claw import settings
 from claw import tests
 
 
@@ -185,8 +184,7 @@ class GenerateTest(tests.BaseTestWithInit):
             for name in cmd_blueprint_override:
                 command_args += ['-b', name]
 
-        sett = settings.Settings()
-        sett.user_suites_yaml.write_text(yaml.safe_dump(suites_yaml))
+        self.settings.user_suites_yaml.write_text(yaml.safe_dump(suites_yaml))
 
         self.claw.generate(*command_args, reset=reset)
 
@@ -211,6 +209,6 @@ class GenerateTest(tests.BaseTestWithInit):
         self.assertEqual(expected_handler_configuration,
                          yaml.safe_load(handler_configuration_path.text()))
         self.assertEqual(suites_yaml,
-                         yaml.safe_load(sett.user_suites_yaml.text()))
+                         yaml.safe_load(self.settings.user_suites_yaml.text()))
         self.assertEqual((self.workdir / 'configurations' / '+').readlink(),
                          configuration)

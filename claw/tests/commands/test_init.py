@@ -17,15 +17,10 @@
 import sh
 
 from claw import resources
-from claw import settings
 from claw import tests
 
 
 class InitTest(tests.BaseTest):
-
-    def setUp(self):
-        super(InitTest, self).setUp()
-        self.settings = settings.Settings()
 
     def test_basic(self, reset=False):
         with self.workdir:

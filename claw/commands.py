@@ -36,8 +36,8 @@ from claw import patcher
 from claw import resources
 from claw.state import current_configuration
 from claw.configuration import Configuration, CURRENT_CONFIGURATION
-from claw.settings import Settings
-from claw.completion import Completion
+from claw.settings import settings
+from claw.completion import completion
 from claw import overview as _overview
 
 
@@ -58,8 +58,6 @@ def bake(cmd):
 app = argh.EntryPoint('claw')
 command = app
 cfy = bake(sh.cfy)
-settings = Settings()
-completion = Completion(settings)
 
 
 @command

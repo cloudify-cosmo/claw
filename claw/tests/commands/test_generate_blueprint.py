@@ -18,7 +18,6 @@ import sh
 import yaml
 
 from claw import configuration
-from claw import settings
 from claw import tests
 
 
@@ -158,9 +157,10 @@ class GenerateBlueprintTest(tests.BaseTest):
                 blueprint_name: blueprint_configuration
             }
         }
-        sett = settings.Settings()
-        sett.user_suites_yaml.write_text(yaml.safe_dump(user_suites_yaml))
-        sett.blueprints_yaml.write_text(yaml.safe_dump(blueprints_yaml))
+        self.settings.user_suites_yaml.write_text(
+            yaml.safe_dump(user_suites_yaml))
+        self.settings.blueprints_yaml.write_text(
+            yaml.safe_dump(blueprints_yaml))
 
         if not skip_conf_generate:
             self.claw.generate(configuration_name)
@@ -187,4 +187,4 @@ class GenerateBlueprintTest(tests.BaseTest):
         self.assertEqual(expected_blueprint_configuration,
                          yaml.safe_load(blueprint_configuration_path.text()))
         self.assertEqual(blueprints_yaml,
-                         yaml.safe_load(sett.blueprints_yaml.text()))
+                         yaml.safe_load(self.settings.blueprints_yaml.text()))

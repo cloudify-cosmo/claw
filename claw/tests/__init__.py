@@ -40,13 +40,12 @@ class BaseTest(unittest.TestCase):
     def setUp(self):
         self.workdir = path(tempfile.mkdtemp(prefix='claw-tests-'))
         self.settings_path = self.workdir / 'settings'
+        self.settings = settings.Settings()
         os.environ[settings.CLAW_SETTINGS] = str(self.settings_path)
         self.addCleanup(self.cleanup)
-
         system_tests_dir = path(cosmo_tester.__file__).dirname().dirname()
         self.main_suites_yaml_path = (system_tests_dir / 'suites' / 'suites' /
                                       'suites.yaml')
-
         self.claw = sh.claw
 
     def cleanup(self):

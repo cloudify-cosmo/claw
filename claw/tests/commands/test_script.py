@@ -19,7 +19,6 @@ import json
 import sh
 
 from claw import patcher
-from claw import settings
 from claw import tests
 from claw.tests import resources
 
@@ -48,8 +47,7 @@ class ScriptTest(tests.BaseTestWithInit):
     def test_script_in_script_dirs(self):
         scripts_dir = self.workdir / 'scripts'
         scripts_dir.mkdir()
-        sett = settings.Settings()
-        with patcher.YamlPatcher(sett.settings_path) as patch:
+        with patcher.YamlPatcher(self.settings.settings_path) as patch:
             patch.obj['scripts'] = [str(scripts_dir)]
         value = 'VALUE'
         script = "def script(): print '{}'".format(value)

@@ -16,7 +16,6 @@
 
 import sh
 
-from claw import settings as _settings
 from claw import patcher
 from claw import commands
 from claw import tests
@@ -32,10 +31,9 @@ class TestCompletion(tests.BaseTest):
             (self.scripts_dir / 'script{0}.py'.format(i)).touch()
         self.scripts = [f.basename() for f in self.scripts_dir.files()]
         self.init()
-        settings = _settings.Settings()
-        with patcher.YamlPatcher(settings.settings_path) as patch:
+        with patcher.YamlPatcher(self.settings.settings_path) as patch:
             patch.obj['scripts'] = [str(self.scripts_dir)]
-        with patcher.YamlPatcher(settings.user_suites_yaml) as patch:
+        with patcher.YamlPatcher(self.settings.user_suites_yaml) as patch:
             obj = patch.obj
             stub = obj['handler_configurations'][tests.STUB_CONFIGURATION]
             configs = {'conf{0}'.format(i): stub for i in range(3)}
@@ -44,7 +42,7 @@ class TestCompletion(tests.BaseTest):
         self.inputs_templates = obj['inputs_override_templates'].keys()
         self.manager_blueprint_templates = obj[
             'manager_blueprint_override_templates'].keys()
-        with patcher.YamlPatcher(settings.blueprints_yaml) as patch:
+        with patcher.YamlPatcher(self.settings.blueprints_yaml) as patch:
             obj = patch.obj
             stub = obj['blueprints'][tests.STUB_BLUEPRINT]
             blueprints = {'blue{0}'.format(i): stub for i in range(3)}

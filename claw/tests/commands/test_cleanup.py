@@ -16,7 +16,6 @@
 
 from claw import tests
 from claw import patcher
-from claw import settings
 from claw import configuration
 
 
@@ -24,8 +23,7 @@ class CleanupTest(tests.BaseTestWithInit):
 
     def setUp(self):
         super(CleanupTest, self).setUp()
-        sett = settings.Settings()
-        with patcher.YamlPatcher(sett.user_suites_yaml) as patch:
+        with patcher.YamlPatcher(self.settings.user_suites_yaml) as patch:
             obj = patch.obj
             conf = obj['handler_configurations'][tests.STUB_CONFIGURATION]
             conf['handler'] = 'stub_handler'

@@ -94,3 +94,4 @@ class Settings(object):
             variables.update(blueprints_yaml.get('variables', {}))
             blueprints_yaml['variables'] = variables
         return blueprints_yaml
+settings = Settings()

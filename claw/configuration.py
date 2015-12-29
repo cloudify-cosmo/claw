@@ -29,11 +29,9 @@ import cloudify_rest_client
 from cosmo_tester.framework import util
 
 from claw import patcher
-from claw.settings import Settings
+from claw.settings import settings
 
 CURRENT_CONFIGURATION = '+'
-
-settings = Settings()
 
 
 class Configuration(object):

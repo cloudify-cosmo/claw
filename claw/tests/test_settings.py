@@ -21,7 +21,7 @@ import yaml
 from path import path
 from mock import patch
 
-from claw import settings as _settings
+from claw import settings
 from claw import tests
 
 
@@ -29,19 +29,18 @@ class TestSettings(tests.BaseTest):
 
     def setUp(self):
         super(TestSettings, self).setUp()
-        self.settings = _settings.Settings()
         self.mock_suites_yaml = self.workdir / 'main_suites.yaml'
         self.mock_suites_yaml.touch()
 
     def test_default_settings_path(self):
-        os.environ.pop(_settings.CLAW_SETTINGS, None)
+        os.environ.pop(settings.CLAW_SETTINGS, None)
         self.assertEqual(
             self.settings.settings_path,
-            path(_settings.DEFAULT_SETTINGS_PATH).expanduser())
+            path(settings.DEFAULT_SETTINGS_PATH).expanduser())
 
     def test_custom_settings_path(self):
         custom_path = 'SOME_PATH'
-        with patch.dict(os.environ, {_settings.CLAW_SETTINGS: custom_path}):
+        with patch.dict(os.environ, {settings.CLAW_SETTINGS: custom_path}):
             self.assertEqual(self.settings.settings_path, custom_path)
 
     def test_properties(self):
@@ -64,10 +63,10 @@ class TestSettings(tests.BaseTest):
 
     def test_scripts(self):
         self._write()
-        settings = yaml.safe_load(self.settings_path.text())
+        read_settings = yaml.safe_load(self.settings_path.text())
         dirs = [str(p) for p in [self.workdir / 'dir1', self.workdir / 'dir2']]
-        settings['scripts'] = dirs
-        self.settings_path.write_text(yaml.safe_dump(settings))
+        read_settings['scripts'] = dirs
+        self.settings_path.write_text(yaml.safe_dump(read_settings))
         self.assertEqual(self.settings.scripts, dirs)
 
     def test_no_settings(self):
