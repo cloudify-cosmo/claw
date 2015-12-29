@@ -77,4 +77,6 @@ class InitTest(tests.BaseTest):
                          resources.get('templates/suites.template.yaml'))
         self.assertEqual(self.settings.blueprints_yaml.text(),
                          resources.get('templates/blueprints.template.yaml'))
+        self.assertEqual((self.settings.basedir / '.gitignore').text(),
+                         resources.get('templates/gitignore.template'))
         self.assertTrue(self.settings.configurations.exists())

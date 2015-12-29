@@ -86,6 +86,8 @@ def init(suites_yaml=None,
         'templates/suites.template.yaml'))
     settings.blueprints_yaml.write_text(resources.get(
         'templates/blueprints.template.yaml'))
+    (settings.basedir / '.gitignore').write_text(resources.get(
+        'templates/gitignore.template'))
     settings.configurations.mkdir_p()
 
 
