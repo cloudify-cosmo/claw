@@ -31,7 +31,7 @@ from claw import settings
 from claw import configuration
 
 
-STUB_CONFIGURATION = 'some_openstack_env'
+STUB_CONFIGURATION = 'sample_openstack_env'
 STUB_BLUEPRINT = 'openstack_nodecellar'
 
 

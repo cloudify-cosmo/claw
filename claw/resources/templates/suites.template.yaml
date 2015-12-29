@@ -16,7 +16,7 @@
 
 variables:
   cloudify_org: https://github.com/cloudify-cosmo
-  branch: CFY-XXX-some-feature-branch
+  branch: CFY-XXX-example-feature-branch
   flavor: small.1
 
 manager_blueprint_override_templates:
@@ -44,7 +44,7 @@ inputs_override_templates:
 #    amqpinflux_source_url:     '{{cloudify_org}}/cloudify-amqp-influxdb/archive/{{branch}}.tar.gz'
 #    securest_source_url:       '{{cloudify_org}}/flask-securest/archive/{{branch}}.tar.gz'
 
-  some_openstack_env: &some_openstack_env_inputs
+  sample_openstack_env: &sample_openstack_env_inputs
     keystone_username: _
     keystone_password: _
     keystone_tenant_name: _
@@ -67,11 +67,11 @@ handler_configuration_templates:
 
 handler_configurations:
 
-  some_openstack_env:
+  sample_openstack_env:
     <<: *openstack_handler_configuration
     properties: openstack_env_properties_name
     inputs_override:
-      <<: *some_openstack_env_inputs
+      <<: *sample_openstack_env_inputs
       # Uncomment to override branches inputs
 #      <<: *branches
     manager_blueprint_override:
