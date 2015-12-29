@@ -21,9 +21,9 @@ import yaml
 import fabric.api
 from path import path
 
-from systest import configuration
-from systest import tests
-from systest.handlers import stub_handler
+from claw import configuration
+from claw import tests
+from claw.handlers import stub_handler
 
 
 class TestConfiguration(tests.BaseTest):
@@ -41,7 +41,7 @@ class TestConfiguration(tests.BaseTest):
         conf = configuration.Configuration(configuration.CURRENT_CONFIGURATION)
         self.assertEqual(conf.configuration,
                          configuration.CURRENT_CONFIGURATION)
-        self.systest.generate(tests.STUB_CONFIGURATION)
+        self.claw.generate(tests.STUB_CONFIGURATION)
         conf = configuration.Configuration(configuration.CURRENT_CONFIGURATION)
         self.assertEqual(conf.configuration, tests.STUB_CONFIGURATION)
 
@@ -49,13 +49,13 @@ class TestConfiguration(tests.BaseTest):
         self.init()
         conf = configuration.Configuration(tests.STUB_CONFIGURATION)
         self.assertFalse(conf.exists())
-        self.systest.generate(tests.STUB_CONFIGURATION)
+        self.claw.generate(tests.STUB_CONFIGURATION)
         conf = configuration.Configuration(tests.STUB_CONFIGURATION)
         self.assertTrue(conf.exists())
         blueprint = conf.blueprint(tests.STUB_BLUEPRINT)
         self.assertFalse(blueprint.exists())
-        self.systest('generate-blueprint', tests.STUB_CONFIGURATION,
-                     tests.STUB_BLUEPRINT)
+        self.claw('generate-blueprint', tests.STUB_CONFIGURATION,
+                  tests.STUB_BLUEPRINT)
         self.assertTrue(blueprint.exists())
 
     def test_configuration_properties(self):
@@ -164,13 +164,13 @@ class TestConfiguration(tests.BaseTest):
         self.assertEqual(conf.client._client.host, ip)
         self.assertEqual(conf.client._client.port, custom_port)
 
-    def test_systest_handler(self):
+    def test_claw_handler(self):
         conf = self._init_configuration()
         with conf.patch.handler_configuration as patch:
             patch.set_value('handler', 'stub_handler')
-        systest_handler = conf.systest_handler
-        self.assertTrue(isinstance(systest_handler, stub_handler.Handler))
-        self.assertIs(systest_handler.configuration, conf)
+        claw_handler = conf.claw_handler
+        self.assertTrue(isinstance(claw_handler, stub_handler.Handler))
+        self.assertIs(claw_handler.configuration, conf)
 
     def test_patch(self):
         conf, blueprint = self._init_configuration_and_blueprint()
@@ -217,13 +217,13 @@ class TestConfiguration(tests.BaseTest):
 
     def _init_configuration(self, suites_yaml=None):
         self.init(suites_yaml)
-        self.systest.generate(tests.STUB_CONFIGURATION)
+        self.claw.generate(tests.STUB_CONFIGURATION)
         return configuration.Configuration(tests.STUB_CONFIGURATION)
 
     def _init_configuration_and_blueprint(self):
         conf = self._init_configuration()
-        self.systest('generate-blueprint',
-                     tests.STUB_CONFIGURATION,
-                     tests.STUB_BLUEPRINT)
+        self.claw('generate-blueprint',
+                  tests.STUB_CONFIGURATION,
+                  tests.STUB_BLUEPRINT)
         blueprint = conf.blueprint(tests.STUB_BLUEPRINT)
         return conf, blueprint

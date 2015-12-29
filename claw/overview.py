@@ -18,7 +18,7 @@ import os
 
 import bottle
 
-from systest import resources
+from claw import resources
 
 
 class Overview(object):

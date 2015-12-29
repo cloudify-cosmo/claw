@@ -1,1 +1,1 @@
-recursive-include systest/resources *
+recursive-include claw/resources *

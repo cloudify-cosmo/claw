@@ -32,13 +32,13 @@ from cloudify_cli.execution_events_fetcher import ExecutionEventsFetcher
 from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
-from systest import patcher
-from systest import resources
-from systest.state import current_conf
-from systest.configuration import Configuration, CURRENT_CONFIGURATION
-from systest.settings import Settings
-from systest.completion import Completion
-from systest import overview as _overview
+from claw import patcher
+from claw import resources
+from claw.state import current_conf
+from claw.configuration import Configuration, CURRENT_CONFIGURATION
+from claw.settings import Settings
+from claw.completion import Completion
+from claw import overview as _overview
 
 
 INIT_EXISTS = argh.CommandError('Configuration already exists. Use --reset'
@@ -55,7 +55,7 @@ def bake(cmd):
                     _err=lambda line: sys.stderr.write(line))
 
 
-app = argh.EntryPoint('systest')
+app = argh.EntryPoint('claw')
 command = app
 cfy = bake(sh.cfy)
 settings = Settings()
@@ -66,7 +66,7 @@ completion = Completion(settings)
 def init(suites_yaml=None,
          basedir=None,
          reset=False):
-    """Initialize a systest environment.
+    """Initialize a claw environment.
     """
     if settings.settings_path.exists() and not reset:
         raise INIT_EXISTS
@@ -383,7 +383,7 @@ def cleanup(configuration):
         temp_configuration = True
         generate(configuration)
     try:
-        conf.systest_handler.cleanup()
+        conf.claw_handler.cleanup()
     finally:
         if temp_configuration:
             conf.dir.rmtree_p()
@@ -442,7 +442,7 @@ def events(configuration,
 @arg('script_path', completer=completion.script_paths)
 @arg('script_args', nargs='...')
 def script(configuration, script_path, script_args):
-    """Run a script managed by systest with the provided configuration
+    """Run a script managed by claw with the provided configuration
        as context."""
     conf = Configuration(configuration)
     if not conf.exists():

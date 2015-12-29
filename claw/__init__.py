@@ -1,4 +1,3 @@
-#! /usr/bin/env systest
 ########
 # Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
 #
@@ -15,8 +14,4 @@
 # limitations under the License.
 ############
 
-from systest import conf
-
-
-def script():
-    conf.logger.info(conf.handler_configuration)
+from claw.state import conf  # NOQA

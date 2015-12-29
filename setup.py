@@ -17,15 +17,14 @@
 from setuptools import setup
 
 setup(
-    name='systest',
+    name='claw',
     version='0.1',
     author='GigaSpaces',
     author_email='cosmo-admin@gigaspaces.com',
-    packages=['systest',
-              'systest.handlers',
-              'systest.resources'],
-    description='Manages Cloudify manager environments by leveraging the'
-                'system tests framework',
+    packages=['claw',
+              'claw.handlers',
+              'claw.resources'],
+    description='Cloudify Almighty Wrapper',
     license='Apache License, Version 2.0',
     zip_safe=False,
     install_requires=[
@@ -35,7 +34,7 @@ setup(
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'systest = systest.main:main',
+            'claw = claw.main:main',
         ],
     }
 )

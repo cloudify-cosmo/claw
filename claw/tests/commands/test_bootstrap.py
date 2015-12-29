@@ -18,10 +18,10 @@ import sh
 import yaml
 from path import path
 
-from systest import settings
-from systest import configuration
-from systest import tests
-from systest.tests import resources
+from claw import settings
+from claw import configuration
+from claw import tests
+from claw.tests import resources
 
 
 class BaseBootstrapTest(tests.BaseTestWithInit):
@@ -64,12 +64,12 @@ class BaseBootstrapTest(tests.BaseTestWithInit):
         }
         sett = settings.Settings()
         sett.user_suites_yaml.write_text(yaml.safe_dump(suites_yaml))
-        self.systest.bootstrap(configuration_name,
-                               '-i', 'mock_inputs1',
-                               '-i', 'mock_inputs2',
-                               '-b', 'mock_blueprint1',
-                               '-b', 'mock_blueprint2',
-                               reset_config=reset)
+        self.claw.bootstrap(configuration_name,
+                            '-i', 'mock_inputs1',
+                            '-i', 'mock_inputs2',
+                            '-b', 'mock_blueprint1',
+                            '-b', 'mock_blueprint2',
+                            reset_config=reset)
         conf = configuration.Configuration(configuration_name)
         self.assertTrue(conf.cli_config['colors'])
         self.assertEqual(conf.handler_configuration['manager_ip'], ip)
@@ -94,5 +94,5 @@ class BootstrapTest(BaseBootstrapTest):
 
     def test_no_such_configuration(self):
         with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.systest.bootstrap('no_such_configuration')
+            self.claw.bootstrap('no_such_configuration')
         self.assertIn('No such configuration', c.exception.stderr)

@@ -17,9 +17,9 @@
 import sh
 import yaml
 
-from systest import configuration
-from systest import settings
-from systest import tests
+from claw import configuration
+from claw import settings
+from claw import tests
 
 
 class GenerateBlueprintTest(tests.BaseTest):
@@ -66,10 +66,10 @@ class GenerateBlueprintTest(tests.BaseTest):
 
     def test_no_such_configuration(self):
         self.init()
-        self.systest.generate(tests.STUB_CONFIGURATION)
+        self.claw.generate(tests.STUB_CONFIGURATION)
         with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.systest('generate-blueprint', tests.STUB_CONFIGURATION,
-                         'no_such_configuration')
+            self.claw('generate-blueprint', tests.STUB_CONFIGURATION,
+                      'no_such_configuration')
         self.assertIn('No such configuration', c.exception.stderr)
 
     def test_existing_blueprint_no_reset(self):
@@ -85,8 +85,8 @@ class GenerateBlueprintTest(tests.BaseTest):
     def test_no_configuration(self):
         self.init()
         with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.systest('generate-blueprint', 'no_such_configuration',
-                         tests.STUB_BLUEPRINT)
+            self.claw('generate-blueprint', 'no_such_configuration',
+                      tests.STUB_BLUEPRINT)
         self.assertIn('Not initialized', c.exception.stderr)
 
     def _test(self,
@@ -163,9 +163,9 @@ class GenerateBlueprintTest(tests.BaseTest):
         sett.blueprints_yaml.write_text(yaml.safe_dump(blueprints_yaml))
 
         if not skip_conf_generate:
-            self.systest.generate(configuration_name)
-        self.systest('generate-blueprint', configuration_name,
-                     blueprint_name, reset=reset)
+            self.claw.generate(configuration_name)
+        self.claw('generate-blueprint', configuration_name,
+                  blueprint_name, reset=reset)
 
         expected_inputs = (inputs or {}).copy()
         expected_inputs.update((processed_inputs_override or {}))

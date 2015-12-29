@@ -21,8 +21,8 @@ from StringIO import StringIO
 import argh
 import argh.utils
 
-from systest import configuration
-from systest import commands
+from claw import configuration
+from claw import commands
 
 
 def main():

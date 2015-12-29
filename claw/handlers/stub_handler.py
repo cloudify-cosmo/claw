@@ -14,4 +14,14 @@
 # limitations under the License.
 ############
 
-from systest.state import conf  # NOQA
+from claw import handlers
+
+
+class Handler(handlers.Handler):
+
+    def cleanup(self):
+        self.configuration.logger.info('Stub handler cleanup')
+
+    def clients(self):
+        self.configuration.logger.info('Stub handler clients')
+        return {}

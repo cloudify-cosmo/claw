@@ -16,8 +16,8 @@
 
 import yaml
 
-from systest import patcher
-from systest import tests
+from claw import patcher
+from claw import tests
 
 
 class TestPatcher(tests.BaseTest):
@@ -74,7 +74,7 @@ class TestPatcher(tests.BaseTest):
         self.write_yaml(test_yaml)
         with patcher.YamlPatcher(self.yaml_path) as patch:
             patch.set_value('a', {
-                'func': 'systest.patcher:filter_list',
+                'func': 'claw.patcher:filter_list',
                 'kwargs': {'include': ['one', 'two']}
             })
         self.assertEqual(self.read_yaml()['a'], ['string one', 'string two'])
@@ -88,7 +88,7 @@ class TestPatcher(tests.BaseTest):
         self.write_yaml(test_yaml)
         with patcher.YamlPatcher(self.yaml_path) as patch:
             patch.set_value('a', {
-                'func': 'systest.patcher:filter_list',
+                'func': 'claw.patcher:filter_list',
                 'kwargs': {'include': [{'key1': 'value12', 'key2': 'value22'},
                                        {'key1': 'value11'}]}
             })
@@ -108,7 +108,7 @@ class TestPatcher(tests.BaseTest):
         self.write_yaml(test_yaml)
         with patcher.YamlPatcher(self.yaml_path) as patch:
             patch.set_value('a', {
-                'func': 'systest.patcher:filter_dict',
+                'func': 'claw.patcher:filter_dict',
                 'kwargs': {'exclude': ['a3']}
             })
         self.assertEqual(self.read_yaml()['a'],

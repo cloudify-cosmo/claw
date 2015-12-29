@@ -28,8 +28,8 @@ import yaml
 import cloudify_rest_client
 from cosmo_tester.framework import util
 
-from systest import patcher
-from systest.settings import Settings
+from claw import patcher
+from claw.settings import Settings
 
 CURRENT_CONFIGURATION = '+'
 
@@ -128,10 +128,10 @@ class Configuration(object):
         return cloudify_rest_client.CloudifyClient(manager_ip, manager_port)
 
     @property
-    def systest_handler(self):
+    def claw_handler(self):
         handler_name = self.handler_configuration['handler']
         module = importlib.import_module(
-            'systest.handlers.{0}'.format(handler_name))
+            'claw.handlers.{0}'.format(handler_name))
         return module.Handler(self)
 
     @property

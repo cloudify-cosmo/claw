@@ -27,11 +27,8 @@ from path import path
 import cosmo_tester
 from cloudify.proxy.server import get_unused_port
 
-from systest import settings
-from systest import configuration
-
-
-systest = sh.systest
+from claw import settings
+from claw import configuration
 
 
 STUB_CONFIGURATION = 'some_openstack_env'
@@ -41,28 +38,28 @@ STUB_BLUEPRINT = 'openstack_nodecellar'
 class BaseTest(unittest.TestCase):
 
     def setUp(self):
-        self.workdir = path(tempfile.mkdtemp(prefix='systest-tests-'))
+        self.workdir = path(tempfile.mkdtemp(prefix='claw-tests-'))
         self.settings_path = self.workdir / 'settings'
-        os.environ[settings.SYSTEST_SETTINGS] = str(self.settings_path)
+        os.environ[settings.CLAW_SETTINGS] = str(self.settings_path)
         self.addCleanup(self.cleanup)
 
         system_tests_dir = path(cosmo_tester.__file__).dirname().dirname()
         self.main_suites_yaml_path = (system_tests_dir / 'suites' / 'suites' /
                                       'suites.yaml')
 
-        self.systest = systest
+        self.claw = sh.claw
 
     def cleanup(self):
         configuration.settings = settings.Settings()
         shutil.rmtree(self.workdir, ignore_errors=True)
-        os.environ.pop(settings.SYSTEST_SETTINGS, None)
+        os.environ.pop(settings.CLAW_SETTINGS, None)
 
     def init(self, suites_yaml=None):
         options = {}
         if suites_yaml:
             options['suites_yaml'] = suites_yaml
         with self.workdir:
-            self.systest.init(**options)
+            self.claw.init(**options)
 
     def server(self, routes):
         port = get_unused_port()

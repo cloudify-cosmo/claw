@@ -17,8 +17,8 @@
 import sh
 import yaml
 
-from systest import settings
-from systest import tests
+from claw import settings
+from claw import tests
 
 
 class GenerateTest(tests.BaseTestWithInit):
@@ -109,7 +109,7 @@ class GenerateTest(tests.BaseTestWithInit):
 
     def test_no_such_configuration(self):
         with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.systest.generate('no_such_configuration')
+            self.claw.generate('no_such_configuration')
         self.assertIn('No such configuration', c.exception.stderr)
 
     def test_existing_configuration_no_reset(self):
@@ -188,7 +188,7 @@ class GenerateTest(tests.BaseTestWithInit):
         sett = settings.Settings()
         sett.user_suites_yaml.write_text(yaml.safe_dump(suites_yaml))
 
-        self.systest.generate(*command_args, reset=reset)
+        self.claw.generate(*command_args, reset=reset)
 
         expected_inputs = (inputs or {}).copy()
         expected_inputs.update((processed_inputs_override or {}))

@@ -18,26 +18,26 @@ import json
 
 import sh
 
-from systest import patcher
-from systest import settings
-from systest import tests
-from systest.tests import resources
+from claw import patcher
+from claw import settings
+from claw import tests
+from claw.tests import resources
 
 
 class ScriptTest(tests.BaseTestWithInit):
 
     def setUp(self):
         super(ScriptTest, self).setUp()
-        self.systest.generate(tests.STUB_CONFIGURATION)
+        self.claw.generate(tests.STUB_CONFIGURATION)
 
     def test_no_configuration(self):
         with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.systest.script('no_such_config', 'stub')
+            self.claw.script('no_such_config', 'stub')
         self.assertIn('Not initialized', c.exception.stderr)
 
     def test_no_script_path(self):
         with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.systest.script(tests.STUB_CONFIGURATION, 'no_such_path')
+            self.claw.script(tests.STUB_CONFIGURATION, 'no_such_path')
         self.assertIn('locate no_such_path', c.exception.stderr)
 
     def test_no_script_func(self):
@@ -82,7 +82,7 @@ class ScriptTest(tests.BaseTestWithInit):
         self._test(script=script, args=[func_name, arg], expected_output=arg)
 
     def test_conf_import(self):
-        script = '''from systest import conf;
+        script = '''from claw import conf;
 def script(): print conf.configuration'''
         self._test(script=script, expected_output=tests.STUB_CONFIGURATION)
 
@@ -123,8 +123,8 @@ def script(): print conf.configuration'''
         script_path = script_dir / script_name
         script_arg = script_arg or script_path
         script_path.write_text(script)
-        output = self.systest.script(tests.STUB_CONFIGURATION,
-                                     script_arg, *args).stdout.strip()
+        output = self.claw.script(tests.STUB_CONFIGURATION,
+                                  script_arg, *args).stdout.strip()
         if not skip_validation:
             self.assertEqual(output, expected_output)
         return output

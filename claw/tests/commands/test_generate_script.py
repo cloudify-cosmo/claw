@@ -15,18 +15,18 @@
 ############
 import sh
 
-from systest import tests
+from claw import tests
 
 
 class GenerateScriptTest(tests.BaseTestWithInit):
 
     def setUp(self):
         super(GenerateScriptTest, self).setUp()
-        self.systest.generate(tests.STUB_CONFIGURATION)
+        self.claw.generate(tests.STUB_CONFIGURATION)
 
     def test_basic(self, rewrite=False):
         script_path = self.workdir / 'script.sh'
-        self.systest('generate-script', script_path, rewrite=rewrite)
+        self.claw('generate-script', script_path, rewrite=rewrite)
         script = sh.Command(script_path)
         self.assertIn("'handler': 'openstack_handler'",
                       script().stdout.strip())

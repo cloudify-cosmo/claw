@@ -21,8 +21,8 @@ import yaml
 from path import path
 
 
-SYSTEST_SETTINGS = 'SYSTEST_SETTINGS'
-DEFAULT_SETTINGS_PATH = '~/.cloudify-systest'
+CLAW_SETTINGS = 'CLAW_SETTINGS'
+DEFAULT_SETTINGS_PATH = '~/.claw'
 
 
 class Settings(object):
@@ -33,7 +33,7 @@ class Settings(object):
     @property
     def settings_path(self):
         return path(os.path.expanduser(
-            os.environ.get(SYSTEST_SETTINGS, DEFAULT_SETTINGS_PATH)))
+            os.environ.get(CLAW_SETTINGS, DEFAULT_SETTINGS_PATH)))
 
     @property
     def basedir(self):
@@ -62,7 +62,7 @@ class Settings(object):
     @property
     def settings(self):
         if not self.settings_path.exists():
-            raise argh.CommandError('Run `systest init` to configure systest')
+            raise argh.CommandError('Run `claw init` to configure claw')
         if not self._settings:
             self._settings = yaml.safe_load(self.settings_path.text())
         return self._settings

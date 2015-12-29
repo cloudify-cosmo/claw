@@ -16,9 +16,9 @@
 
 import sh
 
-from systest import configuration
-from systest import tests
-from systest.tests.commands.test_bootstrap import BaseBootstrapTest
+from claw import configuration
+from claw import tests
+from claw.tests.commands.test_bootstrap import BaseBootstrapTest
 
 
 class TeardownTest(BaseBootstrapTest):
@@ -26,11 +26,11 @@ class TeardownTest(BaseBootstrapTest):
     def test_basic(self):
         configuration_name = self._test()
         conf = configuration.Configuration(configuration_name)
-        self.systest.teardown(configuration_name)
+        self.claw.teardown(configuration_name)
         self.assertEqual('delete invoked',
                          (conf.dir / 'delete.output').text())
 
     def test_no_configuration(self):
         with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.systest.teardown(tests.STUB_CONFIGURATION)
+            self.claw.teardown(tests.STUB_CONFIGURATION)
         self.assertIn('Not initialized', c.exception.stderr)

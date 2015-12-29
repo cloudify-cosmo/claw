@@ -16,8 +16,8 @@
 
 import unittest
 
-from systest import conf
-from systest import state
+from claw import conf
+from claw import state
 
 
 class TestState(unittest.TestCase):

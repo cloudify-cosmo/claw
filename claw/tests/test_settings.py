@@ -21,8 +21,8 @@ import yaml
 from path import path
 from mock import patch
 
-from systest import settings as _settings
-from systest import tests
+from claw import settings as _settings
+from claw import tests
 
 
 class TestSettings(tests.BaseTest):
@@ -34,14 +34,14 @@ class TestSettings(tests.BaseTest):
         self.mock_suites_yaml.touch()
 
     def test_default_settings_path(self):
-        os.environ.pop(_settings.SYSTEST_SETTINGS, None)
+        os.environ.pop(_settings.CLAW_SETTINGS, None)
         self.assertEqual(
             self.settings.settings_path,
             path(_settings.DEFAULT_SETTINGS_PATH).expanduser())
 
     def test_custom_settings_path(self):
         custom_path = 'SOME_PATH'
-        with patch.dict(os.environ, {_settings.SYSTEST_SETTINGS: custom_path}):
+        with patch.dict(os.environ, {_settings.CLAW_SETTINGS: custom_path}):
             self.assertEqual(self.settings.settings_path, custom_path)
 
     def test_properties(self):
@@ -73,7 +73,7 @@ class TestSettings(tests.BaseTest):
     def test_no_settings(self):
         with self.assertRaises(argh.CommandError) as c:
             assert self.settings.settings
-        self.assertIn('systest init', str(c.exception))
+        self.assertIn('claw init', str(c.exception))
 
     def test_load_suites_yaml(self):
         self._write()

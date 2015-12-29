@@ -1,3 +1,4 @@
+#! /usr/bin/env claw
 ########
 # Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
 #
@@ -14,14 +15,8 @@
 # limitations under the License.
 ############
 
-from systest import handlers
+from claw import conf
 
 
-class Handler(handlers.Handler):
-
-    def cleanup(self):
-        self.configuration.logger.info('Stub handler cleanup')
-
-    def clients(self):
-        self.configuration.logger.info('Stub handler clients')
-        return {}
+def script():
+    conf.logger.info(conf.handler_configuration)

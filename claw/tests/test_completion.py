@@ -16,10 +16,10 @@
 
 import sh
 
-from systest import settings as _settings
-from systest import patcher
-from systest import commands
-from systest import tests
+from claw import settings as _settings
+from claw import patcher
+from claw import commands
+from claw import tests
 
 
 class TestCompletion(tests.BaseTest):
@@ -53,7 +53,7 @@ class TestCompletion(tests.BaseTest):
         self.help_args = ['-h', '--help']
         self.existing_configurations = None
 
-    def test_systest(self):
+    def test_claw(self):
         expected = [f.__name__.replace('_', '-')
                     for f in commands.app.commands]
         expected += self.help_args
@@ -179,18 +179,18 @@ class TestCompletion(tests.BaseTest):
     def _prepare_existing_configurations(self):
         self.existing_configurations = list(self.configurations)[:2]
         for conf in self.existing_configurations:
-            self.systest.generate(conf)
+            self.claw.generate(conf)
 
     def assert_completion(self, expected, args=None,
                           filter_non_options=False):
         args = args or []
         args += ["''"]
-        cmd = ['systest'] + list(args)
+        cmd = ['claw'] + list(args)
         partial_word = cmd[-1]
         cmdline = ' '.join(cmd)
         lines = [
             'set -e',
-            'eval "$(register-python-argcomplete systest)"',
+            'eval "$(register-python-argcomplete claw)"',
             'export COMP_LINE="{}"'.format(cmdline),
             'export COMP_WORDS=({})'.format(cmdline),
             'export COMP_CWORD={}'.format(cmd.index(partial_word)),

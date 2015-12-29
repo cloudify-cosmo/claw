@@ -14,10 +14,10 @@
 # limitations under the License.
 ############
 
-from systest import tests
-from systest import patcher
-from systest import settings
-from systest import configuration
+from claw import tests
+from claw import patcher
+from claw import settings
+from claw import configuration
 
 
 class CleanupTest(tests.BaseTestWithInit):
@@ -33,12 +33,12 @@ class CleanupTest(tests.BaseTestWithInit):
             tests.STUB_CONFIGURATION)
 
     def test_basic(self):
-        self.systest.generate(tests.STUB_CONFIGURATION)
-        output = self.systest.cleanup(tests.STUB_CONFIGURATION).stdout.strip()
+        self.claw.generate(tests.STUB_CONFIGURATION)
+        output = self.claw.cleanup(tests.STUB_CONFIGURATION).stdout.strip()
         self.assertIn('Stub handler cleanup', output)
         self.assertTrue(self.configuration.exists())
 
     def test_no_configuration(self):
-        output = self.systest.cleanup(tests.STUB_CONFIGURATION).stdout.strip()
+        output = self.claw.cleanup(tests.STUB_CONFIGURATION).stdout.strip()
         self.assertIn('Stub handler cleanup', output)
         self.assertFalse(self.configuration.exists())

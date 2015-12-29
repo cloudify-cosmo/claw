@@ -21,7 +21,7 @@ import neutronclient.v2_0.client as neutron_client
 import cinderclient.v1.client as cinder_client
 import novaclient.v2.client as nova_client
 
-from systest import handlers
+from claw import handlers
 
 
 class CleanupHandler(object):

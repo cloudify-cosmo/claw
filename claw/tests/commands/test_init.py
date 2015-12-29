@@ -16,9 +16,9 @@
 
 import sh
 
-from systest import resources
-from systest import settings
-from systest import tests
+from claw import resources
+from claw import settings
+from claw import tests
 
 
 class InitTest(tests.BaseTest):
@@ -29,7 +29,7 @@ class InitTest(tests.BaseTest):
 
     def test_basic(self, reset=False):
         with self.workdir:
-            self.systest.init(reset=reset)
+            self.claw.init(reset=reset)
         self._verify_init(expected_basedir=self.workdir,
                           expected_suites_yaml=self.main_suites_yaml_path)
 
@@ -46,24 +46,24 @@ class InitTest(tests.BaseTest):
         suites_yaml = self.workdir / 'main-suites.yaml'
         suites_yaml.touch()
         with self.workdir:
-            self.systest.init(suites_yaml=suites_yaml)
+            self.claw.init(suites_yaml=suites_yaml)
         self._verify_init(expected_basedir=self.workdir,
                           expected_suites_yaml=suites_yaml)
 
     def test_suites_yaml_does_not_exist(self):
         with self.workdir:
             # sanity
-            self.systest.init(suites_yaml=self.main_suites_yaml_path)
+            self.claw.init(suites_yaml=self.main_suites_yaml_path)
             with self.assertRaises(sh.ErrorReturnCode):
-                self.systest.init(
+                self.claw.init(
                     suites_yaml='some_path_that_does_not_exist.yaml')
 
     def test_explicit_basedir(self):
         basedir = self.workdir / 'basedir'
         basedir.mkdir()
         with self.workdir:
-            self.systest.init(suites_yaml=self.main_suites_yaml_path,
-                              basedir=basedir)
+            self.claw.init(suites_yaml=self.main_suites_yaml_path,
+                           basedir=basedir)
         self._verify_init(expected_basedir=basedir,
                           expected_suites_yaml=self.main_suites_yaml_path)
 
