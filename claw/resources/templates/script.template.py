@@ -15,8 +15,8 @@
 # limitations under the License.
 ############
 
-from claw import conf
+from claw import cosmo
 
 
 def script():
-    conf.logger.info(conf.handler_configuration)
+    cosmo.logger.info(cosmo.handler_configuration)

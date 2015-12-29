@@ -18,9 +18,9 @@ from proxy_tools import proxy
 from cloudify.state import CurrentContext
 
 
-current_conf = CurrentContext()
+current_configuration = CurrentContext()
 
 
 @proxy
-def conf():
-    return current_conf.get_ctx()
+def cosmo():
+    return current_configuration.get_ctx()

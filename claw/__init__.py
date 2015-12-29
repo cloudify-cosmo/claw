@@ -14,4 +14,4 @@
 # limitations under the License.
 ############
 
-from claw.state import conf  # NOQA
+from claw.state import cosmo  # NOQA

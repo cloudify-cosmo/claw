@@ -34,7 +34,7 @@ from cosmo_tester.framework import util
 
 from claw import patcher
 from claw import resources
-from claw.state import current_conf
+from claw.state import current_configuration
 from claw.configuration import Configuration, CURRENT_CONFIGURATION
 from claw.settings import Settings
 from claw.completion import Completion
@@ -467,10 +467,10 @@ def script(configuration, script_path, script_args):
         raise argh.CommandError('Cannot find a function to execute. Did you '
                                 'add a default "script" function?')
     try:
-        current_conf.set(conf)
+        current_configuration.set(conf)
         argh.dispatch_command(script_func, argv=script_args)
     finally:
-        current_conf.clear()
+        current_configuration.clear()
 
 
 @command

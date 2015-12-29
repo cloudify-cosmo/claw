@@ -82,8 +82,8 @@ class ScriptTest(tests.BaseTestWithInit):
         self._test(script=script, args=[func_name, arg], expected_output=arg)
 
     def test_conf_import(self):
-        script = '''from claw import conf;
-def script(): print conf.configuration'''
+        script = '''from claw import cosmo;
+def script(): print cosmo.configuration'''
         self._test(script=script, expected_output=tests.STUB_CONFIGURATION)
 
     def test_argh_integration(self):

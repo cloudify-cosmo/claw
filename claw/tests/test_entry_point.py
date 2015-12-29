@@ -32,9 +32,9 @@ class EntryPointTests(tests.BaseTest):
     def test_direct_script_execution(self):
         text = 'TEXT'
         script = '''
-from claw import conf
+from claw import cosmo
 def script(arg):
-    print arg + ':' + conf.configuration
+    print arg + ':' + cosmo.configuration
 '''
         p = self._run_script(script, text)
         self.assertEqual('{0}:{1}'.format(text, self.configuration),

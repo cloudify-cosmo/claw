@@ -16,7 +16,7 @@
 
 import unittest
 
-from claw import conf
+from claw import cosmo
 from claw import state
 
 
@@ -24,8 +24,8 @@ class TestState(unittest.TestCase):
 
     def test(self):
         obj = object()
-        state.current_conf.set(obj)
+        state.current_configuration.set(obj)
         try:
-            self.assertIs(obj, conf._get_current_object())
+            self.assertIs(obj, cosmo._get_current_object())
         finally:
-            state.current_conf.clear()
+            state.current_configuration.clear()
