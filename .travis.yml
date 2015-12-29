@@ -9,7 +9,7 @@ install:
     - |
       if [ $TOX_ENV == 'py27' ]; then
         mkdir -p ~/dev/cloudify
-        for repo in (cloudify-manager-blueprints cloudify-nodecellar-example);
+        for repo in cloudify-manager-blueprints cloudify-nodecellar-example;
         do
           wget https://github.com/cloudify-cosmo/${repo}/archive/master.tar.gz
           tar zxf master.tar.gz
