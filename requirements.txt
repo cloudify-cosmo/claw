@@ -1,1 +1,2 @@
+-r https://raw.githubusercontent.com/cloudify-cosmo/cloudify-system-tests/master/test-requirements.txt
 -e git+https://github.com/cloudify-cosmo/cloudify-system-tests.git@master#egg=cloudify-system-tests
