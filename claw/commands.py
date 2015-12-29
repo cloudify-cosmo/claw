@@ -95,7 +95,7 @@ def init(suites_yaml=None,
 @arg('configuration', completer=completion.all_configurations)
 @arg('-i', '--inputs-override',
      action='append',
-     completer=completion.input_override_templates)
+     completer=completion.inputs_override_templates)
 @arg('-b', '--manager-blueprint-override',
      action='append',
      completer=completion.manager_blueprint_override_templates)
@@ -236,7 +236,7 @@ def status(configuration):
 @arg('configuration', completer=completion.all_configurations)
 @arg('-i', '--inputs-override',
      action='append',
-     completer=completion.input_override_templates)
+     completer=completion.inputs_override_templates)
 @arg('-b', '--manager-blueprint-override',
      action='append',
      completer=completion.manager_blueprint_override_templates)

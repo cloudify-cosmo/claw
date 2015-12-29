@@ -28,7 +28,7 @@ class Completion(object):
         return self._settings.load_blueprints_yaml(variables=False)[
             'blueprints'].keys()
 
-    def _input_override_templates(self):
+    def _inputs_override_templates(self):
         return self._settings.load_suites_yaml(variables=False)[
             'inputs_override_templates']
 
@@ -48,8 +48,8 @@ class Completion(object):
         return (c for c in self.all_configurations(prefix)
                 if (self._settings.configurations / c).exists())
 
-    def input_override_templates(self, prefix, **kwargs):
-        return (io for io in self._input_override_templates()
+    def inputs_override_templates(self, prefix, **kwargs):
+        return (io for io in self._inputs_override_templates()
                 if io.startswith(prefix))
 
     def manager_blueprint_override_templates(self, prefix, **kwargs):
