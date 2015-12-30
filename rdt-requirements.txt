@@ -1,2 +1,2 @@
--c rdt-constraints.txt
+pyev==0.8.1-4.04
 -r requirements.txt
