@@ -29,7 +29,7 @@ class TestCompletion(tests.BaseTest):
         super(TestCompletion, self).setUp()
         self.scripts_dir = self.workdir / 'scripts'
         self.scripts_dir2 = self.workdir / 'scripts2'
-        self.scripts = []
+        self.scripts = ['example-script.py']
         for scripts_dir in [self.scripts_dir, self.scripts_dir2]:
             scripts_dir.mkdir_p()
             for _ in range(3):

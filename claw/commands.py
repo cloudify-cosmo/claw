@@ -87,7 +87,8 @@ def init(suites_yaml=None,
         'templates/gitignore.template'))
     settings.configurations.mkdir_p()
     settings.default_scripts_dir.mkdir_p()
-    generate_script(settings.default_scripts_dir / 'example-script.py')
+    generate_script(settings.default_scripts_dir / 'example-script.py',
+                    rewrite=True)
 
 
 @command
