@@ -74,5 +74,7 @@ class InitTest(tests.BaseTest):
                          resources.get('templates/blueprints.template.yaml'))
         self.assertEqual((self.settings.basedir / '.gitignore').text(),
                          resources.get('templates/gitignore.template'))
+        self.assertEqual(
+            (self.settings.default_scripts_dir / 'example-script.py').text(),
+            resources.get('templates/script.template.py'))
         self.assertTrue(self.settings.configurations.exists())
-        self.assertTrue(self.settings.default_scripts_dir.exists())

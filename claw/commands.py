@@ -64,8 +64,7 @@ cfy = bake(sh.cfy)
 def init(suites_yaml=None,
          basedir=None,
          reset=False):
-    """Initialize a claw environment.
-    """
+    """Initialize a claw environment."""
     if settings.settings_path.exists() and not reset:
         raise INIT_EXISTS
     if not suites_yaml:
@@ -88,6 +87,7 @@ def init(suites_yaml=None,
         'templates/gitignore.template'))
     settings.configurations.mkdir_p()
     settings.default_scripts_dir.mkdir_p()
+    generate_script(settings.default_scripts_dir / 'example-script.py')
 
 
 @command
