@@ -140,7 +140,47 @@ required ``dns_nameservers`` property in place.
 
 Variables
 ^^^^^^^^^
-variables
+Variables let you keep values in one places and references them in inputs and
+manager blueprint overrides.
+
+We'll modify the previous example and extend it to use variables:
+
+.. code-block:: yaml
+
+    variables:
+      username: MY_USERNAME
+      password: MY_PASSWORD
+      tenant: MY_TENANT_NAME
+
+    handler_configurations:
+      some_openstack_env:
+        manager_blueprint: /path/to/my-manager-blueprint.yaml
+        inputs: /path/to/my-partially-filled-manager-blueprint-inputs.yaml
+        inputs_override:
+          keystone_username: '{{username}}'
+          keystone_password: '{{password}}'
+          keystone_tenant_name: '{{tenant}}'
+
+As you can see, variables are pretty straightforward to use. Inside a string,
+use ``{{VARIABLE_NAME}}`` to reference a variable. Variables can also be used
+as part of a larger string. For example, if we have a variable named ``my_var``
+we can use it inside a string like this: ``some_value_{{my_var}}``
+
+In addition to defining your own variables and using them in handler
+configurations, you can reference variables that are defined in the
+``suites.yaml`` file that is located in the ``cloudify-system-tests``
+repository. For example, if the system tests ``suites.yaml`` contains a
+variable named ``datacentred_openstack_centos_7_image_id``, you can reference
+it just the same, without it being defined in your ``suites.yaml`` file:
+
+.. code-block:: yaml
+
+    handler_configurations:
+      some_openstack_env:
+        manager_blueprint: /path/to/my-manager-blueprint.yaml
+        inputs: /path/to/my-partially-filled-manager-blueprint-inputs.yaml
+        inputs_override:
+          image_id: '{{datacentred_openstack_centos_7_image_id}}'
 
 Teardown
 --------

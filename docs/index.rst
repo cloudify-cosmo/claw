@@ -46,7 +46,7 @@ system (i.e. ``git``, privately, as these configuration files will probably
 contain credentials, etc...)
 
 
-The next sections go into details showing how ``claw`` may be useful
+The next sections go into details showing how ``claw`` may be useful in
 simplifying your day to day interactions with Cloudify.
 
 
