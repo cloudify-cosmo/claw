@@ -16,6 +16,7 @@
 
 from setuptools import setup
 
+
 setup(
     name='claw',
     version='0.1',
