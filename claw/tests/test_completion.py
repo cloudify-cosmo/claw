@@ -14,6 +14,8 @@
 # limitations under the License.
 ############
 
+import uuid
+
 import sh
 
 from claw import patcher
@@ -26,13 +28,17 @@ class TestCompletion(tests.BaseTest):
     def setUp(self):
         super(TestCompletion, self).setUp()
         self.scripts_dir = self.workdir / 'scripts'
-        self.scripts_dir.mkdir()
-        for i in range(3):
-            (self.scripts_dir / 'script{0}.py'.format(i)).touch()
-        self.scripts = [f.basename() for f in self.scripts_dir.files()]
+        self.scripts_dir2 = self.workdir / 'scripts2'
+        self.scripts = []
+        for scripts_dir in [self.scripts_dir, self.scripts_dir2]:
+            scripts_dir.mkdir_p()
+            for _ in range(3):
+                (scripts_dir / 'script{0}.py'.format(uuid.uuid4())).touch()
+            self.scripts += [f.basename() for f in scripts_dir.files()]
         self.init()
         with patcher.YamlPatcher(self.settings.settings_path) as patch:
-            patch.obj['scripts'] = [str(self.scripts_dir)]
+            patch.obj['scripts'] = [str(self.scripts_dir),
+                                    str(self.scripts_dir2)]
         with patcher.YamlPatcher(self.settings.user_suites_yaml) as patch:
             obj = patch.obj
             stub = obj['handler_configurations'][tests.STUB_CONFIGURATION]

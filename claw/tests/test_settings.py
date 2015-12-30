@@ -48,17 +48,20 @@ class TestSettings(tests.BaseTest):
         self.assertEqual(self.settings.basedir, self.workdir)
         self.assertEqual(self.settings.configurations,
                          self.workdir / 'configurations')
+        self.assertEqual(self.settings.default_scripts_dir,
+                         self.workdir / 'scripts')
         self.assertEqual(self.settings.user_suites_yaml,
                          self.workdir / 'suites.yaml')
         self.assertEqual(self.settings.blueprints_yaml,
                          self.workdir / 'blueprints.yaml')
         self.assertEqual(self.settings.main_suites_yaml,
                          self.mock_suites_yaml)
-        self.assertEqual(self.settings.scripts, [])
+        self.assertEqual(self.settings.scripts,
+                         [self.settings.default_scripts_dir])
         self.assertEqual(self.settings.settings, {
-            'basedir': self.workdir.expanduser().abspath(),
-            'main_suites_yaml': self.mock_suites_yaml.expanduser().abspath(),
-            'scripts': []
+            'basedir': self.workdir,
+            'main_suites_yaml': self.mock_suites_yaml,
+            'scripts': [self.workdir / 'scripts']
         })
 
     def test_scripts(self):

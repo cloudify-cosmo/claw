@@ -15,6 +15,7 @@
 ############
 
 import json
+import uuid
 
 import sh
 
@@ -45,17 +46,20 @@ class ScriptTest(tests.BaseTestWithInit):
         self.assertIn('Cannot find a function', c.exception.stderr)
 
     def test_script_in_script_dirs(self):
-        scripts_dir = self.workdir / 'scripts'
-        scripts_dir.mkdir()
+        scripts_dir1 = self.settings.default_scripts_dir
+        scripts_dir2 = self.workdir / 'scripts2'
+        scripts_dir2.mkdir()
         with patcher.YamlPatcher(self.settings.settings_path) as patch:
-            patch.obj['scripts'] = [str(scripts_dir)]
-        value = 'VALUE'
-        script = "def script(): print '{}'".format(value)
-        script_name = 'my_script.py'
-        self._test(script=script, expected_output=value,
-                   script_dir=scripts_dir,
-                   script_name=script_name,
-                   script_arg=script_name)
+            patch.obj['scripts'] += [str(scripts_dir2)]
+        for scripts_dir in [scripts_dir1, scripts_dir2]:
+            gen_id = uuid.uuid4()
+            value = 'VALUE-{0}'.format(gen_id)
+            script = "def script(): print '{}'".format(value)
+            script_name = 'my-script-{0}.py'.format(gen_id)
+            self._test(script=script, expected_output=value,
+                       script_dir=scripts_dir,
+                       script_name=script_name,
+                       script_arg=script_name)
 
     def test_implicit_script_func_no_args(self):
         value = 'VALUE'

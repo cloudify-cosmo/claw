@@ -23,6 +23,7 @@ from path import path
 
 CLAW_SETTINGS = 'CLAW_SETTINGS'
 DEFAULT_SETTINGS_PATH = '~/.claw'
+DEFAULT_SCRIPTS_DIR = 'scripts'
 
 
 class Settings(object):
@@ -42,6 +43,10 @@ class Settings(object):
     @property
     def configurations(self):
         return self.basedir / 'configurations'
+
+    @property
+    def default_scripts_dir(self):
+        return self.basedir / DEFAULT_SCRIPTS_DIR
 
     @property
     def user_suites_yaml(self):
@@ -70,11 +75,14 @@ class Settings(object):
     def write_settings(self,
                        basedir,
                        main_suites_yaml_path):
+        basedir = os.path.abspath(os.path.expanduser(basedir))
+        default_scripts_dir = os.path.join(basedir, DEFAULT_SCRIPTS_DIR)
+        main_suites_yaml = os.path.abspath(
+            os.path.expanduser(main_suites_yaml_path))
         self.settings_path.write_text(yaml.safe_dump({
-            'basedir': os.path.abspath(os.path.expanduser(basedir)),
-            'main_suites_yaml': os.path.abspath(
-                os.path.expanduser(main_suites_yaml_path)),
-            'scripts': []
+            'basedir': basedir,
+            'main_suites_yaml': main_suites_yaml,
+            'scripts': [default_scripts_dir]
         }, default_flow_style=False))
 
     def load_suites_yaml(self, variables=True):

@@ -75,3 +75,4 @@ class InitTest(tests.BaseTest):
         self.assertEqual((self.settings.basedir / '.gitignore').text(),
                          resources.get('templates/gitignore.template'))
         self.assertTrue(self.settings.configurations.exists())
+        self.assertTrue(self.settings.default_scripts_dir.exists())

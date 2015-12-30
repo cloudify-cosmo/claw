@@ -87,6 +87,7 @@ def init(suites_yaml=None,
     (settings.basedir / '.gitignore').write_text(resources.get(
         'templates/gitignore.template'))
     settings.configurations.mkdir_p()
+    settings.default_scripts_dir.mkdir_p()
 
 
 @command
