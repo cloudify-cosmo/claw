@@ -2,8 +2,8 @@
 Scripts
 =======
 
-The script mechanism allows you to execute python scripts through ``claw`` and import a context object
-named ``cosmo``.
+The script mechanism allows you to execute python scripts through ``claw``
+and import a context object named ``cosmo``.
 
 
 Executing Scripts
@@ -150,19 +150,22 @@ Finally, to run this function:
     $ {PATH_TO_SCRIPT} John Doe 72
 
 
-All of the features presented above are exposed by the ``argh`` library, but it was
-worth mentioning them here because they could be quite useful. You can read more about ``argh``
-in http://argh.readthedocs.org.
+All of the features presented above are exposed by the ``argh`` library, but
+it was worth mentioning them here because they could be quite useful.
+You can read more about ``argh`` in http://argh.readthedocs.org.
 
 
 Cosmo
 -----
 
-Until now, all we showed, was how to run scripts through ``claw``. This ability on its own,
-is not very useful, as one could always run scripts directly through the ``python`` interpreter.
+Until now, all we showed, was how to run scripts through ``claw``.
+This ability on its own, is not very useful, as one could always run scripts
+directly through the ``python`` interpreter.
 
-This is where the ``cosmo`` object comes in. The ``cosmo`` object, serves as your entry point to... well, the cosmo.
-It encapulates different aspects and utils of a Cloudify manager environment, specified by ``CONFIGURATION_NAME``.
+This is where the ``cosmo`` object comes in. The ``cosmo`` object,
+serves as your entry point to... well, the cosmo. It encapulates different
+aspects and utils of a Cloudify manager environment, specified by
+``CONFIGURATION_NAME``.
 
 To use the ``cosmo`` object, add the following like to the script imports:
 
@@ -185,9 +188,11 @@ Some useful things that the ``cosmo`` holds:
 
 * ``cosmo.inputs`` will return the inputs used for bootstrapping.
 
-* ``cosmo.handler_configuration`` is the generated handler_configuration used when running system tests locally.
+* ``cosmo.handler_configuration`` is the generated handler_configuration used
+  when running system tests locally.
 
-* To see other things exposed by ``cosmo`` take a look at the ``claw.configuration:Configuration`` class code.
+* To see other things exposed by ``cosmo`` take a look at the
+  ``claw.configuration:Configuration`` class code.
 
 
 Script Generation
@@ -199,7 +204,9 @@ To generate a stub script suitable for execution by ``claw``, run the following:
 
     $ claw generate-script {PATH_TO_GENERATED_SCRIPT}
 
-The above will create a template script with a ``script`` function and a ``cosmo`` import already in place.
+The above will create a template script with a ``script`` function and a
+``cosmo`` import already in place.
 
 .. note::
-    ``claw init`` generates a script named ``example-script.py`` under ``$CLAW_HOME/scripts``.
+    ``claw init`` generates a script named ``example-script.py`` under
+    ``$CLAW_HOME/scripts``.

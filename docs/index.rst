@@ -3,8 +3,8 @@ Claw - Cloudify Almighty Wrapper
 
 Prerequisites
 -------------
-`cloudify-system-tests <https://github.com/cloudify-cosmo/cloudify-system-tests>`_ should be installed in editable mode in the
-relevant virtualenv.
+`cloudify-system-tests <https://github.com/cloudify-cosmo/cloudify-system-tests>`_
+should be installed in editable mode in the relevant virtualenv.
 
 
 Installation
@@ -16,26 +16,38 @@ Installation
 
 Getting Started
 ---------------
-#. Choose a location that will serve as the base directory for all ``claw`` related configuration and generated files. For example:
+#. Choose a location that will serve as the base directory for all ``claw``
+   related configuration and generated files. For example:
 
     .. code-block:: sh
 
         export CLAW_HOME=$HOME/claw
         mkdir -p $CLAW_HOME
 
-#. Initialize ``claw`` in the base directory. While we run ``init`` in a specific directory, note that initialization is only performed once, i.e. the init configuration will be stored in ``~/.claw`` and subsequent ``claw`` commands can be executed from any directory, not specifically the directory in which ``init`` was performed.
+#. Initialize ``claw`` in the base directory. While we run ``init`` in a
+   specific directory, note that initialization is only performed once,
+   i.e. the init configuration will be stored in ``~/.claw`` and subsequent
+   ``claw`` commands can be executed from any directory, not specifically the
+   directory in which ``init`` was performed.
 
     .. code-block:: sh
 
         cd $CLAW_HOME
         claw init
 
-The ``init`` command created two files: ``suites.yaml`` and ``blueprints.yaml`` which are covered in their own sections. It also created a directory named ``configurations`` which is where generated manager blueprint configurations will be placed and a directory named ``scripts`` prepopulated with an example script.
+The ``init`` command created two files: ``suites.yaml`` and ``blueprints.yaml``
+which are covered in their own sections. It also created a directory named
+``configurations`` which is where generated manager blueprint configurations
+will be placed and a directory named ``scripts`` prepopulated with an example
+script.
 
-It will make sense to have the base directory managed by some version control system (i.e. ``git``, privately, as these configuration files will probably contain credentials, etc...)
+It will make sense to have the base directory managed by some version control
+system (i.e. ``git``, privately, as these configuration files will probably
+contain credentials, etc...)
 
 
-The next sections go into details showing how ``claw`` may be useful simplifying your day to day interactions with Cloudify.
+The next sections go into details showing how ``claw`` may be useful
+simplifying your day to day interactions with Cloudify.
 
 
 Contents
