@@ -21,7 +21,7 @@ from setuptools import setup
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 additional_requirements = []
 if on_rtd:
-    additional_requirements.append('pika==0.9.13')
+    additional_requirements.append('pyev==0.8.1-4.04')
 
 setup(
     name='claw',
