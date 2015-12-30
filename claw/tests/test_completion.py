@@ -65,7 +65,7 @@ class TestCompletion(tests.BaseTest):
 
     def test_init(self):
         expected = self.help_args + ['-s', '--suites-yaml',
-                                     '-b', '--basedir',
+                                     '-h', '--claw-home',
                                      '-r', '--reset']
         self.assert_completion(expected=expected,
                                args=['init'])

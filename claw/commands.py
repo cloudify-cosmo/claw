@@ -62,7 +62,7 @@ cfy = bake(sh.cfy)
 
 @command
 def init(suites_yaml=None,
-         basedir=None,
+         claw_home=None,
          reset=False):
     """Initialize a claw environment."""
     if settings.settings_path.exists() and not reset:
@@ -76,14 +76,14 @@ def init(suites_yaml=None,
     if not os.path.exists(suites_yaml):
         raise argh.CommandError(
             'suites.yaml not found at {0}'.format(suites_yaml))
-    if not basedir:
-        basedir = os.getcwd()
-    settings.write_settings(basedir, suites_yaml)
+    if not claw_home:
+        claw_home = os.getcwd()
+    settings.write_settings(claw_home, suites_yaml)
     settings.user_suites_yaml.write_text(resources.get(
         'templates/suites.template.yaml'))
     settings.blueprints_yaml.write_text(resources.get(
         'templates/blueprints.template.yaml'))
-    (settings.basedir / '.gitignore').write_text(resources.get(
+    (settings.claw_home / '.gitignore').write_text(resources.get(
         'templates/gitignore.template'))
     settings.configurations.mkdir_p()
     settings.default_scripts_dir.mkdir_p()

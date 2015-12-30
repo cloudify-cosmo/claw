@@ -45,7 +45,7 @@ class TestSettings(tests.BaseTest):
 
     def test_properties(self):
         self._write()
-        self.assertEqual(self.settings.basedir, self.workdir)
+        self.assertEqual(self.settings.claw_home, self.workdir)
         self.assertEqual(self.settings.configurations,
                          self.workdir / 'configurations')
         self.assertEqual(self.settings.default_scripts_dir,
@@ -59,7 +59,7 @@ class TestSettings(tests.BaseTest):
         self.assertEqual(self.settings.scripts,
                          [self.settings.default_scripts_dir])
         self.assertEqual(self.settings.settings, {
-            'basedir': self.workdir,
+            'claw_home': self.workdir,
             'main_suites_yaml': self.mock_suites_yaml,
             'scripts': [self.workdir / 'scripts']
         })

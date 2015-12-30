@@ -25,7 +25,7 @@ class InitTest(tests.BaseTest):
     def test_basic(self, reset=False):
         with self.workdir:
             self.claw.init(reset=reset)
-        self._verify_init(expected_basedir=self.workdir,
+        self._verify_init(expected_claw_home=self.workdir,
                           expected_suites_yaml=self.main_suites_yaml_path)
 
     def test_settings_exists_no_reset(self):
@@ -42,7 +42,7 @@ class InitTest(tests.BaseTest):
         suites_yaml.touch()
         with self.workdir:
             self.claw.init(suites_yaml=suites_yaml)
-        self._verify_init(expected_basedir=self.workdir,
+        self._verify_init(expected_claw_home=self.workdir,
                           expected_suites_yaml=suites_yaml)
 
     def test_suites_yaml_does_not_exist(self):
@@ -53,26 +53,26 @@ class InitTest(tests.BaseTest):
                 self.claw.init(
                     suites_yaml='some_path_that_does_not_exist.yaml')
 
-    def test_explicit_basedir(self):
-        basedir = self.workdir / 'basedir'
-        basedir.mkdir()
+    def test_explicit_claw_home(self):
+        claw_home = self.workdir / 'claw-home'
+        claw_home.mkdir()
         with self.workdir:
             self.claw.init(suites_yaml=self.main_suites_yaml_path,
-                           basedir=basedir)
-        self._verify_init(expected_basedir=basedir,
+                           claw_home=claw_home)
+        self._verify_init(expected_claw_home=claw_home,
                           expected_suites_yaml=self.main_suites_yaml_path)
 
     def _verify_init(self,
-                     expected_basedir,
+                     expected_claw_home,
                      expected_suites_yaml):
         self.assertTrue(self.settings.settings_path.exists())
-        self.assertEqual(self.settings.basedir, expected_basedir)
+        self.assertEqual(self.settings.claw_home, expected_claw_home)
         self.assertEqual(self.settings.main_suites_yaml, expected_suites_yaml)
         self.assertEqual(self.settings.user_suites_yaml.text(),
                          resources.get('templates/suites.template.yaml'))
         self.assertEqual(self.settings.blueprints_yaml.text(),
                          resources.get('templates/blueprints.template.yaml'))
-        self.assertEqual((self.settings.basedir / '.gitignore').text(),
+        self.assertEqual((self.settings.claw_home / '.gitignore').text(),
                          resources.get('templates/gitignore.template'))
         self.assertEqual(
             (self.settings.default_scripts_dir / 'example-script.py').text(),

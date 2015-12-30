@@ -37,24 +37,24 @@ class Settings(object):
             os.environ.get(CLAW_SETTINGS, DEFAULT_SETTINGS_PATH)))
 
     @property
-    def basedir(self):
-        return path(self.settings['basedir'])
+    def claw_home(self):
+        return path(self.settings['claw_home'])
 
     @property
     def configurations(self):
-        return self.basedir / 'configurations'
+        return self.claw_home / 'configurations'
 
     @property
     def default_scripts_dir(self):
-        return self.basedir / DEFAULT_SCRIPTS_DIR
+        return self.claw_home / DEFAULT_SCRIPTS_DIR
 
     @property
     def user_suites_yaml(self):
-        return self.basedir / 'suites.yaml'
+        return self.claw_home / 'suites.yaml'
 
     @property
     def blueprints_yaml(self):
-        return self.basedir / 'blueprints.yaml'
+        return self.claw_home / 'blueprints.yaml'
 
     @property
     def main_suites_yaml(self):
@@ -73,14 +73,14 @@ class Settings(object):
         return self._settings
 
     def write_settings(self,
-                       basedir,
+                       claw_home,
                        main_suites_yaml_path):
-        basedir = os.path.abspath(os.path.expanduser(basedir))
-        default_scripts_dir = os.path.join(basedir, DEFAULT_SCRIPTS_DIR)
+        claw_home = os.path.abspath(os.path.expanduser(claw_home))
+        default_scripts_dir = os.path.join(claw_home, DEFAULT_SCRIPTS_DIR)
         main_suites_yaml = os.path.abspath(
             os.path.expanduser(main_suites_yaml_path))
         self.settings_path.write_text(yaml.safe_dump({
-            'basedir': basedir,
+            'claw_home': claw_home,
             'main_suites_yaml': main_suites_yaml,
             'scripts': [default_scripts_dir]
         }, default_flow_style=False))
