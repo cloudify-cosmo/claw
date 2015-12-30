@@ -213,6 +213,139 @@ might look like this:
         properties: datacentred_openstack_properties
 
 
+YAML Anchors (&), Aliases (*) and Merges (<<)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+While not specific to handler configurations, usage of YAML anchors, aliases
+and merges can greatly reduce repetition of complex configurations and improve
+reusability of different components in the handler configurations.
+
+In the following example, we'll see how YAML anchors, aliases and merges can be
+used in handler configurations.
+
+We'll start be giving an example of a somewhat complex annotated
+``suites.yaml``, and explain what's going on afterwards.
+
+.. code-block:: yaml
+
+    # Under this section, we put templates that will be used in manager
+    # blueprint override sections
+    manager_blueprint_override_templates:
+
+      # For now ignore the key 'openstack_dns' and notice the
+      # anchor (&) 'openstack_dns_servers_blueprint_override'
+      openstack_dns: &openstack_dns_servers_blueprint_override
+        node_templates.management_subnet.properties.subnet.dns_nameservers: [8.8.4.4, 8.8.8.8]
+
+      # For now ignore the key 'openstack_influx_port' and notice the
+      # anchor (&) 'openstack_openinflux_port_blueprint_override'
+      openstack_influx_port: &openstack_openinflux_port_blueprint_override
+        node_templates.management_security_group.properties.rules[append]:
+          port: 8086
+          remote_ip_prefix: 0.0.0.0/0
+
+    # Under this section, we put templates that will be used in inputs
+    # override sections
+    inputs_override_templates:
+
+      # For now ignore the key 'datacentred_openstack_env' and notice the
+      # anchor (&) 'datacentred_openstack_env_inputs'
+      datacentred_openstack_env: &datacentred_openstack_env_inputs
+        keystone_username: MY_USERNAME
+        keystone_password: MY_PASSWORD
+        keystone_tenant_name: MY_TENTANT_NAME
+        keystone_url: MY_KEYSTONE_URL
+        external_network_name: MY_EXTERNAL_NETWORK_NAME
+        image_id: MY_IMAGE_ID
+        flavor_id: MY_FLAVOR_ID
+        region: MY_REGION
+
+    # Under this section, we put templates that will be used in handler
+    # configurations
+    handler_configuration_templates:
+      # Notice the anchor (&) 'openstack_handler_configuration'
+      # also notice that in this section, templates are specified as list
+      # instead of a dict like the previous template sections.
+      # It is not required that this section will be a list (i.e. it can be a
+      # dict as well), but it is required that the previous sections remain
+      # dicts
+      - &openstack_handler_configuration
+        handler: openstack_handler
+        inputs: ~/dev/cloudify/cloudify-manager-blueprints/openstack-manager-blueprint-inputs.yaml
+        manager_blueprint: ~/dev/cloudify/cloudify-manager-blueprints/openstack-manager-blueprint.yaml
+
+    handler_configurations:
+
+      # Notice the anchor (&) 'datacentred_handler_configuration'
+      datacentred_openstack_env_plain: &datacentred_handler_configuration
+
+        # This is the first place aliases (*) and merges (<<) are used in this
+        # file. We merge into the 'datacentred_openstack_env_plain'
+        # handler configuration, the content of the handler configuration
+        # template whose anchor (&) is 'datacentred_openstack_env_plain'.
+        # Note, that while this is the first place aliases are used here, this
+        # is simply how to example is built. There is nothing stopping you
+        # from using them in the templates sections to reference previously
+        # defined templates.
+        <<: *openstack_handler_configuration
+
+        # we continue populating the handler configuration with regular values
+        properties: datacentred_openstack_properties
+
+        # here we use an alias (*) directly to set the value of
+        # 'inputs_override' to be the dict specified by the
+        # 'datacentred_openstack_env_inputs' anchor (&)
+        inputs_override: *datacentred_openstack_env_inputs
+
+      # Defining a modified datacentred handler configuration
+      datacentred_openstack_env_with_modified_dns:
+
+        # Notice that we merge (<<) the previously defined handler
+        # configuration anchored (&) by 'datacentred_handler_configuration'
+        <<: *datacentred_handler_configuration
+
+        # the only modification we make in this handler configuration is
+        # setting 'manager_blueprint_override' to have the value of the
+        # manager blueprint template anchored (&) with
+        # 'openstack_dns_servers_blueprint_override'
+        manager_blueprint_override: *openstack_dns_servers_blueprint_override
+
+      # Defining another modified datacentred handler configuration
+      datacentred_openstack_env_with_modified_dns_and_openinflux:
+
+        # Notice that we merge (<<) the previously defined handler
+        # configuration anchored (&) by 'datacentred_handler_configuration'
+        <<: *datacentred_handler_configuration
+
+        manager_blueprint_override:
+          # In this handler configuration, we merge (<<) both templates
+          # that were defined the the manager blueprint templates sections
+          <<: *openstack_dns_servers_blueprint_override
+          <<: *openstack_openinflux_port_blueprint_override
+
+
+Most of what is going on in the previous example, is inlined within the YAML
+as comments, so make sure you read through them to understand how it works.
+
+One thing to mention is that even though it may look verbose, we now have
+3 slightly different configurations all located close to each other with very
+little duplication. This enables us to bootstrap different (but similar)
+configurations as easy as:
+
+.. code-block:: sh
+
+    $ claw bootstrap datacentred_openstack_env_plain
+
+.. code-block:: sh
+
+    $ claw bootstrap datacentred_openstack_env_with_modified_dns
+
+.. code-block:: sh
+
+    $ claw bootstrap datacentred_openstack_env_with_modified_dns_and_openinflux
+
+(Probably not in parallel though, as they all share the same tenant and are
+likely to interfere with each other)
+
 Teardown
 --------
 pass
