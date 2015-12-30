@@ -14,7 +14,14 @@
 # limitations under the License.
 ############
 
+import os
+
 from setuptools import setup
+
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+additional_requirements = []
+if on_rtd:
+    additional_requirements.append('pika==0.9.13')
 
 setup(
     name='claw',
@@ -30,7 +37,7 @@ setup(
     install_requires=[
         'cloudify-system-tests',
         'argh',
-    ],
+    ] + additional_requirements,
     include_package_data=True,
     entry_points={
         'console_scripts': [
