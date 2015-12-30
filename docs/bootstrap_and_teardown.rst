@@ -81,7 +81,8 @@ This directory contains:
   manager blueprint directory (with the exception that the blueprint file was
   renamed to ``manager-blueprint.yaml``)
 * A ``handler_configuration.yaml`` file that can be used to run system tests on
-  the manager that was just bootstrapped.
+  the manager that was just bootstrapped. (with ``manager_ip`` properly
+  configured)
 
 In addition, ``cfy init`` and ``cfy bootstrap`` were executed in this directory
 by ``claw`` and ``.cloudify/config.yaml`` was configured so that you can see
@@ -181,6 +182,36 @@ it just the same, without it being defined in your ``suites.yaml`` file:
         inputs: /path/to/my-partially-filled-manager-blueprint-inputs.yaml
         inputs_override:
           image_id: '{{datacentred_openstack_centos_7_image_id}}'
+
+
+System Tests Fields
+^^^^^^^^^^^^^^^^^^^
+As mentioned previously, when ``claw bootstrap`` is called, it will generate
+a file named ``handler-configuration.yaml`` under
+``$CLAW_HOME/configurations/{CONFIGURATION_NAME}`` that is suitable for use
+when running system tests locally on the bootstrapped manager.
+
+For this file to be fully suitable, it is up to you, to add the relevant fields
+to the handler configuration. These fields are ``properties`` and ``handler``.
+
+The ``properties`` field should be a name that is specified under the
+``handler_properties`` section of the system tests ``suites.yaml``.
+
+The ``handler`` field should be a handler that matches the environment on
+which the bootstrap is performed.
+
+For example, a handler configuration for running tests on datacentred openstack
+might look like this:
+
+.. code-block:: yaml
+
+    handler_configurations:
+      some_openstack_env:
+        manager_blueprint: /path/to/my-manager-blueprint.yaml
+        inputs: /path/to/my-manager-blueprint-inputs.yaml
+        handler: openstack_handler
+        properties: datacentred_openstack_properties
+
 
 Teardown
 --------
