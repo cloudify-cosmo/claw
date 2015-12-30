@@ -11,7 +11,7 @@ Installation
 ------------
 .. code-block:: sh
 
-    pip install https://github.com/dankilman/claw/archive/master.tar.gz
+    $ pip install https://github.com/dankilman/claw/archive/master.tar.gz
 
 
 Getting Started
@@ -21,8 +21,8 @@ Getting Started
 
     .. code-block:: sh
 
-        export CLAW_HOME=$HOME/claw
-        mkdir -p $CLAW_HOME
+        $ export CLAW_HOME=$HOME/claw
+        $ mkdir -p $CLAW_HOME
 
 #. Initialize ``claw`` in the base directory. While we run ``init`` in a
    specific directory, note that initialization is only performed once,
@@ -32,8 +32,8 @@ Getting Started
 
     .. code-block:: sh
 
-        cd $CLAW_HOME
-        claw init
+        $ cd $CLAW_HOME
+        $ claw init
 
 The ``init`` command created two files: ``suites.yaml`` and ``blueprints.yaml``
 which are covered in their own sections. It also created a directory named
