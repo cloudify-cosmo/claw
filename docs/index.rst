@@ -56,6 +56,7 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   bash_completion
    bootstrap_and_teardown
    scripts
 
