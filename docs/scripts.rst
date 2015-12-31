@@ -1,14 +1,11 @@
 =======
 Scripts
 =======
-
 The script mechanism allows you to execute python scripts through ``claw``
 and import a context object named ``cosmo``.
 
-
 Executing Scripts
 -----------------
-
 There are several ways to execute scripts:
 
 #.
@@ -53,7 +50,6 @@ There are several ways to execute scripts:
 
             $ {PATH_TO_SCRIPT}
 
-
 Script Functions
 ----------------
 When a script is executed, if no function name is supplied as an additional
@@ -69,7 +65,6 @@ it will be executed instead (``my_function`` in the example above).
 
 Script Function Arguments
 -------------------------
-
 Functions are executed by leveraging the ``argh`` library. This library makes it
 easy to pass additional configuration to the function with very little effort
 in terms of argument parsing.
@@ -154,10 +149,8 @@ All of the features presented above are exposed by the ``argh`` library, but
 it was worth mentioning them here because they could be quite useful.
 You can read more about ``argh`` in http://argh.readthedocs.org.
 
-
 Cosmo
 -----
-
 Until now, all we showed, was how to run scripts through ``claw``.
 This ability on its own, is not very useful, as one could always run scripts
 directly through the ``python`` interpreter.
@@ -194,10 +187,8 @@ Some useful things that the ``cosmo`` holds:
 * To see other things exposed by ``cosmo`` take a look at the
   ``claw.configuration:Configuration`` class code.
 
-
 Script Generation
 -----------------
-
 To generate a stub script suitable for execution by ``claw``, run the following:
 
 .. code-block:: sh

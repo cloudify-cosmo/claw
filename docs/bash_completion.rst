@@ -1,6 +1,5 @@
 Bash Completion
 ===============
-
 Working with ``claw`` can get quite verbose at times due to long descriptive
 configuration and blueprint names and many options that may be passed as
 arguments.
@@ -11,7 +10,6 @@ this part even if you're feeling lazy.
 
 Virtualenvwrapper
 -----------------
-
 If you use ``virtualenvwrapper``, a clean solution to have autocomplete only
 available when running inside the Cloudify related virtualenv, would be to add
 it to the virtualenv ``postactivate`` script, like this:
@@ -30,7 +28,6 @@ Next, add the following to the ``postactivate`` script:
 
 Plain Bash
 ----------
-
 If you don't use ``virtualenvwrapper``, consider using it. It's
 great.
 

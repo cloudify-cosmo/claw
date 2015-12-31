@@ -6,13 +6,11 @@ Prerequisites
 `cloudify-system-tests <https://github.com/cloudify-cosmo/cloudify-system-tests>`_
 should be installed in editable mode in the relevant virtualenv.
 
-
 Installation
 ------------
 .. code-block:: sh
 
     $ pip install https://github.com/dankilman/claw/archive/master.tar.gz
-
 
 Getting Started
 ---------------
@@ -45,10 +43,8 @@ It will make sense to have the base directory managed by some version control
 system (i.e. ``git``, privately, as these configuration files will probably
 contain credentials, etc...)
 
-
 The next sections go into details showing how ``claw`` may be useful in
 simplifying your day to day interactions with Cloudify.
-
 
 Contents
 ========

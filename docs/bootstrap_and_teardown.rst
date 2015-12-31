@@ -1,7 +1,6 @@
 ======================
 Bootstrap and Teardown
 ======================
-
 The main reason ``claw`` was written in the first place, was to simplify the
 process of bootstrapping during development.
 
@@ -53,7 +52,6 @@ Bootstrap and Handler Configurations
 
 Simplest example
 ^^^^^^^^^^^^^^^^
-
 For this section we'll use the following basic ``suites.yaml``:
 
 .. code-block:: yaml
@@ -102,7 +100,6 @@ more advanced ``handler_configuration`` features.
 
 Inputs and Manager Blueprint Override
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 Now, we'll build upon the previous example, making use of ``inputs_override``
 and ``manager_blueprint_override``:
 
@@ -183,7 +180,6 @@ it just the same, without it being defined in your ``suites.yaml`` file:
         inputs_override:
           image_id: '{{datacentred_openstack_centos_7_image_id}}'
 
-
 System Tests Fields
 ^^^^^^^^^^^^^^^^^^^
 As mentioned previously, when ``claw bootstrap`` is called, it will generate
@@ -211,7 +207,6 @@ might look like this:
         inputs: /path/to/my-manager-blueprint-inputs.yaml
         handler: openstack_handler
         properties: datacentred_openstack_properties
-
 
 YAML Anchors (&), Aliases (*) and Merges (<<)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
