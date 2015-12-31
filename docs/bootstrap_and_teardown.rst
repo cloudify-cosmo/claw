@@ -118,7 +118,7 @@ and ``manager_blueprint_override``:
 
 The previous handler configuration uses a manager blueprint that needs some
 fix to the management network subnet dns configuration.
-In addition an inputs file that has everything filled excpet for the username,
+In addition an inputs file that has everything filled except for the username,
 password and tenant name. Of course, it also configures ``inputs_override`` and
 ``manager_blueprint_override``.
 
@@ -131,7 +131,7 @@ Similar to the previous section, running:
 will bootstrap the manager.
 
 The new thing here, is that the generated ``inputs.yaml`` file is not just a
-copy of the original inputs file, but rather a merge of its content, overriden
+copy of the original inputs file, but rather a merge of its content, overridden
 by items specified in ``inputs_override``. Similarly, the copy of the manager
 blueprint was modified so the the ``management_subnet`` node template, has the
 required ``dns_nameservers`` property in place.

@@ -114,8 +114,61 @@ by items specified in ``inputs_override``.
 
 Variables
 ^^^^^^^^^
-pass
+Variables behave in a similar manner to how they behave in ``suites.yaml``
+as described in :doc:`bootstrap_and_teardown`.
+
+There are two things to note, though.
+
+First, just as the handler configuration using variables in the user
+``suites.yaml`` can reference variables defined in the system tests
+``suites.yaml``, blueprint configurations can use variables defined in
+the system tests ``suites.yaml``, the user defined ``suites.yaml`` and
+variables defined directly in ``blueprints.yaml``.
+
+In addition, the handler configuration ``properties`` are exposed in the
+variables used in blueprint configurations. For example, building the previous
+section:
+
+.. code-block:: yaml
+
+    variables:
+      agent_user: ubuntu
+
+    blueprints:
+
+      openstack_nodecellar:
+        blueprint: ~/dev/cloudify/cloudify-nodecellar-example/openstack-blueprint.yaml
+        inputs: ~/dev/cloudify/cloudify-nodecellar-example/inputs/openstack.yaml.template
+        inputs_override:
+          image: '{{properties.ubuntu_trusty_image_id}}'
+          flavor: '{{properties.small_flavor_id}}'
+          agent_user: '{{agent_user}}'
+
+
+The ``openstack_nodecellar`` blueprint configuration uses the ``agent_user``
+variable defined in the same file and ``properties.ubuntu_trusty_image_id``
+and ``properties.small_flavor_id`` that come from the properties defined
+in the handler configurations. These are the same properties used by system
+tests when they use ``self.env.ubuntu_trusty_image_id`` for example.
+
+The nice thing about using properties is that they will contain correct values
+when switching between different environments as opposed to hard coded values
+or variable references.
 
 Undeploy
 --------
-pass
+To undeploy (execute uninstall workflow, delete deployment and delete
+blueprint), assuming the blueprint configuration is named
+``openstack_nodecellar`` run:
+
+.. code-block:: sh
+
+    $ claw undeploy datacentred_openstack openstack_nodecellar
+
+To cancel currently running executions before starting the undeploy process,
+pass the ``--cancel-executions`` flag to the ``claw undeploy`` command.
+
+.. warning::
+    Internally, ``claw undeploy`` will pass ``--ignore-live-nodes`` to the
+    underlying ``cfy deployments delete`` command to save
+    you some typing. You should be aware of this when using this command
