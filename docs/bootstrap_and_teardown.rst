@@ -386,6 +386,280 @@ like:
 without having to add a new configuration only for the sake of overriding some
 branches.
 
+Overrides Syntax
+----------------
+Internally, ``claw`` uses and extends the
+``cosmo_tester.framework.utils:YamlPatcher`` to implement the overriding logic.
+
+First we'll go over features that are provided by the original ``YamlPatcher``.
+Next, we'll show an override feature that only exists in ``claw`` (for now).
+
+For the following examples we'll focus on manager blueprint overrides
+because they tend to get nested and require more advanced overrides, but there
+is nothing stopping you from applying the same methods to inputs override if
+your heart desires.
+
+Path Based Overrides
+^^^^^^^^^^^^^^^^^^^^
+Overrides are based on the path to the key/value.
+
+Manager blueprint snippet:
+
+.. code-block:: yaml
+
+    node_templates:
+      management_vm: ...
+      management_subnet: ...
+      webui: ...
+
+If we wanted to add a full note template to the previous example we'd have an
+override like this:
+
+.. code-block:: yaml
+
+    manager_blueprint_override_templates:
+      new_node_in_blueprint: &new_node
+        # You would usually have a single override under an override template,
+        # but there is nothing stopping you from having multiple overrides
+        # under the same template if this is what you need.
+        node_templates.my_new_node:
+          type: cloudify.nodes.Root
+          ...
+
+The resulting YAML will look something like:
+
+.. code-block:: yaml
+
+    node_templates:
+      management_vm: ...
+      management_subnet: ...
+      webui: ...
+      my_new_node:
+        type: cloudify.nodes.Root
+        ...
+
+(after applying the override using one of the methods described in this page)
+
+.. note::
+    Overriding (or adding a value) that is not nested is still path based, only
+    the path to the overridden key is simply the property name.
+    This usually applies to inputs overrides as they are mostly not nested.
+    (You can find examples of such of overrides in previous sections on this
+    page)
+
+.. note::
+    Overriding a nested path that doesn't exist will simply create this path
+    for you.
+
+    For example, based on this simple YAML:
+
+    .. code-block:: yaml
+
+        node_templates:
+          empty_node: {}
+
+    An override like ``node_template.empty_node.some.nested.path: value``, will
+    result in a YAML similar to this:
+
+    .. code-block:: yaml
+
+        node_templates:
+          empty_node:
+            some:
+              nested:
+                path: value
+
+.. note::
+    If an element in a path contains a dot (``.``), you can escape the dot
+    using backslash (``\``).
+
+    For example, if we wanted to add a ``configure`` override to some node
+    template lifecycle operation:
+
+    .. code-block:: yaml
+
+        node_templates:
+          some_node:
+            interfaces:
+              cloudify.interfaces.lifecycle:
+                create: ...
+
+    We'd have something like:
+
+    .. code-block:: yaml
+
+        manager_blueprint_override_templates:
+          configure_lifecycle_operation: &lifecycle_operation
+            node_templates.some_node.interfaces.cloudify\.interfaces\.lifecycle.configure:
+              implementation: ...
+              inputs: ...
+
+    And the resulting YAML will look something like:
+
+    .. code-block:: yaml
+
+        node_templates:
+          some_node:
+            interfaces:
+              cloudify.interfaces.lifecycle:
+                create: ...
+                configure:
+                  implementation: ..
+                  inputs: ...
+
+    (after applying the override using one of the methods described in this
+    page)
+
+Overriding Values in Lists
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+To override a value of some list item, you can you the ``[SOME_INDEX]``
+directive.
+
+For example, if we had this in a manager blueprint:
+
+    .. code-block:: yaml
+
+        node_templates:
+          some_node:
+            relationships:
+              - type: ...
+                target: ...
+              - type: some.relationship.type
+                target: ...
+
+And we wanted to change the type of the second relationship, we'd have an
+override similar to this:
+
+.. code-block:: yaml
+
+    manager_blueprint_override_templates:
+      change_rel_type: &rel_type
+        # note that indexing is zero-based (i.e. the second element is
+        # referenced by index 1)
+        node_templates.some_node.relationships[1].type: some.other.relationship.type
+
+The resulting YAML will look something like this:
+
+.. code-block:: yaml
+
+    node_templates:
+      some_node:
+        relationships:
+          - type: ...
+            target: ...
+          - type: some.other.relationship.type
+            target: ...
+
+(after applying the override using one of the methods described in this page)
+
+If, on the other hand, we wanted to add a new relationship, we'd use the
+``[append]`` directive:
+
+.. code-block:: yaml
+
+    manager_blueprint_override_templates:
+      append_rel: &append_rel
+        node_templates.some_node.relationships[append]:
+            type: ...
+            target: some_new_target_node
+
+The resulting YAML will look something like this:
+
+.. code-block:: yaml
+
+    node_templates:
+      some_node:
+        relationships:
+          - type: ...
+            target: ...
+          - type: ...
+            target: ...
+          - type: ...
+            target: some_new_target_node
+
+(after applying the override using one of the methods described in this page)
+
+Function Based Overrides (Claw Feature Only)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+There may be times when you need to do some advanced override that is not
+catered by the existing mechanism.
+
+To enable this, ``claw`` extends the system tests ``YamlPatcher`` with an
+ability to specify a function that will accept the current overridden value
+as its first argument (or ``None`` if no current value exists) and additional
+optional arguments and keyword arguments.
+
+We'll implement a simple override function that add appends exclamation marks
+to the current value (we will also make it configurable)
+
+.. code-block:: python
+
+    # lives in some.example.module
+
+    def add_excitement(current_value,
+                       excitement_count=3,
+                       excitement_char='!'):
+        assert isinstance(current_value, basestring)
+        return '{0}{1}'.format(current_value,
+                               excitement_char * excitement_count)
+
+
+Example YAML:
+
+.. code-block:: yaml
+
+    node_templates:
+      management_vm:
+        properties:
+          property1: value1
+          property2: value2
+          property3: value3
+
+
+To use the function we just created we'll define an override that has this
+structure:
+
+.. code-block:: yaml
+
+    func: path.to.func.module:function_name
+    # the following two are optional
+    args: [1,2,3]
+    kwargs: {some_kwarg: value, some_kwarg2: 2}
+
+Let's apply this structure to override values in our example
+
+.. code-block:: yaml
+
+    manager_blueprint_override_templates:
+      change_props: &change_props_anchor
+        node_templates.management_vm.properties.property1:
+          func: some.example.module:add_excitement
+        # using the args syntax
+        node_templates.management_vm.properties.property2:
+          func: some.example.module:add_excitement
+          args: [5]
+        # using the kwargs syntax
+        node_templates.management_vm.properties.property3:
+          func: some.example.module:add_excitement
+          kwargs: {excitement_count: 2, excitement_char: ?}
+
+The resulting YAML will look something like this:
+
+.. code-block:: yaml
+
+    node_templates:
+      management_vm:
+        properties:
+          property1: value1!!!
+          property2: value2!!!!!
+          property3: value3??
+
+(after applying the override using one of the methods described in this page)
+
+.. note::
+    ``claw`` comes with 2 built-in override functions to filter values from
+    lists and dictionaries. They can be found at ``claw.patcher:filter_list``
+    and ``claw.patcher:filter_dict``.
 
 Teardown
 --------

@@ -45,7 +45,7 @@ There are several ways to execute scripts:
     the ``cosmo`` context, will be of the configuration that was ``claw generate``-ed or
     ``claw bootstrap``-ed most recently.
 
-    .. note::
+    .. tip::
         By adding ``#! /usr/bin/env claw`` as the first line of an executable script,
         a script can be executed by calling it directly.
 
