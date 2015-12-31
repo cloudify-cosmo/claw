@@ -50,7 +50,7 @@ others.
 Bootstrap and Handler Configurations
 ------------------------------------
 
-Simplest example
+Simplest Example
 ^^^^^^^^^^^^^^^^
 For this section we'll use the following basic ``suites.yaml``:
 
@@ -122,7 +122,7 @@ In addition an inputs file that has everything filled excpet for the username,
 password and tenant name. Of course, it also configures ``inputs_override`` and
 ``manager_blueprint_override``.
 
-Simliar to the previous section, running:
+Similar to the previous section, running:
 
 .. code-block:: sh
 
