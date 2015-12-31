@@ -239,6 +239,9 @@ We'll start be giving an example of a somewhat complex annotated
       # For now ignore the key 'openstack_influx_port' and notice the
       # anchor (&) 'openstack_openinflux_port_blueprint_override'
       openstack_influx_port: &openstack_openinflux_port_blueprint_override
+        # The [append] means that this dict (that contains port and
+        # remote_ip_prefix) will be added to the rules list in the overridden
+        # manager blueprint
         node_templates.management_security_group.properties.rules[append]:
           port: 8086
           remote_ip_prefix: 0.0.0.0/0
@@ -346,6 +349,58 @@ configurations as easy as:
 (Probably not in parallel though, as they all share the same tenant and are
 likely to interfere with each other)
 
+Inputs and Manager Blueprint Override as Command Line Arguments
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+We can now go back to the previous example, where we (not so smoothly) ignored
+the keys in the ``inputs_override_templates`` and
+``manager_blueprint_override_templates``.
+
+What if we had many small override snippets in these sections? Obviously, we
+can't create a configuration for each combination, as there will be too many
+pretty soon and the ``suites.yaml`` file will become a mess to maintain.
+
+For that, ``claw`` accepts ``--inputs-override (-i)`` and
+``--manager-blueprint-override (-b)`` as flags to the ``claw bootstrap``
+command, where several overrides can be passed in a single ``claw bootstrap``
+invocation. The values are the key names in the ``inputs_override_templates``
+and ``manager_blueprint_override_templates`` sections.
+
+Building on our previous example, if we only had the
+``datacentred_openstack_env_plain`` handler configuration, we could do:
+
+.. code-block:: sh
+
+    $ claw bootstrap datacentred_openstack_env_plain -b openstack_dns -b openstack_influx_port
+
+To override the manager blueprints with overrides from the ``openstack_dns``
+and ``openstack_influx_port`` manager blueprint templates.
+
+Similarly, if we had an inputs override template named ``my_dev_branches`` and
+we wanted to bootstrap with our dev branches override we could do something
+like:
+
+.. code-block:: sh
+
+    $ claw bootstrap datacentred_openstack_env_plain -i my_dev_branches
+
+without having to add a new configuration only for the sake of overriding some
+branches.
+
+
 Teardown
 --------
-pass
+There is not much to say about tearing down an environment bootstrapped by
+``claw``.
+
+If we bootstrapped an environment based on ``my_handler_configuration``, we can
+perform teardown like this:
+
+.. code-block:: sh
+
+    $ claw teardown my_handler_configuration
+
+.. warning::
+    Internally, ``claw teardown`` will pass ``--force`` and
+    ``--ignore-deployments`` to the underlying ``cfy teardown`` command to save
+    you some typing. You should be aware of this to avoid unfortunate
+    accidental teardowns.
