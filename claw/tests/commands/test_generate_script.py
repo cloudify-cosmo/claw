@@ -24,9 +24,9 @@ class GenerateScriptTest(tests.BaseTestWithInit):
         super(GenerateScriptTest, self).setUp()
         self.claw.generate(tests.STUB_CONFIGURATION)
 
-    def test_basic(self, rewrite=False):
+    def test_basic(self, reset=False):
         script_path = self.workdir / 'script.sh'
-        self.claw('generate-script', script_path, rewrite=rewrite)
+        self.claw('generate-script', script_path, reset=reset)
         script = sh.Command(script_path)
         self.assertIn("'handler': 'openstack_handler'",
                       script().stdout.strip())
@@ -41,4 +41,4 @@ class GenerateScriptTest(tests.BaseTestWithInit):
 
     def test_exists_with_rewrite(self):
         self.test_basic()
-        self.test_basic(rewrite=True)
+        self.test_basic(reset=True)

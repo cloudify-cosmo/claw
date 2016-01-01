@@ -88,7 +88,7 @@ def init(suites_yaml=None,
     settings.configurations.mkdir_p()
     settings.default_scripts_dir.mkdir_p()
     generate_script(settings.default_scripts_dir / 'example-script.py',
-                    rewrite=True)
+                    reset=True)
 
 
 @command
@@ -102,7 +102,7 @@ def init(suites_yaml=None,
 def generate(configuration,
              inputs_override=None,
              manager_blueprint_override=None,
-             reset_config=False):
+             reset=False):
     """Generate a configuration."""
     conf = Configuration(configuration)
     suites_yaml = settings.load_suites_yaml()
@@ -118,7 +118,7 @@ def generate(configuration,
         blueprint_override_key='manager_blueprint_override',
         blueprint_override_template_key='manager_blueprint_override_templates',
         blueprint_path=conf.manager_blueprint_path,
-        reset_conf=reset_config,
+        reset=reset,
         properties=None,
         user_yaml=suites_yaml)
     with settings.configurations:
@@ -149,7 +149,7 @@ def generate_blueprint(configuration, blueprint, reset=False):
         blueprint_override_key='blueprint_override',
         blueprint_override_template_key=None,
         blueprint_path=blueprint.blueprint_path,
-        reset_conf=reset,
+        reset=reset,
         properties=conf.properties,
         user_yaml=blueprints_yaml)
 
@@ -165,7 +165,7 @@ def _generate_configuration(cmd_inputs_override,
                             blueprint_override_key,
                             blueprint_override_template_key,
                             blueprint_path,
-                            reset_conf,
+                            reset,
                             properties,
                             user_yaml):
     if conf_name not in user_yaml[conf_key]:
@@ -178,7 +178,7 @@ def _generate_configuration(cmd_inputs_override,
     original_inputs_path = os.path.expanduser(conf.get('inputs', ''))
     original_blueprint_path = os.path.expanduser(conf[conf_blueprint_key])
     if conf_obj.exists():
-        if reset_conf:
+        if reset:
             shutil.rmtree(conf_obj.dir)
         else:
             raise ALREADY_INITIALIZED
@@ -243,14 +243,14 @@ def status(configuration):
 def bootstrap(configuration,
               inputs_override=None,
               manager_blueprint_override=None,
-              reset_config=False):
+              reset=False):
     """Bootstrap a configuration based environment."""
     conf = Configuration(configuration)
-    if not conf.exists() or reset_config:
+    if not conf.exists() or reset:
         generate(configuration,
                  inputs_override=inputs_override,
                  manager_blueprint_override=manager_blueprint_override,
-                 reset_config=reset_config)
+                 reset=reset)
     with conf.dir:
         cfy.init().wait()
         with conf.patch.cli_config as patch:
@@ -474,9 +474,9 @@ def script(configuration, script_path, script_args):
 
 
 @command
-def generate_script(script_path, rewrite=False):
+def generate_script(script_path, reset=False):
     """Generate a scaffold script."""
-    if os.path.exists(script_path) and not rewrite:
+    if os.path.exists(script_path) and not reset:
         raise argh.CommandError('{0} already exists'.format(script_path))
     with open(script_path, 'w') as f:
         f.write(resources.get('templates/script.template.py'))

@@ -67,7 +67,7 @@ class BaseBootstrapTest(tests.BaseTestWithInit):
                             '-i', 'mock_inputs2',
                             '-b', 'mock_blueprint1',
                             '-b', 'mock_blueprint2',
-                            reset_config=reset)
+                            reset=reset)
         conf = configuration.Configuration(configuration_name)
         self.assertTrue(conf.cli_config['colors'])
         self.assertEqual(conf.handler_configuration['manager_ip'], ip)

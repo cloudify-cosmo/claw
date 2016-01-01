@@ -80,7 +80,7 @@ class TestCompletion(tests.BaseTest):
         expected = self.configurations + [
             '-i', '--inputs-override',
             '-b', '--manager-blueprint-override',
-            '-r', '--reset-config']
+            '-r', '--reset']
         expected += self.help_args
         self.assert_completion(expected=expected,
                                args=[command])
@@ -175,7 +175,7 @@ class TestCompletion(tests.BaseTest):
                                      self.existing_configurations[0]])
 
     def test_generate_script(self):
-        expected = ['-r', '--rewrite'] + self.help_args
+        expected = ['-r', '--reset'] + self.help_args
         self.assert_completion(expected=expected,
                                args=['generate-script'],
                                filter_non_options=True)
