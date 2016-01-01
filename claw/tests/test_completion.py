@@ -154,16 +154,6 @@ class TestCompletion(tests.BaseTest):
         self.assert_completion(expected=expected,
                                args=['overview'])
 
-    def test_events(self):
-        self._prepare_existing_configurations()
-        options = self.help_args + ['-o', '--output',
-                                    '-b', '--batch-size',
-                                    '-i', '--include-logs',
-                                    '-t', '--timeout']
-        expected = self.existing_configurations + options
-        self.assert_completion(expected=expected,
-                               args=['events'])
-
     def test_script(self):
         self._prepare_existing_configurations()
         expected = self.existing_configurations + self.help_args
