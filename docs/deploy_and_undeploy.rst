@@ -4,9 +4,9 @@ The main use case for using ``claw`` in the first place is to bootstrap
 Cloudify management environments as painlessly as possible. But, once we have
 that in place, why not leverage all this context we have.
 
-One aspect in which this takes place is to allow easy, repeatable deployment
-- which means blueprint upload, deployment creation and install workflow
-execution; and undeployment - which means uninstall workflow execution,
+One aspect in which this takes place, is to allow fast, repeatable deployments
+- which means blueprint upload, deployment creation and ``install`` workflow
+execution; and undeployment - which means ``uninstall`` workflow execution,
 deployment deletion and blueprint deletion.
 
 Similarly to the bootstrap process, on first look, it would appear doing this
@@ -23,18 +23,18 @@ yet, but with it, this process should be even simpler.
 
 So, how can ``claw`` simplify this process?
 
-The answer lies on a configuration mechanism that if very similar in nature
+The answer lies in a configuration mechanism that is very similar in nature
 to the handler configuration mechanism that has been described in
 :doc:`bootstrap_and_teardown`.
 
 Configurations
 --------------
 During ``claw init``, in addition to the generated ``suites.yaml`` file,
-a file named ``blueprints.yaml`` was also generated. The structure of this file
-is similar to that of ``suites.yaml`` but much simpler.
+a file named ``blueprints.yaml`` is also generated. The structure of this file
+is similar to that of ``suites.yaml``.
 
 It has two sections: ``variables``, which should be familiar to you from
-``suites.yaml`` and ``blueprints``, which logically, serves the same purpose of
+``suites.yaml`` and ``blueprints``, which logically, serves the same purpose as
 ``handler_configurations`` in ``suites.yaml``.
 
 Deploy and Blueprint Configurations
@@ -61,8 +61,8 @@ With this blueprint configuration in place, you can run (from any directory):
 
     $ claw deploy datacentred_openstack openstack_nodecellar
 
-To deploy (upload blueprint, create deployment and execute install workflow)
-nodecellar on the ``datacentred_openstack`` environment.
+To deploy nodecellar on the ``datacentred_openstack`` environment. (upload
+blueprint, create deployment and execute ``install`` workflow)
 
 The command above created a directory at
 ``$CLAW_HOME/configurations/datacentred_openstack/blueprints/openstack_nodecellar``.
@@ -78,7 +78,7 @@ This directory contains:
 
 Inputs and Blueprint Override
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Now, we'll build upon the previous example, making use of ``inputs_override``:
+Next, we'll build upon the previous example, making use of ``inputs_override``:
 
 .. code-block:: yaml
 
@@ -90,8 +90,8 @@ Now, we'll build upon the previous example, making use of ``inputs_override``:
       flavor: MY_FLAVOR
       agent_user: AGENT_USERNAME
 
-The previous blueprint configuration uses a the default openstack nodecellar
-blueprint and the inputs template file that comes with. In addition, it uses
+The previous blueprint configuration uses the default openstack nodecellar
+blueprint and the inputs template file that comes with it. In addition, it uses
 ``inputs_override`` to override the ``image``, ``flavor`` and ``agent_user``
 inputs.
 
@@ -126,8 +126,8 @@ the system tests ``suites.yaml``, the user defined ``suites.yaml`` and
 variables defined directly in ``blueprints.yaml``.
 
 In addition, the handler configuration ``properties`` are exposed in the
-variables used in blueprint configurations. For example, building the previous
-section:
+variables used in blueprint configurations. For example, building upon the
+previous section:
 
 .. code-block:: yaml
 
@@ -148,16 +148,16 @@ section:
 The ``openstack_nodecellar`` blueprint configuration uses the ``agent_user``
 variable defined in the same file and ``properties.ubuntu_trusty_image_id``
 and ``properties.small_flavor_id`` that come from the properties defined
-in the handler configurations. These are the same properties used by system
+in the handler configuration. These are the same properties used by system
 tests when they use ``self.env.ubuntu_trusty_image_id`` for example.
 
-The nice thing about using properties is that they will contain correct values
+The nice thing about using properties, is that they will contain correct values
 when switching between different environments as opposed to hard coded values
-or variable references.
+or plain variable references.
 
 Undeploy
 --------
-To undeploy (execute uninstall workflow, delete deployment and delete
+To undeploy (execute ``uninstall`` workflow, delete deployment and delete
 blueprint), assuming the blueprint configuration is named
 ``openstack_nodecellar`` run:
 
@@ -171,4 +171,4 @@ pass the ``--cancel-executions`` flag to the ``claw undeploy`` command.
 .. warning::
     Internally, ``claw undeploy`` will pass ``--ignore-live-nodes`` to the
     underlying ``cfy deployments delete`` command to save
-    you some typing. You should be aware of this when using this command
+    you some typing. You should be aware of this when using this command.
