@@ -155,6 +155,11 @@ The nice thing about using properties, is that they will contain correct values
 when switching between different environments as opposed to hard coded values
 or plain variable references.
 
+Reset Configuration
+-------------------
+``claw deploy`` accept a ``--reset`` flag that will remove the current
+configuration directory. Use with care.
+
 Undeploy
 --------
 To undeploy (execute ``uninstall`` workflow, delete deployment and delete

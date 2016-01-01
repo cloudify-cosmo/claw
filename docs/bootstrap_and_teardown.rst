@@ -656,6 +656,11 @@ The resulting YAML will look something like this:
     lists and dictionaries. They can be found at ``claw.patcher:filter_list``
     and ``claw.patcher:filter_dict``.
 
+Reset Configuration
+-------------------
+``claw bootstrap`` accept a ``--reset`` flag that will remove the current
+configuration directory. Use with care.
+
 Teardown
 --------
 There is not much to say about tearing down an environment bootstrapped by

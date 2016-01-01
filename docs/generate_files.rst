@@ -46,3 +46,8 @@ configuration based environment, run:
 The previous command will generate all the files in a directory located at
 ``$CLAW_HOME/configurations/CONFIGURATION_NAME/blueprints/BLUEPRINT_NAME`` as
 described in :doc:`deploy_and_undeploy`.
+
+Reset Configuration
+-------------------
+All commands accept a ``--reset`` flag that will remove the current
+configuration directory. Use with care.
