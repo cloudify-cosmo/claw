@@ -673,7 +673,7 @@ perform teardown like this:
 
     $ claw teardown my_handler_configuration
 
-.. warning::
+.. caution::
     Internally, ``claw teardown`` will pass ``--force`` and
     ``--ignore-deployments`` to the underlying ``cfy teardown`` command to save
     you some typing. You should be aware of this to avoid unfortunate

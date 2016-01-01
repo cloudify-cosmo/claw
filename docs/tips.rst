@@ -48,7 +48,7 @@ Installation
 To use it, run ``claw cdconfiguration`` and put the output of this command
 somewhere in your ``~/.bashrc``.
 
-.. warning::
+.. attention::
     Don't put anything like this in your ``~/.bashrc``:
 
     .. code-block:: sh

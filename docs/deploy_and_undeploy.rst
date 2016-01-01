@@ -173,7 +173,7 @@ blueprint), assuming the blueprint configuration is named
 To cancel currently running executions before starting the undeploy process,
 pass the ``--cancel-executions`` flag to the ``claw undeploy`` command.
 
-.. warning::
+.. caution::
     Internally, ``claw undeploy`` will pass ``--ignore-live-nodes`` to the
     underlying ``cfy deployments delete`` command to save
     you some typing. You should be aware of this when using this command.

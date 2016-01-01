@@ -22,7 +22,7 @@ To cancel currently running executions of deployments before the undeployment
 process, pass the ``--cancel-executions`` to the ``claw cleanup-deployments``
 command.
 
-.. warning::
+.. caution::
     Internally, ``claw cleanup-deployments`` will pass ``--ignore-live-nodes``
     to the underlying ``cfy deployments delete`` commands.
     You should be aware of this when using this command.
@@ -36,6 +36,12 @@ run:
 .. code-block:: sh
 
     $ claw cleanup CONFIGURATION_NAME
+
+.. caution::
+    This command removes **all** IaaS resources it finds (with a few
+    exceptions).
+
+    Don't run it on a shared tenant/account.
 
 .. note::
     At the moment, the ``claw cleanup`` command is only implemented for
