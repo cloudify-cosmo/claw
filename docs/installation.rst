@@ -13,6 +13,12 @@ Installing The Code
 
     $ pip install https://github.com/dankilman/claw/archive/master.tar.gz
 
+.. note::
+    ``claw`` is updated quite frequently at the moment, so you may want to
+    consider cloning the ``claw`` repo, and installing it in editable mode.
+    This way, updates will be as easy as ``git pull`` in the repo local
+    directory.
+
 Setting Up The Environment
 --------------------------
 #. Choose a location that will serve as the base directory for all ``claw``
