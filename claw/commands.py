@@ -481,3 +481,13 @@ def generate_script(script_path, reset=False):
     with open(script_path, 'w') as f:
         f.write(resources.get('templates/script.template.py'))
     os.chmod(script_path, 0755)
+
+
+@command
+def cdconfiguration():
+    if not settings.settings_path.exists():
+        return
+    cdconfiguration_template = resources.get(
+        'templates/cdconfiguration.template.sh')
+    sys.stdout.write(cdconfiguration_template.replace('{{configurations}}',
+                                                      settings.configurations))
