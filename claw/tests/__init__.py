@@ -64,7 +64,10 @@ class BaseTest(unittest.TestCase):
         port = get_unused_port()
         app = bottle.app()
         for route, handler in routes.items():
-            app.route(route)(handler)
+            method = 'GET'
+            if isinstance(route, tuple):
+                route, method = route
+            app.route(route, method=method)(handler)
         p = multiprocessing.Process(target=lambda: app.run(port=port,
                                                            quiet=True))
         p.start()

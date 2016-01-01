@@ -244,7 +244,7 @@ def bootstrap(configuration,
     """Bootstrap a configuration based environment."""
     conf = Configuration(configuration)
     if not conf.exists() or reset:
-        generate(configuration,
+        generate(configuration=configuration,
                  inputs_override=inputs_override,
                  manager_blueprint_override=manager_blueprint_override,
                  reset=reset)
@@ -288,7 +288,9 @@ def deploy(configuration, blueprint,
         raise NO_INIT
     bp = conf.blueprint(blueprint)
     if not skip_generation:
-        generate_blueprint(configuration, blueprint, reset)
+        generate_blueprint(configuration=configuration,
+                           blueprint=blueprint,
+                           reset=reset)
     with conf.dir:
         cfy.blueprints.upload(blueprint_path=bp.blueprint_path,
                               blueprint_id=blueprint).wait()
