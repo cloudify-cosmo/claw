@@ -147,13 +147,6 @@ class TestCompletion(tests.BaseTest):
         self.assert_completion(expected=expected,
                                args=['cleanup'])
 
-    def test_overview(self):
-        self._prepare_existing_configurations()
-        expected = self.existing_configurations + self.help_args
-        expected += ['-p', '--port']
-        self.assert_completion(expected=expected,
-                               args=['overview'])
-
     def test_script(self):
         self._prepare_existing_configurations()
         expected = self.existing_configurations + self.help_args

@@ -36,7 +36,6 @@ from claw.state import current_configuration
 from claw.configuration import Configuration, CURRENT_CONFIGURATION
 from claw.settings import settings
 from claw.completion import completion
-from claw import overview as _overview
 
 
 INIT_EXISTS = argh.CommandError('Configuration already exists. Use --reset'
@@ -385,16 +384,6 @@ def cleanup(configuration):
     finally:
         if temp_configuration:
             conf.dir.rmtree_p()
-
-
-@command
-@arg('configuration', completer=completion.existing_configurations)
-def overview(configuration, port=8080):
-    """Work in progress."""
-    conf = Configuration(configuration)
-    if not conf.exists():
-        raise NO_INIT
-    _overview.serve(conf, port)
 
 
 @command
