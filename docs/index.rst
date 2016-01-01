@@ -37,3 +37,4 @@ in the beginning.
     cleanup
     generate_files
     scripts
+    tips
