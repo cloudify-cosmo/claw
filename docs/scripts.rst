@@ -201,3 +201,25 @@ The above will create a template script with a ``script`` function and a
 .. note::
     ``claw init`` generates a script named ``example-script.py`` under
     ``$CLAW_HOME/scripts``.
+
+Contributed Scripts
+-------------------
+
+The github repo https://github.com/dankilman/claw-scripts contains additional
+scripts that can simplify certain day to day Cloudify development related
+tasks.
+
+To use these scripts, clone this repository somewhere and add a
+``PATH_TO_CLAW_SCRIPTS_REPO_DIR/scripts`` entry to the ``scripts`` list in
+``~/.claw``:
+
+.. code-block:: yaml
+
+    claw_home: ...
+    main_suites_yaml: ...
+    scripts:
+      - ...
+      - /path/to/claw-scripts/scripts
+
+You are encouraged to open pull requests with your scripts if you find them
+useful enough for a wider audience.
