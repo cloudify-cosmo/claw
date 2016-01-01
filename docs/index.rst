@@ -11,5 +11,5 @@ TODO - Write Intro
    bootstrap_and_teardown
    deploy_and_undeploy
    cleanup
-   files_generation
+   generate_files
    scripts
