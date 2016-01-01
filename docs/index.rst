@@ -26,6 +26,7 @@ inconvenient. Next, read :doc:`bootstrap_and_teardown`.
 The other sections are great too, but you can certainly get going without them
 in the beginning.
 
+The code lives `here <https://github.com/dankilman/claw>`_.
 
 .. toctree::
     :maxdepth: 2
