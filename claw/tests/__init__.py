@@ -25,6 +25,7 @@ import sh
 from path import path
 
 import cosmo_tester
+from cloudify_rest_client.client import DEFAULT_API_VERSION
 from cloudify.proxy.server import get_unused_port
 
 from claw import settings
@@ -67,6 +68,7 @@ class BaseTest(unittest.TestCase):
             method = 'GET'
             if isinstance(route, tuple):
                 route, method = route
+            route = '/api/{0}/{1}'.format(DEFAULT_API_VERSION, route)
             app.route(route, method=method)(handler)
         p = multiprocessing.Process(target=lambda: app.run(port=port,
                                                            quiet=True))

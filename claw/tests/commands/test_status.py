@@ -16,8 +16,6 @@
 
 import sh
 
-from cloudify_rest_client.client import DEFAULT_API_VERSION
-
 from claw import configuration
 from claw import tests
 
@@ -26,8 +24,7 @@ class StatusTest(tests.BaseTestWithInit):
 
     def test_basic(self):
         test_version = 'TEST_VERSION'
-        route = '/api/{0}/version'.format(DEFAULT_API_VERSION)
-        port = self.server({route: lambda: {'version': test_version}})
+        port = self.server({'version': lambda: {'version': test_version}})
         self.claw.generate(tests.STUB_CONFIGURATION)
         conf = configuration.Configuration(tests.STUB_CONFIGURATION)
         with conf.patch.handler_configuration as patch:

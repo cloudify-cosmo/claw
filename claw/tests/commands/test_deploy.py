@@ -20,7 +20,6 @@ import bottle
 import sh
 
 from cloudify_cli import utils as cli_utils
-from cloudify_rest_client.client import DEFAULT_API_VERSION
 
 from claw import configuration
 from claw import tests
@@ -48,7 +47,7 @@ class DeployTest(tests.BaseTestWithInit):
         requests_path = self.workdir / 'requests.json'
         requests_path.write_text('[]')
 
-        def _response(body=None, request=None):
+        def response(body=None, request=None):
             requests = json.loads(requests_path.text())
             requests.append(request)
             requests_path.write_text(json.dumps(requests))
@@ -57,25 +56,21 @@ class DeployTest(tests.BaseTestWithInit):
                 status=201,
                 headers={'content-type': 'application/json'})
 
-        def put_blueprint(blueprint_id):
-            return _response(request={'blueprint': [blueprint_id]})
+        def upload_blueprint(blueprint_id):
+            return response(request={'blueprint': [blueprint_id]})
 
-        def put_deployment(deployment_id):
-            return _response(
+        def create_deployment(deployment_id):
+            return response(
                 request={'deployment': [deployment_id, bottle.request.json]})
 
         def start_execution():
-            return _response({'status': 'terminated'},
-                             request={'execution': [bottle.request.json]})
+            return response({'status': 'terminated'},
+                            request={'execution': [bottle.request.json]})
 
-        routes = {
-            ('blueprints/<blueprint_id>', 'PUT'): put_blueprint,
-            ('deployments/<deployment_id>', 'PUT'): put_deployment,
-            ('executions', 'POST'): start_execution
-        }
         port = self.server({
-            ('/api/{}/{}'.format(DEFAULT_API_VERSION, endpoint), method): handl
-            for (endpoint, method), handl in routes.items()
+            ('blueprints/<blueprint_id>', 'PUT'): upload_blueprint,
+            ('deployments/<deployment_id>', 'PUT'): create_deployment,
+            ('executions', 'POST'): start_execution
         })
 
         with conf.dir:
