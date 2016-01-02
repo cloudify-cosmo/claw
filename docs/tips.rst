@@ -19,6 +19,33 @@ Remember that ``claw bootstrap`` will update ``handler-configuration.yaml``
 with the ``manager_ip`` of the newly bootstrapped manager.
 
 
+Current Configuration
+---------------------
+As mentioned in the previous section, the last generated/bootstrapped
+configuration will always be symlinked at ``$CLAW_HOME/configurations/+``.
+
+As such, you can save some more typing by using ``+`` instead of the
+configuration name, in all commands that take the configuration name as their
+first argument.
+
+For example, if we recently bootstrapped an environment based on a handler
+configuration named ``datacentred_openstack``, and we wish to run some script
+with the ``datacentred_openstack`` environment as the script's ``cosmo``,
+
+instead of writing:
+
+.. code-block:: sh
+
+    $ claw script datacentred_openstack my_script
+
+we can instead write:
+
+.. code-block:: sh
+
+    $ claw script + my_script
+
+to get the same result. Much shorter.
+
 Shell Configuration Navigation
 ------------------------------
 To simplify the process of navigating between configurations,
