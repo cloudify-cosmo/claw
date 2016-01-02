@@ -166,7 +166,7 @@ serves as your entry point to... well, the cosmo. It encapulates different
 aspects and utils of a Cloudify manager environment, specified by
 ``CONFIGURATION_NAME``.
 
-To use the ``cosmo`` object, add the following like to the script imports:
+To use the ``cosmo`` object, add the following to the script imports:
 
     .. code-block:: python
 
