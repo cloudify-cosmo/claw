@@ -65,5 +65,7 @@ class Completion(object):
             for script_path in script_dir.files():
                 basename = script_path.basename()
                 if basename.startswith(prefix):
+                    if basename.endswith('.py'):
+                        basename = basename[:-len('.py')]
                     yield basename
 completion = Completion()

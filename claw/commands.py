@@ -400,8 +400,12 @@ def script(configuration, script_path, script_args):
     if not os.path.isfile(script_path):
         for scripts_dir in settings.scripts:
             possible_script_path = scripts_dir / script_path
+            possible_script_path2 = scripts_dir / '{0}.py'.format(script_path)
             if possible_script_path.isfile():
                 script_path = possible_script_path
+                break
+            if possible_script_path2.isfile():
+                script_path = possible_script_path2
                 break
         else:
             raise argh.CommandError('Could not locate {0}'.format(script_path))

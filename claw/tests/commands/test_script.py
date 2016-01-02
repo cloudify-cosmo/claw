@@ -56,10 +56,12 @@ class ScriptTest(tests.BaseTestWithInit):
             value = 'VALUE-{0}'.format(gen_id)
             script = "def script(): print '{}'".format(value)
             script_name = 'my-script-{0}.py'.format(gen_id)
-            self._test(script=script, expected_output=value,
-                       script_dir=scripts_dir,
-                       script_name=script_name,
-                       script_arg=script_name)
+            partial_script_name = script_name[:-3]
+            for script_arg in [script_name, partial_script_name]:
+                self._test(script=script, expected_output=value,
+                           script_dir=scripts_dir,
+                           script_name=script_name,
+                           script_arg=script_arg)
 
     def test_implicit_script_func_no_args(self):
         value = 'VALUE'

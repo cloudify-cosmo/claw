@@ -9,7 +9,7 @@ Executing Scripts
 There are several ways to execute scripts:
 
 #.
-    Explicit
+    Explicit path to the script:
 
     .. code-block:: sh
 
@@ -29,6 +29,12 @@ There are several ways to execute scripts:
     .. code-block:: sh
 
         $ claw script {CONFIGURATION_NAME} my_script.py
+
+    If the script name ends with ``.py`` you can omit the ``.py`` extension:
+
+    .. code-block:: sh
+
+        $ claw script {CONFIGURATION_NAME} my_script
 
 #.
     To enable running scripts directly, ``claw`` will execute a script if it's

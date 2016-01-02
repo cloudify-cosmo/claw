@@ -29,12 +29,15 @@ class TestCompletion(tests.BaseTest):
         super(TestCompletion, self).setUp()
         self.scripts_dir = self.workdir / 'scripts'
         self.scripts_dir2 = self.workdir / 'scripts2'
-        self.scripts = ['example-script.py']
+        self.scripts = ['example-script']
         for scripts_dir in [self.scripts_dir, self.scripts_dir2]:
             scripts_dir.mkdir_p()
             for _ in range(3):
                 (scripts_dir / 'script{0}.py'.format(uuid.uuid4())).touch()
-            self.scripts += [f.basename() for f in scripts_dir.files()]
+                (scripts_dir / 'script{0}.pyy'.format(uuid.uuid4())).touch()
+            self.scripts += [
+                f.basename()[:-3] if f.basename().endswith('.py') else
+                f.basename() for f in scripts_dir.files()]
         self.init()
         with patcher.YamlPatcher(self.settings.settings_path) as patch:
             patch.obj['scripts'] = [str(self.scripts_dir),
