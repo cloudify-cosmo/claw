@@ -49,4 +49,6 @@ be seeing something like this:
 .. code-block:: sh
 
     $ claw <TAB> <TAB>
-    --help    bootstrap    cleanup-deployments    events    ...
+    --help               cdconfiguration      deploy               generate-script      status
+    -h                   cleanup              generate             init                 teardown
+    bootstrap            cleanup-deployments  generate-blueprint   script               undeploy
