@@ -407,7 +407,7 @@ Manager blueprint snippet:
       management_subnet: ...
       webui: ...
 
-If we wanted to add a full note template to the previous example we'd have an
+If we wanted to add a full node template to the previous example we'd have an
 override like this:
 
 .. code-block:: yaml
