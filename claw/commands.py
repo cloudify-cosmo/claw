@@ -218,8 +218,7 @@ def status(configuration):
     conf = Configuration(configuration)
     if not conf.exists():
         raise NO_INIT
-    with conf.dir:
-        manager_ip = conf.handler_configuration.get('manager_ip')
+    manager_ip = conf.handler_configuration.get('manager_ip')
     if not manager_ip:
         raise NO_BOOTSTRAP
     try:
