@@ -14,9 +14,9 @@
 # limitations under the License.
 ############
 
-import sys
 import os
 import shutil
+import sys
 import tempfile
 import time
 
@@ -430,7 +430,7 @@ def generate_script(script_path, reset=False):
         raise argh.CommandError('{0} already exists'.format(script_path))
     with open(script_path, 'w') as f:
         f.write(resources.get('templates/script.template.py'))
-    os.chmod(script_path, 0755)
+    os.chmod(script_path, os.stat(script_path).st_mode | 0o111)
 
 
 @command
