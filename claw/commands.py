@@ -223,7 +223,7 @@ def status(configuration):
         raise NO_BOOTSTRAP
     try:
         version = conf.client.manager.get_version()['version']
-        return '[{0}] Running ({1})'.format(manager_ip, version)
+        conf.logger.info('[{0}] Running ({1})'.format(manager_ip, version))
     except requests.exceptions.ConnectionError:
         raise argh.CommandError('[{0}] Not reachable'.format(manager_ip))
 
