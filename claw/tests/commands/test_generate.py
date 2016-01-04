@@ -121,6 +121,11 @@ class GenerateTest(tests.BaseTestWithInit):
         self._test()
         self._test(reset=True)
 
+    def test_existing_reset_in_conf_dir(self):
+        config_dir = self._test()
+        with config_dir:
+            self._test(reset=True)
+
     def test_existing_current_configuration(self):
         self._test()
         self._test(configuration='some_other_conf')
@@ -212,3 +217,4 @@ class GenerateTest(tests.BaseTestWithInit):
                          yaml.safe_load(self.settings.user_suites_yaml.text()))
         self.assertEqual((self.workdir / 'configurations' / '+').readlink(),
                          configuration)
+        return config_dir

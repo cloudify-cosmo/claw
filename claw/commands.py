@@ -176,6 +176,8 @@ def _generate_configuration(cmd_inputs_override,
     original_blueprint_path = os.path.expanduser(conf[conf_blueprint_key])
     if conf_obj.exists():
         if reset:
+            if conf_obj.dir == os.getcwd():
+                os.chdir(conf_obj.dir.dirname())
             shutil.rmtree(conf_obj.dir)
         else:
             raise ALREADY_INITIALIZED
