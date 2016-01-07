@@ -80,8 +80,11 @@ class BaseTest(unittest.TestCase):
         for _ in range(100):
             try:
                 requests.get('http://localhost:{}/ping'.format(port))
+                break
             except requests.RequestException:
                 time.sleep(0.1)
+        else:
+            self.fail('Failed starting server.')
         self.addCleanup(lambda: (p.terminate(), p.join()))
         return port
 
