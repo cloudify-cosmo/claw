@@ -155,6 +155,7 @@ class Configuration(object):
             handler.setLevel(logging.DEBUG)
             logger.setLevel(logging.DEBUG)
             logger.addHandler(handler)
+            logger.propagate = False
             self._logger = logger
         return self._logger
 

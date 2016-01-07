@@ -14,6 +14,7 @@
 # limitations under the License.
 ############
 
+import logs
 import os
 import sys
 from StringIO import StringIO
@@ -26,6 +27,7 @@ from claw import commands
 
 
 def main():
+    logs.setup_logging()
     if len(sys.argv) > 1 and os.path.isfile(sys.argv[1]):
         try:
             commands.script(configuration=configuration.CURRENT_CONFIGURATION,

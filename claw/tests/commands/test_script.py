@@ -114,6 +114,24 @@ def script(): print cosmo.configuration'''
             }
         })
 
+    def test_script_logging(self):
+        expected_in_once = 'ONE_TWO_THREE'
+        expected_in = 'HELLO'
+        expected_out = 'GOODBYE'
+        script = '''import logging
+from claw import cosmo
+def script():
+    cosmo.logger.info('{}')
+    logging.info('{}')
+    logging.debug('{}')'''.format(expected_in_once,
+                                  expected_in,
+                                  expected_out)
+        output = self._test(script=script, skip_validation=True)
+        self.assertIn(expected_in_once, output)
+        self.assertEqual(1, output.count(expected_in_once))
+        self.assertIn(expected_in, output)
+        self.assertNotIn(expected_out, output)
+
     def _test(self,
               script,
               args=None,
