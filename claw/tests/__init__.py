@@ -48,6 +48,7 @@ class BaseTest(unittest.TestCase):
         self.main_suites_yaml_path = (system_tests_dir / 'suites' / 'suites' /
                                       'suites.yaml')
         self.claw = sh.claw
+        sh.ErrorReturnCode.truncate_cap = 1024 * 1024 * 10
 
     def cleanup(self):
         configuration.settings = settings.Settings()
