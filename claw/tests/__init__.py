@@ -19,9 +19,11 @@ import shutil
 import tempfile
 import unittest
 import multiprocessing
+import time
 
 import bottle
 import sh
+import requests
 from path import path
 
 import cosmo_tester
@@ -71,9 +73,15 @@ class BaseTest(unittest.TestCase):
                 route, method = route
             route = '/api/{0}/{1}'.format(DEFAULT_API_VERSION, route)
             app.route(route, method=method)(handler)
+        app.route('/ping')(lambda: {})
         p = multiprocessing.Process(target=lambda: app.run(port=port,
                                                            quiet=True))
         p.start()
+        for _ in range(100):
+            try:
+                requests.get('http://localhost:{}/ping'.format(port))
+            except requests.RequestException:
+                time.sleep(0.1)
         self.addCleanup(lambda: (p.terminate(), p.join()))
         return port
 
