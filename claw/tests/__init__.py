@@ -72,7 +72,7 @@ class BaseTest(unittest.TestCase):
             if isinstance(route, tuple):
                 route, method = route
             route = '/api/{0}/{1}'.format(DEFAULT_API_VERSION, route)
-            app.route(route, method=method)(handler)
+            app.route(route, method=method)(self.ServerHandlerWrapper(handler))
         app.route('/ping')(lambda: {})
         p = multiprocessing.Process(target=lambda: app.run(port=port,
                                                            quiet=True))
@@ -87,6 +87,20 @@ class BaseTest(unittest.TestCase):
             self.fail('Failed starting server.')
         self.addCleanup(lambda: (p.terminate(), p.join()))
         return port
+
+    class ServerHandlerWrapper(object):
+
+        def __init__(self, handler):
+            self.handler = handler
+
+        def __call__(self, *args, **kwargs):
+            try:
+                return self.handler(*args, **kwargs)
+            finally:
+                try:
+                    bottle.request.body.read()
+                except:
+                    pass
 
 
 class BaseTestWithInit(BaseTest):

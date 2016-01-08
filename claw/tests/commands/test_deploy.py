@@ -42,36 +42,11 @@ class DeployTest(tests.BaseTestWithInit):
         self.assertIn('Not initialized', c.exception.stderr)
 
     def _test(self, skip_generation=False, reset=False):
+        requests_path = self.workdir / 'requests.json'
+        port = self._start_server(requests_path)
+
         self.claw.generate(tests.STUB_CONFIGURATION)
         conf = configuration.Configuration(tests.STUB_CONFIGURATION)
-        requests_path = self.workdir / 'requests.json'
-        requests_path.write_text('[]')
-
-        def response(body=None, request=None):
-            requests = json.loads(requests_path.text())
-            requests.append(request)
-            requests_path.write_text(json.dumps(requests))
-            return bottle.HTTPResponse(
-                body=body or {},
-                status=201,
-                headers={'content-type': 'application/json'})
-
-        def upload_blueprint(blueprint_id):
-            return response(request={'blueprint': [blueprint_id]})
-
-        def create_deployment(deployment_id):
-            return response(
-                request={'deployment': [deployment_id, bottle.request.json]})
-
-        def start_execution():
-            return response({'status': 'terminated'},
-                            request={'execution': [bottle.request.json]})
-
-        port = self.server({
-            ('blueprints/<blueprint_id>', 'PUT'): upload_blueprint,
-            ('deployments/<deployment_id>', 'PUT'): create_deployment,
-            ('executions', 'POST'): start_execution
-        })
 
         with conf.dir:
             sh.cfy.init()
@@ -118,3 +93,32 @@ class DeployTest(tests.BaseTestWithInit):
                 'workflow_id': 'install',
                 'force': 'false'
             }]})
+
+    def _start_server(self, requests_path):
+        requests_path.write_text('[]')
+
+        def response(body=None, request=None):
+            requests = json.loads(requests_path.text())
+            requests.append(request)
+            requests_path.write_text(json.dumps(requests))
+            return bottle.HTTPResponse(
+                body=body or {},
+                status=201,
+                headers={'content-type': 'application/json'})
+
+        def upload_blueprint(blueprint_id):
+            return response(request={'blueprint': [blueprint_id]})
+
+        def create_deployment(deployment_id):
+            return response(
+                request={'deployment': [deployment_id, bottle.request.json]})
+
+        def start_execution():
+            return response({'status': 'terminated'},
+                            request={'execution': [bottle.request.json]})
+
+        return self.server({
+            ('blueprints/<blueprint_id>', 'PUT'): upload_blueprint,
+            ('deployments/<deployment_id>', 'PUT'): create_deployment,
+            ('executions', 'POST'): start_execution
+        })
