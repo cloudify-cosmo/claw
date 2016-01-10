@@ -122,10 +122,10 @@ def script(): print cosmo.configuration'''
 from claw import cosmo
 def script():
     cosmo.logger.info('{}')
-    logging.info('{}')
-    logging.debug('{}')'''.format(expected_in_once,
-                                  expected_in,
-                                  expected_out)
+    logging.warn('{}')
+    logging.info('{}')'''.format(expected_in_once,
+                                 expected_in,
+                                 expected_out)
         output = self._test(script=script, skip_validation=True)
         self.assertIn(expected_in_once, output)
         self.assertEqual(1, output.count(expected_in_once))

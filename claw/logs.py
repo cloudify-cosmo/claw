@@ -24,6 +24,6 @@ def setup_logging():
     handler = logging.StreamHandler(sys.stdout)
     fmt = '%(asctime)s [%(levelname)s] %(message)s'
     handler.setFormatter(logging.Formatter(fmt))
-    handler.setLevel(logging.INFO)
-    root_logger.setLevel(logging.INFO)
+    handler.setLevel(logging.WARNING)
+    root_logger.setLevel(logging.WARNING)
     root_logger.addHandler(handler)
