@@ -6,7 +6,7 @@ process of bootstrapping during development.
 
 You may have many environments in which you bootstrap on, ``aws`` based environments,
 ``openstack`` based environments, etc...
-Each environments has its own set of ``inputs``, such as different credentials,
+Each environment has its own set of ``inputs``, such as different credentials,
 different resource names, etc...
 At the same time, some set of properties may be shared between environments
 which means duplication. You get the drift.
@@ -17,7 +17,7 @@ which suffer from the same problems.
 At the same time, during development, you generally want to use the tip of the
 ``master`` or build branch of the ``cloudify-manager-blueprints`` repository.
 
-All these different constraints, will likely cause you many headaches, sporadic
+All these different constraints will likely cause you many headaches, sporadic
 failures due to some manual typing gone wrong and similar mishaps.
 
 ``claw`` can help you keep you sanity.
@@ -38,11 +38,11 @@ making the assumption of familiarity.
 
 The sections in ``suites.yaml`` are:
 
-* ``handler_configurations``
 * ``variables``
 * ``manager_blueprint_override_templates``
 * ``inputs_override_templates``
 * ``handler_configuration_templates``
+* ``handler_configurations``
 
 For now, we'll focus on the ``handler_configurations`` sections, and ignore the
 others.
@@ -116,12 +116,9 @@ and ``manager_blueprint_override``:
         manager_blueprint_override:
           node_templates.management_subnet.properties.subnet.dns_nameservers: [8.8.4.4, 8.8.8.8]
 
-The previous handler configuration uses a manager blueprint that needs some
+Suppose that the above handler configuration uses a manager blueprint that needs a
 fix to the management network subnet dns configuration.
-In addition an inputs file that has everything filled except for the username,
-password and tenant name. Of course, it also configures ``inputs_override`` and
-``manager_blueprint_override``.
-
+Its inputs file lacks a username, a password, and a tenant name. ``claw`` enables us to override or even add properties to both the manager blueprint and the inputs file. This can be done by configuring, in addition to ``manager_blueprint`` and ``inputs`` properties, the ``manager_blueprint_override`` and ``inputs_override`` ones.
 Similar to the previous section, running:
 
 .. code-block:: sh
@@ -133,12 +130,12 @@ will bootstrap the manager.
 The new thing here, is that the generated ``inputs.yaml`` file is not just a
 copy of the original inputs file, but rather a merge of its content, overridden
 by items specified in ``inputs_override``. Similarly, the copy of the manager
-blueprint was modified so the the ``management_subnet`` node template, has the
+blueprint was modified so that the ``management_subnet`` node template, has the
 required ``dns_nameservers`` property in place.
 
 Variables
 ^^^^^^^^^
-Variables let you keep values in one places and references them in inputs and
+Variables let you keep values in one place and reference them in inputs and
 manager blueprint overrides.
 
 We'll modify the previous example and extend it to use variables:
