@@ -364,13 +364,20 @@ def _wait_for_executions(conf, deployment_id, cancel_executions):
             continue
         if e.workflow_id != STOP_DEPLOYMENT_ENVIRONMENT and cancel_executions:
             client.executions.cancel(e.id)
-        while e.status not in e.END_STATES:
+        cancel_timeout = time.time() + 10
+        while e.status not in e.END_STATES and time.time() < cancel_timeout:
             conf.logger.info("Waiting for execution {0}[{1}] to end. "
                              "Current status is {2}".format(e.id,
                                                             e.workflow_id,
                                                             e.status))
             time.sleep(1)
             e = client.executions.get(e.id)
+        if e.status not in e.END_STATES:
+            if e.workflow_id == 'create_deployment_environment':
+                new_status = e.TERMINATED
+            else:
+                new_status = e.CANCELLED
+            client.executions.update(e.id, status=new_status)
 
 
 @command
