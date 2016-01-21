@@ -38,6 +38,7 @@ class CleanupHandler(object):
         self.cinder = clients['cinder']
 
     def cleanup(self):
+        self.delete_floatingips()
         self.delete_servers()
         self.delete_keys()
         self.delete_volumes()
@@ -45,7 +46,6 @@ class CleanupHandler(object):
         self.delete_ports()
         self.delete_networks()
         self.delete_security_groups()
-        self.delete_floatingips()
         self.logger.info('Done!')
 
     def delete_servers(self):
