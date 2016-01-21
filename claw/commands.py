@@ -366,8 +366,8 @@ def _wait_for_executions(conf, deployment_id, cancel_executions):
             client.executions.cancel(e.id)
         cancel_timeout = time.time() + 10
         while e.status not in e.END_STATES and time.time() < cancel_timeout:
-            conf.logger.info("Waiting for execution {0}[{1}] to end. "
-                             "Current status is {2}".format(e.id,
+            conf.logger.info('Waiting for execution {0}[{1}] to end. '
+                             'Current status is {2}'.format(e.id,
                                                             e.workflow_id,
                                                             e.status))
             time.sleep(1)
@@ -377,6 +377,8 @@ def _wait_for_executions(conf, deployment_id, cancel_executions):
                 new_status = e.TERMINATED
             else:
                 new_status = e.CANCELLED
+            conf.logger.info('Execution did not reach a final state. '
+                             'Manually setting status: {0}'.format(new_status))
             client.executions.update(e.id, status=new_status)
 
 
