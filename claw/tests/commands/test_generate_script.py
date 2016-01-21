@@ -24,21 +24,27 @@ class GenerateScriptTest(tests.BaseTestWithInit):
         super(GenerateScriptTest, self).setUp()
         self.claw.generate(tests.STUB_CONFIGURATION)
 
-    def test_basic(self, reset=False):
-        script_path = self.workdir / 'script.sh'
-        self.claw('generate-script', script_path, reset=reset)
-        script = sh.Command(script_path)
-        self.assertIn("'handler': 'openstack_handler'",
-                      script().stdout.strip())
-        return script_path
+    def test_basic(self):
+        self._test()
 
     def test_exists_no_rewrite(self):
-        script_path = self.test_basic()
+        script_path = self._test()
         with self.assertRaises(sh.ErrorReturnCode) as c:
-            self.test_basic()
+            self._test()
         self.assertIn('{0} already exists'.format(script_path),
                       c.exception.stderr)
 
     def test_exists_with_rewrite(self):
-        self.test_basic()
-        self.test_basic(reset=True)
+        self._test()
+        self._test(reset=True)
+
+    def test_plain(self):
+        self._test(plain=True)
+
+    def _test(self, reset=False, plain=False):
+        script_path = self.workdir / 'script.sh'
+        self.claw('generate-script', script_path, reset=reset, plain=plain)
+        script = sh.Command(script_path)
+        expected = 'plain' if plain else "'handler': 'openstack_handler'"
+        self.assertIn(expected, script().stdout.strip())
+        return script_path

@@ -442,12 +442,13 @@ def script(configuration, script_path, script_args):
 
 
 @command
-def generate_script(script_path, reset=False):
+def generate_script(script_path, reset=False, plain=False):
     """Generate a scaffold script."""
     if os.path.exists(script_path) and not reset:
         raise argh.CommandError('{0} already exists'.format(script_path))
+    template = 'script.plain.template.py' if plain else 'script.template.py'
     with open(script_path, 'w') as f:
-        f.write(resources.get('templates/script.template.py'))
+        f.write(resources.get('templates/{0}'.format(template)))
     os.chmod(script_path, os.stat(script_path).st_mode | 0o111)
 
 
