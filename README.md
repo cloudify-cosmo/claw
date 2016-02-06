@@ -3,4 +3,4 @@
 # Claw
 Cloudify Almighty Wrapper - It just works.
 
-Documentation lives at http://claw.readthedocs.org.
+Documentation lives at https://claw.readthedocs.org.
