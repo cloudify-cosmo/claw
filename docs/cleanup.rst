@@ -59,3 +59,9 @@ run:
           some_openstack_env:
             ...
             delete_keypairs: true
+
+.. note::
+    If a certain configuration is passed to ``claw cleanup`` and it doesn't
+    exist, it will be generated temporarily for cleanup purposes. As such
+    you can use the ``--inputs-override`` and ``--manager-blueprint-override``
+    flags as described in :doc:`bootstrap_and_teardown`.

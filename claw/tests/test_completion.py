@@ -74,16 +74,20 @@ class TestCompletion(tests.BaseTest):
                                args=['init'])
 
     def test_generate(self):
-        self._test_generate_and_bootstrap('generate')
+        self._test_generate_bootstrap_and_cleanup('generate')
 
     def test_bootstrap(self):
-        self._test_generate_and_bootstrap('bootstrap')
+        self._test_generate_bootstrap_and_cleanup('bootstrap')
 
-    def _test_generate_and_bootstrap(self, command):
+    def test_cleanup(self):
+        self._test_generate_bootstrap_and_cleanup('cleanup')
+
+    def _test_generate_bootstrap_and_cleanup(self, command):
         expected = self.configurations + [
             '-i', '--inputs-override',
-            '-b', '--manager-blueprint-override',
-            '-r', '--reset']
+            '-b', '--manager-blueprint-override']
+        if command != 'cleanup':
+            expected += ['-r', '--reset']
         expected += self.help_args
         self.assert_completion(expected=expected,
                                args=[command])
@@ -144,11 +148,6 @@ class TestCompletion(tests.BaseTest):
         expected = self.existing_configurations + options
         self.assert_completion(expected=expected,
                                args=['cleanup-deployments'])
-
-    def test_cleanup(self):
-        expected = self.configurations + self.help_args
-        self.assert_completion(expected=expected,
-                               args=['cleanup'])
 
     def test_script(self):
         self._prepare_existing_configurations()

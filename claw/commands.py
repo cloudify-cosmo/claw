@@ -119,7 +119,7 @@ def generate(configuration,
         properties=None,
         user_yaml=suites_yaml)
     with settings.configurations:
-        if os.path.exists(CURRENT_CONFIGURATION):
+        if os.path.islink(CURRENT_CONFIGURATION):
             os.remove(CURRENT_CONFIGURATION)
         os.symlink(configuration, CURRENT_CONFIGURATION)
 
@@ -387,18 +387,37 @@ def _wait_for_executions(conf, deployment_id, cancel_executions):
 
 @command
 @arg('configuration', completer=completion.all_configurations)
-def cleanup(configuration):
+@arg('-i', '--inputs-override',
+     action='append',
+     completer=completion.inputs_override_templates)
+@arg('-b', '--manager-blueprint-override',
+     action='append',
+     completer=completion.manager_blueprint_override_templates)
+def cleanup(configuration,
+            inputs_override=None,
+            manager_blueprint_override=None):
     """Clean all infrastructure in a configuration based environment."""
     conf = Configuration(configuration)
     temp_configuration = False
     if not conf.exists():
         temp_configuration = True
-        generate(configuration)
+        generate(configuration,
+                 inputs_override=inputs_override,
+                 manager_blueprint_override=manager_blueprint_override)
+    if not temp_configuration and (inputs_override or
+                                   manager_blueprint_override):
+        conf.logger.warn('Inputs override or manager blueprints override '
+                         'was passed, but an existing configuration was '
+                         'found so they are ignored and the existing '
+                         'configuration will be used.')
     try:
         conf.claw_handler.cleanup()
     finally:
         if temp_configuration:
             conf.dir.rmtree_p()
+            with settings.configurations:
+                if os.path.islink(CURRENT_CONFIGURATION):
+                    os.remove(CURRENT_CONFIGURATION)
 
 
 @command

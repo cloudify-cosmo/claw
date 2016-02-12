@@ -35,8 +35,12 @@ class CleanupTest(tests.BaseTestWithInit):
         output = self.claw.cleanup(tests.STUB_CONFIGURATION).stdout.strip()
         self.assertIn('Stub handler cleanup', output)
         self.assertTrue(self.configuration.exists())
+        self.assertTrue((self.settings.configurations /
+                         configuration.CURRENT_CONFIGURATION).islink())
 
     def test_no_configuration(self):
         output = self.claw.cleanup(tests.STUB_CONFIGURATION).stdout.strip()
         self.assertIn('Stub handler cleanup', output)
         self.assertFalse(self.configuration.exists())
+        self.assertFalse((self.settings.configurations /
+                          configuration.CURRENT_CONFIGURATION).islink())
