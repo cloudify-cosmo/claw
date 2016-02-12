@@ -16,6 +16,8 @@
 
 import time
 
+from path import path
+
 import keystoneclient.v2_0.client as keystone_client
 import neutronclient.v2_0.client as neutron_client
 import cinderclient.v1.client as cinder_client
@@ -31,6 +33,7 @@ class CleanupHandler(object):
         self.logger = configuration.logger
         self.should_delete_keypairs = configuration.handler_configuration.get(
             'delete_keypairs', False)
+        self.inputs = configuration.inputs
         clients = handler.clients()
         self.keystone = clients['keystone']
         self.neutron = clients['neutron']
@@ -41,6 +44,7 @@ class CleanupHandler(object):
         self.delete_floatingips()
         self.delete_servers()
         self.delete_keys()
+        self.delete_private_keys()
         self.delete_volumes()
         self.delete_routers()
         self.delete_ports()
@@ -66,6 +70,19 @@ class CleanupHandler(object):
                 self.nova.keypairs.delete(keypair.id)
             else:
                 self.logger.info('\tSkipping keypair {0}'.format(keypair.name))
+
+    def delete_private_keys(self):
+        def handle_key_path(use_existing_key, key_path_key):
+            if self.inputs.get(use_existing_key) is False:
+                key_path = self.inputs.get(key_path_key)
+                key_path = path(key_path).expanduser() if key_path else None
+                if key_path and key_path.exists():
+                    self.logger.info('\tDeleting private key {0}'.format(
+                        key_path))
+                    key_path.remove()
+        self.logger.info('Deleting non external private keys')
+        handle_key_path('use_existing_manager_keypair', 'ssh_key_filename')
+        handle_key_path('use_existing_agent_keypair', 'agent_private_key_path')
 
     def delete_volumes(self):
         self.logger.info('Deleting Volumes')
