@@ -16,6 +16,7 @@
 
 import copy
 import importlib
+import os
 
 from cosmo_tester.framework import util
 
@@ -58,3 +59,7 @@ def filter_list(current_value, include):
 
 def filter_dict(current_value, exclude):
     return {k: v for k, v in current_value.items() if k not in exclude}
+
+
+def env(current_value, key, default=None):
+    return os.environ.get(key, default)

@@ -654,7 +654,9 @@ The resulting YAML will look something like this:
 .. note::
     ``claw`` comes with 2 built-in override functions to filter values from
     lists and dictionaries. They can be found at ``claw.patcher:filter_list``
-    and ``claw.patcher:filter_dict``.
+    and ``claw.patcher:filter_dict``. It also comes with an override function
+    that reads values from environment variables. It can be found at
+    ``claw.patcher:env``.
 
 Reset Configuration
 -------------------

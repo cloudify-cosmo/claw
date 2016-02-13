@@ -14,7 +14,10 @@
 # limitations under the License.
 ############
 
+import os
+
 import yaml
+import mock
 
 from claw import patcher
 from claw import tests
@@ -113,6 +116,25 @@ class TestPatcher(tests.BaseTest):
             })
         self.assertEqual(self.read_yaml()['a'],
                          {'a1': 1, 'a2': 2})
+
+    def test_builtin_env(self):
+        test_yaml = {
+            'key1': {'func': 'claw.patcher:env', 'args': ['KEY1']},
+            'key2': {'func': 'claw.patcher:env', 'args': ['KEY2',
+                                                          'default']},
+            'key3': {'func': 'claw.patcher:env', 'args': ['KEY3',
+                                                          'default']}
+        }
+        self.write_yaml(test_yaml)
+        with mock.patch.dict(os.environ, {'KEY1': 'VALUE1',
+                                          'KEY2': 'VALUE2'}):
+            with patcher.YamlPatcher(self.yaml_path) as patch:
+                for key in ['key1', 'key2', 'key3']:
+                    func = patch.obj[key]
+                    patch.set_value(key, func)
+        self.assertEqual(self.read_yaml(), {
+            'key1': 'VALUE1', 'key2': 'VALUE2', 'key3': 'default'
+        })
 
     def write_yaml(self, obj):
         self.yaml_path.write_text(yaml.safe_dump(obj))
