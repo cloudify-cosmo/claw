@@ -132,6 +132,14 @@ class TestPatcher(tests.BaseTest):
                 for key in ['key1', 'key2', 'key3']:
                     func = patch.obj[key]
                     patch.set_value(key, func)
+
+            with self.assertRaises(KeyError) as c:
+                with patcher.YamlPatcher(self.yaml_path) as patch:
+                    patch.set_value('key4', {
+                        'func': 'claw.patcher:env',
+                        'args': ['I_DO_NOT_EXIST']
+                    })
+            self.assertIn('I_DO_NOT_EXIST', str(c.exception))
         self.assertEqual(self.read_yaml(), {
             'key1': 'VALUE1', 'key2': 'VALUE2', 'key3': 'default'
         })

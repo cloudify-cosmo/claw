@@ -62,4 +62,7 @@ def filter_dict(current_value, exclude):
 
 
 def env(current_value, key, default=None):
-    return os.environ.get(key, default)
+    if default is None:
+        return os.environ[key]
+    else:
+        return os.environ.get(key, default)
