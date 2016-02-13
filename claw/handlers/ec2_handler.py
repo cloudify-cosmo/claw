@@ -42,10 +42,78 @@ class CleanupHandler(object):
         self.logger.info('Terminating EC2 Instances')
         for reservation in self.ec2.get_all_reservations():
             instance = reservation.instances[0]
+            self.logger.info('\tTerminating instance: {}'.format(instance.id))
             instance.terminate()
         while self.ec2.get_all_reservations():
             self.logger.info('Waiting for all EC2 instances to terminate...')
             time.sleep(5)
+
+    def delete_keypairs(self):
+        self.logger.info('Deleting Key Pairs')
+        for keypair in self.ec2.get_all_keypairs():
+            self.logger.info('\tDeleting key pair {}'.format(keypair.name))
+            self.ec2.delete_key_pair(keypair)
+
+    def delete_elasticips(self):
+        self.logger.info('Releasing Elastic IPs')
+        for address in self.ec2.get_all_addresses():
+            self.logger.info('\tReleasing elastic ip {}'.format(
+                address.public_ip))
+            address.release()
+
+    def delete_security_groups(self):
+        self.logger.info('Deleting security groups')
+        for security_group in self.ec2.get_all_security_groups():
+            if 'default' in security_group.name:
+                continue
+            self.logger.info('\tDeleting security group {}'.format(
+                security_group.name))
+            security_group.delete()
+
+    def delete_volumes(self):
+        self.logger.info('Deleting volumes')
+        for volume in self.ec2.get_all_volumes():
+            if volume.status == 'in-use':
+                self.logger.info('\tDetaching volume {}'.format(volume.id))
+                volume.detach(force=True)
+            self.logger.info('\tDeleting volume {}'.format(volume.id))
+            volume.delete()
+
+    def delete_snapshots(self):
+        self.logger.info('Deleting snapshots')
+        for snapshot in self.ec2.get_all_snapshots(owner='self'):
+            self.logger.info('\tDeleting snapshot {}'.format(snapshot.id))
+            snapshot.delete()
+
+    def delete_load_balancers(self):
+        self.logger.info('Deleting load balancers')
+        for elb in self.elb.get_all_load_balancers():
+            self.logger.info('\tDeleting load balancer {}'.format(elb.name))
+            elb.delete()
+
+    def delete_vpcs(self):
+        pass
+
+    def delete_subnets(self):
+        pass
+
+    def delete_internet_gateways(self):
+        pass
+
+    def delete_vpn_gateways(self):
+        pass
+
+    def delete_customer_gateways(self):
+        pass
+
+    def delete_network_acls(self):
+        pass
+
+    def delete_dhcp_option_sets(self):
+        pass
+
+    def delete_route_tables(self):
+        pass
 
 
 class Handler(handlers.Handler):
