@@ -15,6 +15,7 @@
 ############
 
 from claw.settings import settings
+from claw.configuration import Configuration
 
 
 class Completion(object):
@@ -46,6 +47,11 @@ class Completion(object):
     def all_configurations(self, prefix, **kwargs):
         return (c for c in self._configurations()
                 if c.startswith(prefix))
+
+    def existing_blueprints(self, prefix, parsed_args, **kwargs):
+        conf = Configuration(parsed_args.configuration)
+        return (b for b in self.all_blueprints(prefix)
+                if (conf.blueprints_dir / b).exists())
 
     def existing_configurations(self, prefix, **kwargs):
         return (c for c in self.all_configurations(prefix)
