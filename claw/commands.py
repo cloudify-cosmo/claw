@@ -306,7 +306,7 @@ def deploy(configuration, blueprint,
 
 @command
 @arg('configuration', completer=completion.existing_configurations)
-@arg('blueprint', completer=completion.all_blueprints)
+@arg('blueprint', completer=completion.existing_blueprints)
 def undeploy(configuration, blueprint, cancel_executions=False):
     """Undeploy (uninstall, delete deployment and delete blueprint in a
        configuration based environment."""
