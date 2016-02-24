@@ -24,6 +24,7 @@ import argh.utils
 
 from claw import configuration
 from claw import commands
+from claw.settings import settings
 
 
 def main():
@@ -39,6 +40,11 @@ def main():
         parser = argh.ArghParser()
         subparsers_action = argh.utils.get_subparsers(parser, create=True)
         subparsers_action.metavar = ''
+        if settings.settings_path.exists():
+            try:
+                commands.add_script_based_commands()
+            except argh.CommandError as e:
+                sys.exit('error: {0}'.format(e))
         parser.add_commands(commands.app.commands)
         errors = StringIO()
         parser.dispatch(errors_file=errors)

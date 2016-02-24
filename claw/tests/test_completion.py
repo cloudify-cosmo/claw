@@ -63,8 +63,15 @@ class TestCompletion(tests.BaseTest):
     def test_claw(self):
         expected = [f.__name__.replace('_', '-')
                     for f in commands.app.commands]
+        expected += [s for s in self.scripts if '.' not in s]
         expected += self.help_args
         self.assert_completion(expected=expected)
+
+    def test_script_as_builtin(self):
+        self._prepare_existing_configurations()
+        expected = self.existing_configurations + self.help_args
+        self.assert_completion(expected=expected,
+                               args=[self.scripts[0]])
 
     def test_init(self):
         expected = self.help_args + ['-s', '--suites-yaml',

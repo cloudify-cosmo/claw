@@ -460,6 +460,29 @@ def script(configuration, script_path, script_args):
         current_configuration.clear()
 
 
+def add_script_based_commands():
+    names = {getattr(f, argh.decorators.ATTR_NAME,
+                     f.__name__.replace('_', '-')) for f in app.commands}
+
+    def _gen_func(script_path):
+        name = script_path.basename()[:-len('.py')].replace('_', '-')
+        if name in names:
+            raise argh.CommandError('Name conflict: Found two commands named '
+                                    '"{0}".'.format(name))
+
+        @command
+        @arg('configuration', completer=completion.existing_configurations)
+        @arg('script_args', nargs='...')
+        @argh.named(name)
+        def func(configuration, script_args):
+            """Script based command."""
+            return script(configuration, script_path, script_args)
+        return func
+    for scripts_dir in settings.scripts:
+        for script_file in scripts_dir.files('*.py'):
+            _gen_func(script_file)
+
+
 @command
 def generate_script(script_path, reset=False, plain=False):
     """Generate a scaffold script."""
@@ -473,6 +496,7 @@ def generate_script(script_path, reset=False, plain=False):
 
 @command
 def cdconfiguration():
+    """Output bash function and completion for cdconfiguration."""
     if not settings.settings_path.exists():
         return
     cdconfiguration_template = resources.get(

@@ -54,14 +54,37 @@ class ScriptTest(tests.BaseTestWithInit):
         for scripts_dir in [scripts_dir1, scripts_dir2]:
             gen_id = uuid.uuid4()
             value = 'VALUE-{0}'.format(gen_id)
-            script = "def script(): print '{}'".format(value)
+            args = [value]
+            expected = '{}-{}'.format(value, tests.STUB_CONFIGURATION)
+            script = ("from claw import cosmo\n"
+                      "def script(arg): print '{}-{}'.format(arg, "
+                      "cosmo.configuration)")
             script_name = 'my-script-{0}.py'.format(gen_id)
             partial_script_name = script_name[:-3]
             for script_arg in [script_name, partial_script_name]:
-                self._test(script=script, expected_output=value,
-                           script_dir=scripts_dir,
-                           script_name=script_name,
-                           script_arg=script_arg)
+                self._test(
+                    script=script,
+                    args=args,
+                    expected_output=expected,
+                    script_dir=scripts_dir,
+                    script_name=script_name,
+                    script_arg=script_arg,
+                    also_run_as_built_in=script_arg == partial_script_name)
+
+    def test_script_in_scripts_dir_name_conflict(self):
+        with self.assertRaises(sh.ErrorReturnCode) as c:
+            self._test(script='', script_name='generate.py',
+                       script_dir=self.settings.default_scripts_dir)
+        self.assertIn('Name conflict', c.exception.stderr)
+        self.assertIn('"generate"', c.exception.stderr)
+
+    def test_script_in_scripts_dir_underscore_to_dash(self):
+        self._test(script='def script(): print 123',
+                   script_name='my_script.py',
+                   script_dir=self.settings.default_scripts_dir,
+                   expected_output='123',
+                   script_arg='my_script',
+                   also_run_as_built_in=True)
 
     def test_implicit_script_func_no_args(self):
         value = 'VALUE'
@@ -139,7 +162,8 @@ def script():
               script_dir=None,
               script_name='script.py',
               script_arg=None,
-              skip_validation=False):
+              skip_validation=False,
+              also_run_as_built_in=False):
         args = args or []
         script_dir = script_dir or self.workdir
         script_path = script_dir / script_name
@@ -149,4 +173,10 @@ def script():
                                   script_arg, *args).stdout.strip()
         if not skip_validation:
             self.assertEqual(output, expected_output)
+        if also_run_as_built_in:
+            output = self.claw(script_arg.replace('_', '-'),
+                               tests.STUB_CONFIGURATION,
+                               *args).stdout.strip()
+            if not skip_validation:
+                self.assertEqual(output, expected_output)
         return output

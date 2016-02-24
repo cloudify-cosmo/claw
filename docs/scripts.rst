@@ -36,6 +36,14 @@ There are several ways to execute scripts:
 
         $ claw script {CONFIGURATION_NAME} my_script
 
+    If the script name ends with ``.py`` you can also run it as if it were a
+    built-in ``claw`` command (underscores ``_`` are replaced with dashes ``-``):
+
+    .. code-block:: sh
+
+        $ claw my-script {CONFIGURATION_NAME}
+
+
 #.
     To enable running scripts directly, ``claw`` will execute a script if it's
     path is supplied as the first argument, e.g.:
