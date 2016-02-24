@@ -4,7 +4,7 @@ Tips
 Running System Tests
 --------------------
 ``claw generate`` and ``claw bootstrap`` create a symlink to the last generated
-configuration directory in ``$CLAW_HOME/configurations/+``.
+configuration directory in ``$CLAW_HOME/configurations/_``.
 
 With this in place, instead of exporting the ``HANDLER_CONFIGURATION``
 environment variable every time you run a system test, to some other
@@ -13,7 +13,7 @@ variable:
 
 .. code-block:: sh
 
-    export HANDLER_CONFIGURATION=PATH_TO_CLAW_HOME/configurations/+/handler-configuration.yaml
+    export HANDLER_CONFIGURATION=PATH_TO_CLAW_HOME/configurations/_/handler-configuration.yaml
 
 Remember that ``claw bootstrap`` will update ``handler-configuration.yaml``
 with the ``manager_ip`` of the newly bootstrapped manager.
@@ -22,9 +22,9 @@ with the ``manager_ip`` of the newly bootstrapped manager.
 Current Configuration
 ---------------------
 As mentioned in the previous section, the last generated/bootstrapped
-configuration will always be symlinked at ``$CLAW_HOME/configurations/+``.
+configuration will always be symlinked at ``$CLAW_HOME/configurations/_``.
 
-As such, you can save some more typing by using ``+`` instead of the
+As such, you can save some more typing by using ``_`` instead of the
 configuration name, in all commands that take the configuration name as their
 first argument.
 
@@ -42,7 +42,7 @@ we can instead write:
 
 .. code-block:: sh
 
-    $ claw script + my_script
+    $ claw script _ my_script
 
 to get the same result. Much shorter.
 

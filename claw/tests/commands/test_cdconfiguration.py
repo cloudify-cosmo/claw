@@ -56,5 +56,5 @@ class CDConfigurationTest(tests.BaseTest):
         script_path = self.workdir / 'completions.sh'
         script_path.write_text('\n'.join(lines))
         self.assertEqual(
-            set([tests.STUB_CONFIGURATION, '+']),
+            set([tests.STUB_CONFIGURATION, '_']),
             set(sh.bash(script_path).stdout.strip().split(' ')))

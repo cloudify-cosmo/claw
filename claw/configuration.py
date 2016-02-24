@@ -31,7 +31,7 @@ from cosmo_tester.framework import util
 from claw import patcher
 from claw.settings import settings
 
-CURRENT_CONFIGURATION = '+'
+CURRENT_CONFIGURATION = '_'
 
 
 class Configuration(object):

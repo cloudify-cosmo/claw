@@ -215,6 +215,6 @@ class GenerateTest(tests.BaseTestWithInit):
                          yaml.safe_load(handler_configuration_path.text()))
         self.assertEqual(suites_yaml,
                          yaml.safe_load(self.settings.user_suites_yaml.text()))
-        self.assertEqual((self.workdir / 'configurations' / '+').readlink(),
+        self.assertEqual((self.workdir / 'configurations' / '_').readlink(),
                          configuration)
         return config_dir
