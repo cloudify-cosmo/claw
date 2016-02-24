@@ -75,7 +75,7 @@ class TestCompletion(tests.BaseTest):
 
     def test_init(self):
         expected = self.help_args + ['-s', '--suites-yaml',
-                                     '-h', '--claw-home',
+                                     '-h', '--claw-home', '-c',
                                      '-r', '--reset']
         self.assert_completion(expected=expected,
                                args=['init'])
@@ -123,23 +123,15 @@ class TestCompletion(tests.BaseTest):
 
     def test_generate_blueprint(self):
         options = self.help_args + ['-r', '--reset']
-        self._test_generate_blueprint_and_deploy_and_undeploy(
-            'generate-blueprint', options)
+        self._test_generate_blueprint_and_deploy('generate-blueprint', options)
 
     def test_deploy(self):
         options = self.help_args + ['-r', '--reset',
                                     '-s', '--skip-generation',
                                     '-t', '--timeout']
-        self._test_generate_blueprint_and_deploy_and_undeploy('deploy',
-                                                              options)
+        self._test_generate_blueprint_and_deploy('deploy', options)
 
-    def test_undeploy(self):
-        options = self.help_args + ['--cancel-executions']
-        self._test_generate_blueprint_and_deploy_and_undeploy('undeploy',
-                                                              options)
-
-    def _test_generate_blueprint_and_deploy_and_undeploy(self, command,
-                                                         options):
+    def _test_generate_blueprint_and_deploy(self, command, options):
         self._prepare_existing_configurations()
         expected = self.existing_configurations + options
         self.assert_completion(expected=expected,
@@ -147,6 +139,16 @@ class TestCompletion(tests.BaseTest):
         expected = self.blueprints + options
         self.assert_completion(expected=expected,
                                args=[command,
+                                     self.configurations[0]])
+
+    def test_undeploy(self):
+        self._prepare_existing_configurations()
+        self.claw('generate-blueprint', self.configurations[0],
+                  self.blueprints[0])
+        expected = self.help_args + ['--cancel-executions',
+                                     self.blueprints[0]]
+        self.assert_completion(expected=expected,
+                               args=['undeploy',
                                      self.configurations[0]])
 
     def test_cleanup_deployments(self):
@@ -200,6 +202,4 @@ class TestCompletion(tests.BaseTest):
         completions = p.stdout.strip().split(' ')
         if filter_non_options:
             completions = [c for c in completions if c.startswith('-')]
-        self.assertEqual(len(expected), len(completions))
-        for expected_completion in expected:
-            self.assertIn(expected_completion, completions)
+        self.assertEqual(set(expected), set(completions))
