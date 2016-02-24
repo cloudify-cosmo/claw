@@ -42,7 +42,7 @@ class StatusTest(tests.BaseTestWithInit):
         self.claw.generate(tests.STUB_CONFIGURATION)
         with self.assertRaises(sh.ErrorReturnCode) as c:
             self.claw.status(tests.STUB_CONFIGURATION)
-        self.assertIn('Not bootstrapped', c.exception.stderr)
+        self.assertIn('Configuration not bootstrapped', c.exception.stderr)
 
     def test_no_connectivity_to_manager(self):
         self.claw.generate(tests.STUB_CONFIGURATION)

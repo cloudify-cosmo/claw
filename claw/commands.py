@@ -41,9 +41,10 @@ from claw.completion import completion
 INIT_EXISTS = argh.CommandError('Configuration already exists. Use --reset'
                                 ' to overwrite.')
 NO_INIT = argh.CommandError('Not initialized')
-ALREADY_INITIALIZED = argh.CommandError('Already initialized')
-NO_BOOTSTRAP = argh.CommandError('Not bootstrapped')
-NO_SUCH_CONFIGURATION = argh.CommandError('No such configuration')
+ALREADY_INITIALIZED = argh.CommandError('Configuration already initialized. '
+                                        'Use --reset to overwrite.')
+NO_BOOTSTRAP = argh.CommandError('Configuration not bootstrapped.')
+NO_SUCH_CONFIGURATION = argh.CommandError('No such configuration.')
 STOP_DEPLOYMENT_ENVIRONMENT = '_stop_deployment_environment'
 
 
@@ -250,6 +251,8 @@ def bootstrap(configuration,
                  manager_blueprint_override=manager_blueprint_override,
                  reset=reset)
     with conf.dir:
+        if conf.cli_config_path.exists():
+            raise ALREADY_INITIALIZED
         cfy.init().wait()
         with conf.patch.cli_config as patch:
             patch.obj['colors'] = True

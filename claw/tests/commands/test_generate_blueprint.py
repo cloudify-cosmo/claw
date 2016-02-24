@@ -75,7 +75,7 @@ class GenerateBlueprintTest(tests.BaseTest):
         self._test()
         with self.assertRaises(sh.ErrorReturnCode) as c:
             self._test(skip_conf_generate=True)
-        self.assertIn('Already initialized', c.exception.stderr)
+        self.assertIn('Configuration already initialized', c.exception.stderr)
 
     def test_existing_blueprint_reset(self):
         self._test()

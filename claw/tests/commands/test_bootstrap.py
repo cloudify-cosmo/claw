@@ -83,8 +83,9 @@ class BootstrapTest(BaseBootstrapTest):
 
     def test_existing_configuration_no_reset(self):
         self._test()
-        with self.assertRaises(sh.ErrorReturnCode):
+        with self.assertRaises(sh.ErrorReturnCode) as c:
             self._test()
+        self.assertIn('already initialized', c.exception.stderr)
 
     def test_existing_configuration_reset(self):
         self._test()

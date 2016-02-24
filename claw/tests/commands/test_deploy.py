@@ -71,7 +71,8 @@ class DeployTest(tests.BaseTestWithInit):
             with self.assertRaises(sh.ErrorReturnCode) as c:
                 self.claw.deploy(tests.STUB_CONFIGURATION,
                                  tests.STUB_BLUEPRINT)
-            self.assertIn('Already initialized', c.exception.stderr)
+            self.assertIn('Configuration already initialized',
+                          c.exception.stderr)
 
         self.claw.deploy(tests.STUB_CONFIGURATION, tests.STUB_BLUEPRINT,
                          skip_generation=skip_generation,
