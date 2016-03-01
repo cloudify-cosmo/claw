@@ -1,8 +1,8 @@
 Claw - Cloudify Almighty Wrapper
 ================================
 
-* ``claw`` can help you take the pain out of bootstrapping woes (some of them at least).
-* Along the way, ``claw`` can help you with other Cloudify development related
+* ``claw`` can help you take the pain out of (at least) some bootstrapping woes.
+* Along the way, ``claw`` can help you with other Cloudify development-related
   aspects.
 * ``claw`` uses concepts derived from the system tests framework. Mainly,
   handler configurations which are used to describe different environments
