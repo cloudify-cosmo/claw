@@ -21,22 +21,20 @@ import tempfile
 import time
 
 import argh
-import sh
 import requests
 from argh.decorators import arg
 
 import cosmo_tester
-from cloudify_cli import exec_env
-from cloudify_cli.utils import load_cloudify_working_dir_settings
 from cosmo_tester.framework import util
 
+from claw import cfy
+from claw import exec_env
 from claw import patcher
 from claw import resources
 from claw.state import current_configuration
 from claw.configuration import Configuration, CURRENT_CONFIGURATION
 from claw.settings import settings
 from claw.completion import completion
-
 
 INIT_EXISTS = argh.CommandError('Configuration already exists. Use --reset'
                                 ' to overwrite.')
@@ -48,14 +46,8 @@ NO_SUCH_CONFIGURATION = argh.CommandError('No such configuration.')
 STOP_DEPLOYMENT_ENVIRONMENT = '_stop_deployment_environment'
 
 
-def bake(cmd):
-    return cmd.bake(_out=lambda line: sys.stdout.write(line),
-                    _err=lambda line: sys.stderr.write(line))
-
-
 app = argh.EntryPoint('claw')
 command = app
-cfy = bake(sh.cfy)
 
 
 @command
@@ -251,19 +243,14 @@ def bootstrap(configuration,
                  manager_blueprint_override=manager_blueprint_override,
                  reset=reset)
     with conf.dir:
-        if conf.cli_config_path.exists():
-            raise ALREADY_INITIALIZED
-        cfy.init().wait()
-        with conf.patch.cli_config as patch:
-            patch.obj['colors'] = True
+        cfy.init(conf)
         cfy.bootstrap(blueprint_path=conf.manager_blueprint_path,
-                      inputs=conf.inputs_path).wait()
-        cli_settings = load_cloudify_working_dir_settings()
+                      inputs=conf.inputs_path)
         with conf.patch.handler_configuration as patch:
             patch.obj.update({
-                'manager_ip': cli_settings.get_management_server(),
-                'manager_key': cli_settings.get_management_key(),
-                'manager_user': cli_settings.get_management_user()
+                'manager_ip': cfy.get_manager_ip(),
+                'manager_key': cfy.get_manager_key(),
+                'manager_user': cfy.get_manager_user()
             })
 
 
@@ -275,7 +262,7 @@ def teardown(configuration):
     if not conf.exists():
         raise NO_INIT
     with conf.dir:
-        cfy.teardown(force=True, ignore_deployments=True).wait()
+        cfy.teardown(force=True, ignore_deployments=True)
 
 
 @command
@@ -296,15 +283,15 @@ def deploy(configuration, blueprint,
                            blueprint=blueprint,
                            reset=reset)
     with conf.dir:
-        cfy.blueprints.upload(blueprint_path=bp.blueprint_path,
-                              blueprint_id=blueprint).wait()
-        cfy.deployments.create(blueprint_id=blueprint,
+        cfy.blueprints_upload(blueprint_path=bp.blueprint_path,
+                              blueprint_id=blueprint)
+        cfy.deployments_create(blueprint_id=blueprint,
                                deployment_id=blueprint,
-                               inputs=bp.inputs_path).wait()
-        cfy.executions.start(workflow='install',
+                               inputs=bp.inputs_path)
+        cfy.executions_start(workflow='install',
                              deployment_id=blueprint,
                              include_logs=True,
-                             timeout=timeout).wait()
+                             timeout=timeout)
 
 
 @command
@@ -340,19 +327,20 @@ def _cleanup_deployments(configuration, cancel_executions, blueprint=None):
         _wait_for_executions(conf, blueprint, cancel_executions)
         for deployment_id in deployments:
             try:
-                cfy.executions.start(workflow='uninstall',
+                cfy.executions_start(workflow='uninstall',
                                      deployment_id=deployment_id,
-                                     include_logs=True).wait()
+                                     include_logs=True,
+                                     timeout=1800)
                 _wait_for_executions(conf, deployment_id,
                                      cancel_executions)
-                cfy.deployments.delete(deployment_id=deployment_id,
-                                       ignore_live_nodes=True).wait()
+                cfy.deployments_delete(deployment_id=deployment_id,
+                                       ignore_live_nodes=True)
             except Exception as e:
                 conf.logger.warn('Failed cleaning deployment: {0} [1]'.format(
                     deployment_id, e))
         for blueprint_id in blueprints:
             try:
-                cfy.blueprints.delete(blueprint_id=blueprint_id).wait()
+                cfy.blueprints_delete(blueprint_id=blueprint_id)
             except Exception as e:
                 conf.logger.warn('Failed cleaning blueprint: {0} [1]'.format(
                     blueprint_id, e))
