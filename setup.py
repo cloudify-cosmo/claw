@@ -30,6 +30,7 @@ setup(
     zip_safe=False,
     install_requires=[
         'cloudify-system-tests',
+        'argcomplete',
         'argh',
     ],
     include_package_data=True,
