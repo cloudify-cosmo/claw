@@ -19,6 +19,7 @@ import shutil
 import tempfile
 import unittest
 import multiprocessing
+import logging
 import time
 
 import bottle
@@ -27,6 +28,7 @@ import requests
 from path import path
 
 import cosmo_tester
+import cloudify.utils
 from cloudify_rest_client.client import DEFAULT_API_VERSION
 from cloudify.proxy.server import get_unused_port
 
@@ -36,6 +38,11 @@ from claw import configuration
 
 STUB_CONFIGURATION = 'sample_openstack_env'
 STUB_BLUEPRINT = 'openstack_nodecellar'
+
+
+# Silencing 3rd party logs
+for logger_name in ('sh', 'requests.packages.urllib3.connectionpool'):
+    cloudify.utils.setup_logger(logger_name, logging.WARNING)
 
 
 class BaseTest(unittest.TestCase):
